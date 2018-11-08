@@ -1,0 +1,14 @@
+Package: treestructure
+Type: Package
+Title: Detect Population Structure Within Phylogenetic Trees
+Version: 0.0.1
+Date: 2018-11-07
+Author: Erik Volz
+Maintainer: Erik Volz <erik.volz@gmail.com>
+Description: TODO
+License: GPL (>= 2)
+Depends: ape
+Suggests: ggtree 
+Imports: Rcpp (>= 0.12.19)
+LinkingTo: Rcpp
+RoxygenNote: 6.1.0
