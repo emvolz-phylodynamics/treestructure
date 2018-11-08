@@ -337,7 +337,7 @@ print(todig)
 	h <- ape::as.phylo( hclust( D ) ) 
 	#~ 	h$edge.length[ h$edge.length <= zstar ] <- 0
 	partinds <- cutree( hclust( as.dist( ape::cophenetic.phylo( h ) ) ), h = zstar)
-	partition <- as.factor( setNames( partinds[ clustering ] , tr$tip.label ) )
+	partition <- as.factor( setNames( partinds[ clustering ] , tre$tip.label ) )
 	clustering <- as.factor( clustering )
 	clusters <- split( tre$tip.label, clustering )
 	partitionSets <- split( tre$tip.label, partition )
