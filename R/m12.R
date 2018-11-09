@@ -121,7 +121,8 @@ for (ie in 1:nrow(poedges))
 	.uv.overlap <- function(u,v) {
 		nu <- sum( (descInternalHeights[[u]]  > timerange[v,1]) & (descInternalHeights[[u]]  <= timerange[v,2]))
 		nv <- sum( (descInternalHeights[[v]]  > timerange[u,1]) & (descInternalHeights[[v]]  <= timerange[u,2]))
-		( min(nu,nv) > minOverlap )
+		rv = ( min(nu,nv) > minOverlap )
+		rv
 	}
 	.au.overlap <- function(a,u) {
 		a_range <- range( nhs[ setdiff( descendants[[a]], descendants[[u]] ) ] )
@@ -236,6 +237,9 @@ shouldDig[ rootnode ] <- TRUE
 	if ( zs[wm] <= zstar )
 	  return(NULL)
 #~ browser()
+#~ .zs <- ( sapply( descendants[[a]], function(u) 
+#~ 	  .calc.z( u, a, z_exclude )
+#~ 	))
 #~ o = descendants[[a]][ zs > zstar ]
 	ustar 
 }
@@ -250,12 +254,43 @@ shouldDig[ rootnode ] <- TRUE
 }
 
 
+#' find biggest outlier(s) descended from a not counting rest of tree 
+.find.biggest.outlier2 <- function(a, z_exclude ){
+	zs <- sapply( descendants[[a]], function(u) 
+	  .calc.z( u, a, z_exclude )
+	)
+	wm <- which( zs > zstar )
+	if (length( wm)==0) 
+	  return(NULL)
+	ustars <- descendants[[a]][ wm ]
+#~ e = new.env(); load('test.rda', envir=e)
+#~ browser()
+#~ do.call( save, c( as.list( c(ls(), ls(environment(.dig.clade), all.names=TRUE) ) ) , file = 'test.rda') ) 
+	ustars
+}
+#' return nodes {u},  new exclude[a] 
+.dig.clade2 <- function(a) {
+	exclude <- node2exclude[[a]]
+	us <- .find.biggest.outlier2( a, exclude )
+	if (is.null(us)) 
+	  return(NULL)
+#~ browser()
+	exclude <- c( exclude
+	  , do.call( c
+	    , lapply( us, function(u) c(descendants[[u]] , tail(ancestors[[u]],1) )) ))
+	list( ustar = us, newexclude = exclude )
+}
+
+
+
+
 outliers <- c() 
 done <- FALSE
 while( any(shouldDig) ){
 	todig <- which( shouldDig )
 	for (a in todig ){
-		dc = .dig.clade( a )
+#~ 		dc = .dig.clade( a ) #TODO 
+		dc = .dig.clade2( a )
 		if ( is.null( dc )){
 			shouldDig[a] <- FALSE
 		}else{
@@ -266,12 +301,10 @@ while( any(shouldDig) ){
 	}
 cat('todig\n') 
 print(todig)
-
 }
 # /OUTLIERS
 
 	outliers <- unique( outliers ) #TODO should be unnecessary 
-
 	clades <- lapply( outliers, function(u) ape::extract.clade( tre,u))
 	names(clades) <- outliers 
 		
@@ -291,24 +324,26 @@ print(todig)
 	D <- matrix( NA, nrow = nc, ncol = nc )
 	diag(D) <- 0
 	# 1) fill in D where ancestry/size/overlap req's are met 
-	for (iu in 1:(nc-1)){
-		u <- as.numeric( names(clades)[iu] )
-		for (iv in (iu+1):nc){
-			v <- as.numeric( names(clades)[iv] )
-			# overlap
-			if ( .uv.overlap(u,v)) # 
-			{
-				if ( u %in% descendants[[v]] ){
-					D[iu,iv] <- .uv.diss.u( u , exclude = c( descendants[[u]], setdiff(1:(n+nnode), descendants[[v]]) ) )
-				} else if(v %in% descendants[[u]]){
-					D[iu,iv] <- .uv.diss.u( v , exclude = c( descendants[[v]], setdiff(1:(n+nnode), descendants[[u]]) ) )
-				} else{
-					D[iu, iv] <- .uv.diss(u,v) # TODO should treat remainder differently 
+	if ( nc  > 1){
+		for (iu in 1:(nc-1)){
+			u <- as.numeric( names(clades)[iu] )
+			for (iv in (iu+1):nc){
+				v <- as.numeric( names(clades)[iv] )
+				# overlap
+				if ( .uv.overlap(u,v)) # 
+				{
+					if ( u %in% descendants[[v]] ){
+						D[iu,iv] <- .uv.diss.u( u , exclude = c( descendants[[u]], setdiff(1:(n+nnode), descendants[[v]]) ) )
+					} else if(v %in% descendants[[u]]){
+						D[iu,iv] <- .uv.diss.u( v , exclude = c( descendants[[v]], setdiff(1:(n+nnode), descendants[[u]]) ) )
+					} else{
+						D[iu, iv] <- .uv.diss(u,v) # TODO should treat remainder differently 
+					}
+					D[iv, iu] <- D[iu, iv] 
 				}
-				D[iv, iu] <- D[iu, iv] 
 			}
-		}
-	} 
+		} 
+	}
 	# 2) impute any missing 
 	# impute and remaining missingness using weighted mean; weights based on tree distance 
 	.D <- D 
@@ -334,22 +369,38 @@ print(todig)
 		}
 		x
 	})
-	h <- ape::as.phylo( hclust( D ) ) 
-	#~ 	h$edge.length[ h$edge.length <= zstar ] <- 0
-	partinds <- cutree( hclust( as.dist( ape::cophenetic.phylo( h ) ) ), h = zstar)
-	partition <- as.factor( setNames( partinds[ clustering ] , tre$tip.label ) )
-	clustering <- as.factor( clustering )
-	clusters <- split( tre$tip.label, clustering )
-	partitionSets <- split( tre$tip.label, partition )
+	if ( nc  >  1){
+		h <- ape::as.phylo( hclust( D ) ) 
+		#~ 	h$edge.length[ h$edge.length <= zstar ] <- 0
+		partinds <- cutree( hclust( as.dist( ape::cophenetic.phylo( h ) ) ), h = zstar)
+		partition <- as.factor( setNames( partinds[ clustering ] , tre$tip.label ) )
+		clustering <- as.factor( clustering )
+		clusters <- split( tre$tip.label, clustering )
+		partitionSets <- split( tre$tip.label, partition )
+		partitionNodes <-  lapply( 1:max(partinds), function(i) as.numeric(names(partinds))[ partinds==i ] )#
+		   names(partitionNodes) <- 1:max(partinds)
+		
+	} else{
+		clustering <- as.factor( rep(1, n ))
+		partition <- as.factor( rep(1, n ))
+		clusters <- list( tre$tip.label )
+		partitionSets <- list( tre$tip.label )
+		remainderClade <- NULL 
+		partitionNodes <- NULL 
+	}
+#~ browser()
+	
 	rv = list(
 	  clades = clades
 	  , clustering = clustering 
 	  , partition = partition 
 	  , clusterSets  = clusters
 	  , partitionSets = partitionSets
+	  , partitionNodes =  partitionNodes
 	  , D = D 
 	  , outliers = outliers 
 	  , remainderClade = remainderClade
+	  , tree = tre
 	)
 	class(rv) <- 'TreeStructure'
 
