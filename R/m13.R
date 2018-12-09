@@ -1,6 +1,8 @@
-#~ library(ape)
-#~ library(Rcpp)
-#~ sourceCpp( 'uv_ranksum_nulldist0.cpp')
+invisible('
+- an option allow_nested which would prevent ident of nested clades 
+- rather than classify outliers as internal nodes, classify them as sets of tips
+	 this would allow nesting of mrcas, but tip sets would be disjoint 
+') 
 
 .get_anc <- function(edge, u ){
 	edge[ edge[,2]==u ,1]
@@ -27,7 +29,7 @@
 #' tree <- rcoal(100)
 #' struct <-  trestruct( tree )
 #' @export 
-trestruct <- function( tre, minCladeSize = 20, minOverlap = -Inf, nsim = 1e3, level = .001,  ... )
+trestruct13 <- function( tre, minCladeSize = 20, minOverlap = -Inf, nsim = 1e3, level = .01,  ... )
 {
 	stopifnot( ape::is.rooted(tre))
 	stopifnot( ape::is.binary(tre))
@@ -118,85 +120,52 @@ for (ie in 1:nrow(poedges))
 
 # DISSIMILARITY FUNCTIONS
 	# do clades u and v overlap in time? 
-	.uv.overlap <- function(u,v) {
-		nu <- sum( (descInternalHeights[[u]]  > timerange[v,1]) & (descInternalHeights[[u]]  <= timerange[v,2]))
-		nv <- sum( (descInternalHeights[[v]]  > timerange[u,1]) & (descInternalHeights[[v]]  <= timerange[u,2]))
-		rv = ( min(nu,nv) > minOverlap )
-		rv
-	}
 	.au.overlap <- function(a,u) {
 		a_range <- range( nhs[ setdiff( descendants[[a]], descendants[[u]] ) ] )
 		nu <- sum( (descInternalHeights[[u]]  > a_range[1]) & (descInternalHeights[[u]]  <= a_range[2]))
 		( nu > minOverlap )
 	}
+	.overlap <- function( uset, vset){
+		uhs <- nhs[ intersect( uset, inodes) ]
+		vhs <- nhs[ intersect(vset, inodes) ]
+		nu <- sum( (uhs > min(vhs)) & (uhs < max(vhs)))
+		nv <- sum( (vhs > min(uhs)) & (vhs < max(uhs)))
+		rv = ( min(nu,nv) > minOverlap )
+		rv
+	}
 	
 	# test statistic comparing two internals  
-	.rank.sum <- function( u, v ) {
-		x <- rbind( 
-		 cbind(  nhs[descInternal[[u]] ], 1 )
-		 , cbind(  nhs[descInternal[[v]] ], 0 )
+	.rank.sum <- function( uinternals, vinternals ) {
+		x =rbind( 
+		 cbind(  nhs[ uinternals ], 1 )
+		 , cbind(  nhs[ vinternals ], 0 )
 		)
 		x <- as.vector( x[ order(x[,1] ) , 2] )
 		sum( x * (1:length(x)) )
 	}
 	
 	# test stat null distribution 
-	.uv.diss <- function(u,v){
+	#' @param nested 0 if u is nested under v, 1 if u & v are both under root
+	.uv.diss <- function(uset,vset, nested = 1){
 		# 1 sample u
 		# 0 co 
 		# -1 sample v 
+		
+		uinternals <-  intersect( uset, inodes)
+		vinternals <- setdiff(  intersect( vset, inodes), uinternals )
 		x <- rbind( 
-		 cbind(  nhs[descInternal[[u]] ], 0 )
-		 , cbind(  nhs[descInternal[[v]] ], 0 )
-		 , cbind(  nhs[descendantTips[[u]] ], 1 )
-		 , cbind(  nhs[descendantTips[[v]] ], -1 )
+		 cbind(    nhs[ uinternals ], 0 )
+		 , cbind(  nhs[ vinternals ], 0 )
+		 , cbind(  nhs[ intersect( uset, 1:n) ], 1 )
+		 , cbind(  nhs[ intersect( vset, 1:n) ], -1 )
 		)
 		x <- as.vector( x[ order(x[,1] ) , 2] )
-		nd <- Cuv_ranksum_nulldist(x, nsim, 1  )
+		nd <- Cuv_ranksum_nulldist(x, nsim, nested  )
 		
-		rsuv <- .rank.sum( u, v)
-		#d <- sum( rsuv >= nd ) / nsim 
-		#min( d, 1 - d)
+		rsuv <- .rank.sum( uinternals, vinternals)
 		
 		m_nd <- mean(nd)
 		sd_nd <- sd(nd)
-		abs( (rsuv - m_nd) / sd_nd )
-	}
-	
-	# test statistic comparing internal with remaindrer 
-	.rank.sum.u <- function( u , exclude = c() ){
-		diroot <- setdiff( descInternal[[rootnode]], c(exclude, descInternal[[u]] ) )
-		x <- rbind( 
-		 cbind(  nhs[descInternal[[u]] ], 1 )
-		 , cbind(  nhs[ diroot ], 0 )
-		)
-		x <- as.vector( x[ order(x[,1] ) , 2] )
-		sum( x * (1:length(x)) )
-	}
-	
-	# null-with-remainder null distribution 
-	.uv.diss.u <- function(u, exclude = c() ){
-		# 1 sample u
-		# 0 co 
-		# -1 sample root 
-		diroot <- setdiff( descInternal[[rootnode]], c(exclude, descInternal[[u]] ) )
-		dtroot <- setdiff( descendantTips[[rootnode]], c( exclude, descendantTips[[u]] ) )
-		if ( length( diroot) == 0 | length(dtroot)==0 )
-		  return(0)
-		x <- rbind( 
-		 cbind(  nhs[descInternal[[u]] ], 0 )
-		 , cbind(  nhs[ diroot ], 0 )
-		 , cbind(  nhs[descendantTips[[u]] ], 1 )
-		 , cbind(  nhs[ dtroot ], -1 )
-		)
-		x <- as.vector( x[ order(x[,1] ) , 2] )
-		nd <- Cuv_ranksum_nulldist(x, nsim , 0 )
-		
-		rsuv <- .rank.sum.u( u, exclude = exclude )
-		
-		m_nd <- mean(nd)
-		sd_nd <- sd(nd)
-		
 		abs( (rsuv - m_nd) / sd_nd )
 	}
 	
@@ -206,96 +175,90 @@ for (ie in 1:nrow(poedges))
 
 # FIND OUTLIERS
 zstar  <- qnorm( 1-min(1,level)/2 )
-node2exclude <- lapply( 1:(n+nnode), function(u) setdiff( 1:(n+nnode),  descendants[[u]] ) ) # exclude all but descendant of u 
+node2nodeset <- descendants 
 shouldDig <- rep(FALSE, n + nnode )
 shouldDig[ rootnode ] <- TRUE 
+
 #' compute z score for u descendened from claderoot 
-.calc.z <- function(u, claderoot, z_exclude){
+.calc.z <- function(u, v, nested = 0){
 	if ( u <= n ) 
 	  return(0)
-	if ( u %in% z_exclude )
+	if ( v <= n ) 
 	  return(0)
 	if ( ndesc[u] < minCladeSize )
 	  return(0 )
-	if ( (ndesc[claderoot] - ndesc[u] ) < minCladeSize )
+	if ( ndesc[v] < minCladeSize )
+	  return(0 )
+	if ( u==v )
 	  return(0)
-	if ( u==claderoot )
-	  return(0)
-	if (!.au.overlap(claderoot, u) ){
-		return(0)
+	if (nested==0) {
+		if (!.au.overlap(v, u) ){
+			return(0)
+		}
+	} else {
+		if (!.overlap( node2nodeset[[u]], node2nodeset[[v]]) ){
+			return(0)
+		}
 	}
-	.uv.diss.u( u , exclude = z_exclude )
+	if (nested==0){
+		nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
+		vtips <- intersect( nsv, 1:ape::Ntip(tre))
+		if (length( vtips ) < minCladeSize)
+		  return(0)
+		# v clade must include tips not in u
+		if ( length( vtips ) == 0){
+			return( 0 )
+		}
+		.uv.diss( node2nodeset[[u]] , nsv, nested=nested )
+	} else{
+if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('intersect error ')
+		.uv.diss( node2nodeset[[u]] , node2nodeset[[v]], nested=nested )
+	}
 }
 #' find biggest outlier descend from a not counting rest of tree 
-.find.biggest.outlier <- function(a, z_exclude ){
-	zs <- sapply( descendants[[a]], function(u) 
-	  .calc.z( u, a, z_exclude )
+.find.biggest.outlier <- function(a ){
+	zs <- sapply( node2nodeset[[a]], function(u) 
+	  .calc.z( u, a )
 	)
 	wm <- which.max( zs )
-	ustar <- descendants[[a]][ wm ]
+	ustar <- node2nodeset[[a]][ wm ]
 	if ( zs[wm] <= zstar )
 	  return(NULL)
-#~ browser()
-#~ .zs <- ( sapply( descendants[[a]], function(u) 
-#~ 	  .calc.z( u, a, z_exclude )
-#~ 	))
-#~ o = descendants[[a]][ zs > zstar ]
 	ustar 
 }
 #' return ustar,  new exclude[a] 
 .dig.clade <- function(a){
-	exclude <- node2exclude[[a]]
-	u <- .find.biggest.outlier( a, exclude )
+	u <- .find.biggest.outlier( a )
 	if (is.null(u)) 
 	  return(NULL)
-	exclude <- unique( c( exclude, descendants[[u]] , tail(ancestors[[u]],1) )) #
-	list( ustar = u, newexclude = exclude )
-}
-
-
-#' find biggest outlier(s) descended from a not counting rest of tree 
-.find.biggest.outlier2 <- function(a, z_exclude ){
-	zs <- sapply( descendants[[a]], function(u) 
-	  .calc.z( u, a, z_exclude )
+#~ print(a)
+#~ print(u)
+#~ browser()
+	list( ustar = u
+	  , newnodeset_a = setdiff( node2nodeset[[a]], descendants[[u]] )
 	)
-	wm <- which( zs > zstar ) # NOTE all u such that z is > zstar 
-	if (length( wm)==0) 
-	  return(NULL)
-	ustars <- descendants[[a]][ wm ]
-#~ e = new.env(); load('test.rda', envir=e)
-#~ browser()
-#~ do.call( save, c( as.list( c(ls(), ls(environment(.dig.clade), all.names=TRUE) ) ) , file = 'test.rda') ) 
-	ustars
-}
-#' return nodes {u},  new exclude[a] 
-.dig.clade2 <- function(a) {
-	exclude <- node2exclude[[a]]
-	us <- .find.biggest.outlier2( a, exclude )
-	if (is.null(us)) 
-	  return(NULL)
-#~ browser()
-	exclude <- c( exclude
-	  , do.call( c
-	    , lapply( us, function(u) c(descendants[[u]] , tail(ancestors[[u]],1) )) ))
-	list( ustar = us, newexclude = exclude )
 }
 
 
 
 
-outliers <- c() 
+
+clusterlist <- list()
 done <- FALSE
 while( any(shouldDig) ){
 	todig <- which( shouldDig )
 	for (a in todig ){
-#~ 		dc = .dig.clade( a )  # returns only u with highest z  
-		dc = .dig.clade2( a ) # retursn all u with z > zstar 
+		dc = .dig.clade( a )  # returns only u with highest z  
+		
 		if ( is.null( dc )){
 			shouldDig[a] <- FALSE
+			if ( length( node2nodeset[[a]] ) > 0 ){
+				no <- length( clusterlist)
+				clusterlist[[ no + 1 ]] <- node2nodeset[[a]] 
+			}
 		}else{
 			shouldDig[ dc$ustar ] <- TRUE 
-			node2exclude[[a]] <- dc$newexclude 
-			outliers <- c( outliers, dc$ustar )
+			node2nodeset[[a]] <- dc$newnodeset_a
 		}
 	}
 cat('todig\n') 
@@ -303,41 +266,25 @@ print(todig)
 }
 # /OUTLIERS
 
-	outliers <- unique( outliers ) #TODO should be unnecessary 
-	clades <- lapply( outliers, function(u) ape::extract.clade( tre,u))
-	names(clades) <- outliers 
-		
-	t2d <- do.call( c, lapply( clades, '[[', 'tip.label' ) )
-	t2k <- setdiff( tre$tip.label, t2d  )
-	#~ 	if ( length( t2k ) < minCladeSize ){
-	#~ 		remainderClade = NULL 
-	#~ 		remainderFit = ' ** Remainder of tree after removing tree splits is less than minimum clade size. ** ' 
-	#~ 	} else 
-	{
-		remainderClade = ape::drop.tip ( tre, t2d )
-		clades[[ as.character(rootnode) ]] <- remainderClade
+	
+	no <- length(clusterlist)
+	x <- setdiff( c( 1:n, inodes), do.call( c, clusterlist )) # remainder 
+	if (length(x) > 0){
+		clusterlist[[no + 1]] <- x
 	}
 	
 # DISTANCE
-	nc = length( clades )
+	nc <- length( clusterlist )
 	D <- matrix( NA, nrow = nc, ncol = nc )
 	diag(D) <- 0
 	# 1) fill in D where ancestry/size/overlap req's are met 
 	if ( nc  > 1){
 		for (iu in 1:(nc-1)){
-			u <- as.numeric( names(clades)[iu] )
 			for (iv in (iu+1):nc){
-				v <- as.numeric( names(clades)[iv] )
 				# overlap
-				if ( .uv.overlap(u,v)) # 
+				if ( .overlap( clusterlist[[iu]] , clusterlist[[iv]] )) # 
 				{
-					if ( u %in% descendants[[v]] ){
-						D[iu,iv] <- .uv.diss.u( u , exclude = c( descendants[[u]], setdiff(1:(n+nnode), descendants[[v]]) ) )
-					} else if(v %in% descendants[[u]]){
-						D[iu,iv] <- .uv.diss.u( v , exclude = c( descendants[[v]], setdiff(1:(n+nnode), descendants[[u]]) ) )
-					} else{
-						D[iu, iv] <- .uv.diss(u,v) # TODO should treat remainder differently 
-					}
+					D[iu,iv] <- .uv.diss ( clusterlist[[iu]] , clusterlist[[iv]], nested = 1)	
 					D[iv, iu] <- D[iu, iv] 
 				}
 			}
@@ -346,38 +293,37 @@ print(todig)
 	# 2) impute any missing 
 	# impute and remaining missingness using weighted mean; weights based on tree distance 
 	.D <- D 
-	.D[ is.na(D) | is.infinite(D)] <- 0  #TODO shouldnt need to filter inf 
-	rownames(.D)  = colnames(.D) <- names(clades)
+	.D[ is.na(D) | is.infinite(D)] <- 0  #
+	rownames(.D)  = colnames(.D) <- 1:nc
 	D <- as.dist(.D)
 # /DISTANCE 
 
 
+#~ browser()
+
+
 # RETURN
-	clustering <- sapply( tre$tip.label, function(tip){
-		x = c()
-		k <- 0
-		#nt <- -Inf 
-		nt <- Inf 
-		for ( clade in clades){
-			k <- k + 1
-			#if ( (tip %in% clade$tip.label) & (Ntip(clade) > nt)){ #TODO or maybe smaller level
-			if ( (tip %in% clade$tip.label) & (ape::Ntip(clade) < nt)){ 
-				x <- k 
-				nt <- ape::Ntip(clade)
-			}
-		}
-		x
-	})
+	# for each tip: 
+	setNames( rep(NA, ape::Ntip(tre)), tre$tip.label) -> clustervec 
+	for (k in 1:nc){
+		cl <- clusterlist[[k]]
+		itip <- intersect( 1:(ape::Ntip(tre)), cl)
+		clustervec[ itip ] <- k 
+	}
+	
+#~ browser()
+# TODO nesting within clustervec! should be disjoint 
+	
 	if ( nc  >  1){
 		h <- ape::as.phylo( hclust( D ) ) 
 		#~ 	h$edge.length[ h$edge.length <= zstar ] <- 0
 		partinds <- cutree( hclust( as.dist( ape::cophenetic.phylo( h ) ) ), h = zstar)
-		partition <- as.factor( setNames( partinds[ clustering ] , tre$tip.label ) )
-		clustering <- as.factor( clustering )
-		clusters <- split( tre$tip.label, clustering )
+		partition <- as.factor( setNames( partinds[ clustervec ] , tre$tip.label ) )
+		clustering <- as.factor( clustervec )
+		clusters <- split( tre$tip.label, clustervec )
 		partitionSets <- split( tre$tip.label, partition )
 		partitionNodes <-  lapply( 1:max(partinds), function(i) as.numeric(names(partinds))[ partinds==i ] )#
-		   names(partitionNodes) <- 1:max(partinds)
+		names(partitionNodes) <- 1:max(partinds)
 		
 	} else{
 		clustering <- as.factor( rep(1, n ))
@@ -387,26 +333,20 @@ print(todig)
 		remainderClade <- NULL 
 		partitionNodes <- NULL 
 	}
-#~ browser()
 	
 	rv = list(
-	  clades = clades
-	  , clustering = clustering 
+	  clustering = clustering 
 	  , partition = partition 
 	  , clusterSets  = clusters
 	  , partitionSets = partitionSets
 	  , partitionNodes =  partitionNodes
 	  , D = D 
-	  , outliers = outliers 
-	  , remainderClade = remainderClade
+	  , clusterList = clusterlist 
 	  , tree = tre
+	  , level = level
+	  , zstar = zstar 
 	)
 	class(rv) <- 'TreeStructure'
-
-#~ X11(); plot( tre ); nodelabels( outliers, outliers ); 
-#~ X11(); plot( as.phylo( hclust( D )) )
-#~ browser()
-# structure( list(), class = 'TreeStructure' )
 	rv
 }
 
