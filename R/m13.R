@@ -1,9 +1,3 @@
-invisible('
-- an option allow_nested which would prevent ident of nested clades 
-- rather than classify outliers as internal nodes, classify them as sets of tips
-	 this would allow nesting of mrcas, but tip sets would be disjoint 
-') 
-
 .get_anc <- function(edge, u ){
 	edge[ edge[,2]==u ,1]
 }
@@ -29,7 +23,7 @@ invisible('
 #' tree <- rcoal(100)
 #' struct <-  trestruct( tree )
 #' @export 
-trestruct13 <- function( tre, minCladeSize = 20, minOverlap = -Inf, nsim = 1e3, level = .01,  ... )
+trestruct <- function( tre, minCladeSize = 20, minOverlap = -Inf, nsim = 1e3, level = .01,  ... )
 {
 	stopifnot( ape::is.rooted(tre))
 	stopifnot( ape::is.binary(tre))
@@ -146,7 +140,7 @@ for (ie in 1:nrow(poedges))
 	
 	# test stat null distribution 
 	#' @param nested 0 if u is nested under v, 1 if u & v are both under root
-	.uv.diss <- function(uset,vset, nested = 1){
+	.uv.diss <- function(uset, vset, nested = 1){
 		# 1 sample u
 		# 0 co 
 		# -1 sample v 
@@ -200,16 +194,20 @@ shouldDig[ rootnode ] <- TRUE
 			return(0)
 		}
 	}
-	if (nested==0){
+	if (nested==0){ # u under v
+		nsu <-  intersect( node2nodeset[[u]], node2nodeset[[v]] )
 		nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
-		vtips <- intersect( nsv, 1:ape::Ntip(tre))
+		vtips <- intersect( nsv, 1:(ape::Ntip(tre)))
+		utips <- intersect( nsu, 1:(ape::Ntip(tre)))
 		if (length( vtips ) < minCladeSize)
+		  return(0)
+		if (length( utips ) < minCladeSize)
 		  return(0)
 		# v clade must include tips not in u
 		if ( length( vtips ) == 0){
 			return( 0 )
 		}
-		.uv.diss( node2nodeset[[u]] , nsv, nested=nested )
+		.uv.diss( nsu , nsv, nested=nested )
 	} else{
 if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('intersect error ')
 		.uv.diss( node2nodeset[[u]] , node2nodeset[[v]], nested=nested )
@@ -242,19 +240,18 @@ if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('int
 
 
 
-
+node2cl <- c()
 clusterlist <- list()
-done <- FALSE
 while( any(shouldDig) ){
 	todig <- which( shouldDig )
 	for (a in todig ){
 		dc = .dig.clade( a )  # returns only u with highest z  
-		
 		if ( is.null( dc )){
 			shouldDig[a] <- FALSE
 			if ( length( node2nodeset[[a]] ) > 0 ){
 				no <- length( clusterlist)
 				clusterlist[[ no + 1 ]] <- node2nodeset[[a]] 
+				node2cl <- c( node2cl, a )
 			}
 		}else{
 			shouldDig[ dc$ustar ] <- TRUE 
@@ -266,12 +263,14 @@ print(todig)
 }
 # /OUTLIERS
 
-	
+	names( clusterlist ) <- node2cl 
 	no <- length(clusterlist)
 	x <- setdiff( c( 1:n, inodes), do.call( c, clusterlist )) # remainder 
 	if (length(x) > 0){
 		clusterlist[[no + 1]] <- x
 	}
+	
+	
 	
 # DISTANCE
 	nc <- length( clusterlist )
@@ -299,8 +298,6 @@ print(todig)
 # /DISTANCE 
 
 
-#~ browser()
-
 
 # RETURN
 	# for each tip: 
@@ -310,9 +307,6 @@ print(todig)
 		itip <- intersect( 1:(ape::Ntip(tre)), cl)
 		clustervec[ itip ] <- k 
 	}
-	
-#~ browser()
-# TODO nesting within clustervec! should be disjoint 
 	
 	if ( nc  >  1){
 		h <- ape::as.phylo( hclust( D ) ) 
@@ -345,46 +339,100 @@ print(todig)
 	  , tree = tre
 	  , level = level
 	  , zstar = zstar 
+	  , cluster_mrca  = node2cl 
 	)
 	class(rv) <- 'TreeStructure'
 	rv
 }
 
 
-
+.plot.TreeStructure.ggtree <- function(x, ... ){
+	stopifnot(  'ggtree' %in% installed.packages() )
+	stopifnot( inherits( x, 'TreeStructure') )
+	tre <- x$tree 
+	dtdf <- data.frame( taxa = tre$tip.label
+		 , cluster = x$clustering
+		 , part = x$partition 
+		 , shape = rep('circle', ape::Ntip(tre))
+	 , row.names = tre$tip.label
+	)
+	
+#~ 	tre <- ggtree::groupClade(tre, node=x$clusterList)
+	prenodes <- tre$edge[ rev( ape::postorder( tre )), 1]
+	tre <- ggtree::groupClade(tre, node=  prenodes[ prenodes %in% x$cluster_mrca ]  )
+	#+ geom_hilight( getMRCA( tr, sp$clusterList[[1]] ) )
+	pl <- ggtree( tre, aes(color=group), ... ) %<+% dtdf + geom_tippoint(aes( color=part, shape=shape, show.legend=TRUE), size = 2 )
+	(pl <- pl+ theme(legend.position="right"))
+}
 
 summary.TreeStructure <- function(x, ... )
 {
+	stopifnot( inherits( x, 'TreeStructure') )
 	invisible(x)
 }
 
 print.TreeStructure <- function(x, ...)
 {
+	stopifnot( inherits( x, 'TreeStructure') )
+	
+	npart <- nlevels( x$partition)
+	nc <- nlevels( x$clustering )
+	tre <- x$tree 
+cat( '
+trestruct( ... ) \n 
+' )
+	cat ( paste( 'Number of clusters:', nc , '\n') )
+	cat ( paste( 'Number of partitions:', npart, '\n' ) )
+	cat('Cluster and partition assignment: \n')
+	
+	dtdf <- data.frame( taxon = tre$tip.label
+		 , cluster = x$clustering
+		 , partition = x$partition 
+	 , row.names = tre$tip.label
+	)
+	print( dtdf )
+	
 	invisible(x)
 }
+print(sp)
 
 plot.TreeStructure <- function(x, ... )
 {
+	stopifnot( inherits( x, 'TreeStructure') )
+	if ( 'ggtree' %in% installed.packages() ){
+		return( .plot.TreeStructure.ggtree (x , ... ) )
+	} else{
+		tr <- x$tree 
+		tr$tip.label <- as.character( x$partition[tr$tip.label]  )
+		ape::plot.phylo( tr , ... ) 
+		ape::nodelabels( '', node = x$cluster_mrca , pch = 8, cex = 3, frame = 'none') 
+		tiplabels( '', pch = 15, col   =  as.vector( sp$partition ) )
+	}
+	
 	invisible(x)
 }
 
 coef.TreeStructure <- function(x, ... )
 {
+	stopifnot( inherits( x, 'TreeStructure') )
 	invisible(x)
 }
 
 partition <- function(x, ... )
 {
+	stopifnot( inherits( x, 'TreeStructure') )
 	invisible(x)
 }
 
 cluster <- function(x, ... )
 {
+	stopifnot( inherits( x, 'TreeStructure') )
 	invisible(x)
 }
 
 distance <- function(x, ... )
 {
+	stopifnot( inherits( x, 'TreeStructure') )
 	invisible(x)
 }
 
