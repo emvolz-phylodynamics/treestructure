@@ -340,6 +340,7 @@ print(todig)
 	  , level = level
 	  , zstar = zstar 
 	  , cluster_mrca  = node2cl 
+	  , call = match.call() 
 	)
 	class(rv) <- 'TreeStructure'
 	rv
@@ -365,11 +366,6 @@ print(todig)
 	(pl <- pl+ theme(legend.position="right"))
 }
 
-summary.TreeStructure <- function(x, ... )
-{
-	stopifnot( inherits( x, 'TreeStructure') )
-	invisible(x)
-}
 
 print.TreeStructure <- function(x, ...)
 {
@@ -379,8 +375,10 @@ print.TreeStructure <- function(x, ...)
 	nc <- nlevels( x$clustering )
 	tre <- x$tree 
 cat( '
-trestruct( ... ) \n 
+Call: \n
 ' )
+	print( x$call )
+	
 	cat ( paste( 'Number of clusters:', nc , '\n') )
 	cat ( paste( 'Number of partitions:', npart, '\n' ) )
 	cat('Cluster and partition assignment: \n')
@@ -394,7 +392,6 @@ trestruct( ... ) \n
 	
 	invisible(x)
 }
-print(sp)
 
 plot.TreeStructure <- function(x, ... )
 {
@@ -415,24 +412,18 @@ plot.TreeStructure <- function(x, ... )
 coef.TreeStructure <- function(x, ... )
 {
 	stopifnot( inherits( x, 'TreeStructure') )
-	invisible(x)
+	x$partition
 }
 
 partition <- function(x, ... )
 {
 	stopifnot( inherits( x, 'TreeStructure') )
-	invisible(x)
+	x$partition
 }
 
 cluster <- function(x, ... )
 {
 	stopifnot( inherits( x, 'TreeStructure') )
-	invisible(x)
-}
-
-distance <- function(x, ... )
-{
-	stopifnot( inherits( x, 'TreeStructure') )
-	invisible(x)
+	x$clustering
 }
 
