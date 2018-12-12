@@ -23,7 +23,7 @@
 #' tree <- rcoal(100)
 #' struct <-  trestruct( tree )
 #' @export 
-trestruct <- function( tre, minCladeSize = 20, minOverlap = -Inf, nsim = 1e3, level = .01,  ... )
+trestruct <- function( tre, minCladeSize = 20, minOverlap = -Inf, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1, ... )
 {
 	stopifnot( ape::is.rooted(tre))
 	stopifnot( ape::is.binary(tre))
@@ -147,12 +147,14 @@ for (ie in 1:nrow(poedges))
 		
 		uinternals <-  intersect( uset, inodes)
 		vinternals <- setdiff(  intersect( vset, inodes), uinternals )
+tryCatch( {
 		x <- rbind( 
 		 cbind(    nhs[ uinternals ], 0 )
 		 , cbind(  nhs[ vinternals ], 0 )
 		 , cbind(  nhs[ intersect( uset, 1:n) ], 1 )
 		 , cbind(  nhs[ intersect( vset, 1:n) ], -1 )
 		)
+}, error = function(e) browser() )
 		x <- as.vector( x[ order(x[,1] ) , 2] )
 		nd <- Cuv_ranksum_nulldist(x, nsim, nested  )
 		
@@ -215,9 +217,13 @@ if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('int
 }
 #' find biggest outlier descend from a not counting rest of tree 
 .find.biggest.outlier <- function(a ){
-	zs <- sapply( node2nodeset[[a]], function(u) 
-	  .calc.z( u, a )
-	)
+	zs <- if ( ncpu  > 1 ){
+		unlist( parallel::mclapply(  node2nodeset[[a]], function(u)  .calc.z( u, a ) 
+		 , mc.cores = ncpu ) )
+	} else{
+		sapply( node2nodeset[[a]], function(u)  .calc.z( u, a ) )
+	}
+#~ browser()
 	wm <- which.max( zs )
 	ustar <- node2nodeset[[a]][ wm ]
 	if ( zs[wm] <= zstar )
@@ -229,16 +235,15 @@ if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('int
 	u <- .find.biggest.outlier( a )
 	if (is.null(u)) 
 	  return(NULL)
-#~ print(a)
-#~ print(u)
-#~ browser()
 	list( ustar = u
 	  , newnodeset_a = setdiff( node2nodeset[[a]], descendants[[u]] )
 	)
 }
 
-
-
+.init.nodeset <- function(u, digging){
+#~ browser()
+	setdiff( descendants[[u]], do.call( c, lapply( digging, function(v) node2nodeset[[v]] ) ) )
+}
 
 node2cl <- c()
 clusterlist <- list()
@@ -254,12 +259,15 @@ while( any(shouldDig) ){
 				node2cl <- c( node2cl, a )
 			}
 		}else{
-			shouldDig[ dc$ustar ] <- TRUE 
+			node2nodeset[[dc$ustar]] <- .init.nodeset( dc$ustar, setdiff(union( todig, node2cl ), a)  )
+			if ( length(node2nodeset[[dc$ustar]]) > 0)
+				shouldDig[ dc$ustar ] <- TRUE 
 			node2nodeset[[a]] <- dc$newnodeset_a
 		}
 	}
-cat('todig\n') 
-print(todig)
+	if (verbosity > 0 ){
+		cat(paste( 'Finding splits under nodes:',   paste(todig, collapse = ' ') , '\n') )
+	}
 }
 # /OUTLIERS
 
@@ -341,6 +349,11 @@ print(todig)
 	  , zstar = zstar 
 	  , cluster_mrca  = node2cl 
 	  , call = match.call() 
+	  , data =  data.frame( taxon = tre$tip.label
+		   , cluster = clustering
+		   , partition = partition
+	     , row.names = tre$tip.label
+		)
 	)
 	class(rv) <- 'TreeStructure'
 	rv
@@ -350,6 +363,7 @@ print(todig)
 .plot.TreeStructure.ggtree <- function(x, ... ){
 	stopifnot(  'ggtree' %in% installed.packages() )
 	stopifnot( inherits( x, 'TreeStructure') )
+	require(ggtree)
 	tre <- x$tree 
 	dtdf <- data.frame( taxa = tre$tip.label
 		 , cluster = x$clustering
@@ -358,56 +372,59 @@ print(todig)
 	 , row.names = tre$tip.label
 	)
 	
-#~ 	tre <- ggtree::groupClade(tre, node=x$clusterList)
 	prenodes <- tre$edge[ rev( ape::postorder( tre )), 1]
 	tre <- ggtree::groupClade(tre, node=  prenodes[ prenodes %in% x$cluster_mrca ]  )
 	#+ geom_hilight( getMRCA( tr, sp$clusterList[[1]] ) )
-	pl <- ggtree( tre, aes(color=group), ... ) %<+% dtdf + geom_tippoint(aes( color=part, shape=shape, show.legend=TRUE), size = 2 )
-	(pl <- pl+ theme(legend.position="right"))
+	pl <- ggtree::ggtree( tre, aes(color=group), ... ) %<+% dtdf + ggtree::geom_tippoint(aes( color=part, shape=shape, show.legend=TRUE), size = 2 )
+	#+ ggplot2::theme(legend.position="right")
+	pl
 }
 
-
-print.TreeStructure <- function(x, ...)
+plot.TreeStructure <- function(x, use_ggtree = TRUE , ... )
 {
 	stopifnot( inherits( x, 'TreeStructure') )
-	
-	npart <- nlevels( x$partition)
-	nc <- nlevels( x$clustering )
-	tre <- x$tree 
-cat( '
-Call: \n
-' )
-	print( x$call )
-	
-	cat ( paste( 'Number of clusters:', nc , '\n') )
-	cat ( paste( 'Number of partitions:', npart, '\n' ) )
-	cat('Cluster and partition assignment: \n')
-	
-	dtdf <- data.frame( taxon = tre$tip.label
-		 , cluster = x$clustering
-		 , partition = x$partition 
-	 , row.names = tre$tip.label
-	)
-	print( dtdf )
-	
-	invisible(x)
-}
-
-plot.TreeStructure <- function(x, ... )
-{
-	stopifnot( inherits( x, 'TreeStructure') )
-	if ( 'ggtree' %in% installed.packages() ){
+	if ( 'ggtree' %in% installed.packages() & use_ggtree ){
 		return( .plot.TreeStructure.ggtree (x , ... ) )
 	} else{
 		tr <- x$tree 
 		tr$tip.label <- as.character( x$partition[tr$tip.label]  )
 		ape::plot.phylo( tr , ... ) 
 		ape::nodelabels( '', node = x$cluster_mrca , pch = 8, cex = 3, frame = 'none') 
-		tiplabels( '', pch = 15, col   =  as.vector( sp$partition ) )
+		ape::tiplabels( '', pch = 15, col   =  as.vector( sp$partition ) , frame='none')
 	}
 	
 	invisible(x)
 }
+
+
+print.TreeStructure <- function(x, rows = 10, ...)
+{
+	stopifnot( inherits( x, 'TreeStructure') )
+	
+	npart <- nlevels( x$partition)
+	nc <- nlevels( x$clustering )
+	tre <- x$tree 
+	cat( 'Call: \n' )
+	print( x$call )
+	cat('\n')
+	
+	cat ( paste( 'Number of clusters:', nc , '\n') )
+	cat ( paste( 'Number of partitions:', npart, '\n' ) )
+	cat ( paste( 'Significance level:', x$level, '\n' ) )
+	cat ('Cluster and partition assignment: \n')
+	
+	print( x$data[1:min(nrow(x$data),rows), ] )
+	cat( '...\n') 
+	cat( 'For complete data, use `as.data.frame(...)` \n ' )
+	
+	invisible(x)
+}
+
+as.data.frame.TreeStructure <- function(x){
+	stopifnot( inherits( x, 'TreeStructure') )
+	x$data
+}
+
 
 coef.TreeStructure <- function(x, ... )
 {
