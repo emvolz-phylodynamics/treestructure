@@ -17,6 +17,8 @@
 #' @param minOverlap Threshold time overlap required to find splits in a clade  
 #' @param nsim Number of simulations for computing null distribution of test statistics 
 #' @param level Significance level for finding new split within a set of tips 
+#' @param ncpu If >1 will compute statistics in parallel using multiple CPUs 
+#' @param verbosity If > 0 will print information about progress of the algorithm 
 #' @return A TreeStructure object which includes cluster and partitition assignment for each tip of the tree. 
 #' @examples 
 #' library(ape)

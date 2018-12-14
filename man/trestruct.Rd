@@ -17,6 +17,10 @@ trestruct(tre, minCladeSize = 20, minOverlap = -Inf, nsim = 1000,
 \item{nsim}{Number of simulations for computing null distribution of test statistics}
 
 \item{level}{Significance level for finding new split within a set of tips}
+
+\item{ncpu}{If >1 will compute statistics in parallel using multiple CPUs}
+
+\item{verbosity}{If > 0 will print information about progress of the algorithm}
 }
 \value{
 A TreeStructure object which includes cluster and partitition assignment for each tip of the tree.
