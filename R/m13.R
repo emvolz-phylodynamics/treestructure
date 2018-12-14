@@ -10,17 +10,17 @@
 }
 
 
-#' Partition rooted tree into sets of clades
+#' Detect cryptic population structure in time trees 
 #' 
 #' @param tre A tree of type ape::phylo. Must be rooted and binary. 
 #' @param minCladeSize All clusters within parititon must have at least this many tips. 
-#' @param minOverlap 
-#' @param nsim Number of simulations for comparing clusters within partition
-#' @param level Significance level for splitting partition to make new cluster 
+#' @param minOverlap Threshold time overlap required to find splits in a clade  
+#' @param nsim Number of simulations for computing null distribution of test statistics 
+#' @param level Significance level for finding new split within a set of tips 
 #' @return A TreeStructure object which includes cluster and partitition assignment for each tip of the tree. 
 #' @examples 
 #' library(ape)
-#' tree <- rcoal(100)
+#' tree <- rcoal(50)
 #' struct <-  trestruct( tree )
 #' @export 
 trestruct <- function( tre, minCladeSize = 20, minOverlap = -Inf, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1, ... )
@@ -139,7 +139,7 @@ for (ie in 1:nrow(poedges))
 	}
 	
 	# test stat null distribution 
-	#' @param nested 0 if u is nested under v, 1 if u & v are both under root
+	# nested 0 if u is nested under v, 1 if u & v are both under root
 	.uv.diss <- function(uset, vset, nested = 1){
 		# 1 sample u
 		# 0 co 
@@ -147,14 +147,12 @@ for (ie in 1:nrow(poedges))
 		
 		uinternals <-  intersect( uset, inodes)
 		vinternals <- setdiff(  intersect( vset, inodes), uinternals )
-tryCatch( {
 		x <- rbind( 
 		 cbind(    nhs[ uinternals ], 0 )
 		 , cbind(  nhs[ vinternals ], 0 )
 		 , cbind(  nhs[ intersect( uset, 1:n) ], 1 )
 		 , cbind(  nhs[ intersect( vset, 1:n) ], -1 )
 		)
-}, error = function(e) browser() )
 		x <- as.vector( x[ order(x[,1] ) , 2] )
 		nd <- Cuv_ranksum_nulldist(x, nsim, nested  )
 		
@@ -175,7 +173,7 @@ node2nodeset <- descendants
 shouldDig <- rep(FALSE, n + nnode )
 shouldDig[ rootnode ] <- TRUE 
 
-#' compute z score for u descendened from claderoot 
+# compute z score for u descendened from claderoot 
 .calc.z <- function(u, v, nested = 0){
 	if ( u <= n ) 
 	  return(0)
@@ -215,7 +213,7 @@ if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('int
 		.uv.diss( node2nodeset[[u]] , node2nodeset[[v]], nested=nested )
 	}
 }
-#' find biggest outlier descend from a not counting rest of tree 
+# find biggest outlier descend from a not counting rest of tree 
 .find.biggest.outlier <- function(a ){
 	zs <- if ( ncpu  > 1 ){
 		unlist( parallel::mclapply(  node2nodeset[[a]], function(u)  .calc.z( u, a ) 
@@ -223,14 +221,13 @@ if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('int
 	} else{
 		sapply( node2nodeset[[a]], function(u)  .calc.z( u, a ) )
 	}
-#~ browser()
 	wm <- which.max( zs )
 	ustar <- node2nodeset[[a]][ wm ]
 	if ( zs[wm] <= zstar )
 	  return(NULL)
 	ustar 
 }
-#' return ustar,  new exclude[a] 
+# return ustar,  new exclude[a] 
 .dig.clade <- function(a){
 	u <- .find.biggest.outlier( a )
 	if (is.null(u)) 
@@ -241,7 +238,6 @@ if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('int
 }
 
 .init.nodeset <- function(u, digging){
-#~ browser()
 	setdiff( descendants[[u]], do.call( c, lapply( digging, function(v) node2nodeset[[v]] ) ) )
 }
 
@@ -352,7 +348,7 @@ while( any(shouldDig) ){
 	  , data =  data.frame( taxon = tre$tip.label
 		   , cluster = clustering
 		   , partition = partition
-	     , row.names = tre$tip.label
+	     , row.names = 1:ape::Ntip(tre)
 		)
 	)
 	class(rv) <- 'TreeStructure'
@@ -365,21 +361,20 @@ while( any(shouldDig) ){
 	stopifnot( inherits( x, 'TreeStructure') )
 	require(ggtree)
 	tre <- x$tree 
-	dtdf <- data.frame( taxa = tre$tip.label
-		 , cluster = x$clustering
-		 , part = x$partition 
-		 , shape = rep('circle', ape::Ntip(tre))
-	 , row.names = tre$tip.label
-	)
+	d <- x$data 
+	d$shape <-  rep('circle', ape::Ntip(tre))
 	
 	prenodes <- tre$edge[ rev( ape::postorder( tre )), 1]
 	tre <- ggtree::groupClade(tre, node=  prenodes[ prenodes %in% x$cluster_mrca ]  )
-	#+ geom_hilight( getMRCA( tr, sp$clusterList[[1]] ) )
-	pl <- ggtree::ggtree( tre, aes(color=group), ... ) %<+% dtdf + ggtree::geom_tippoint(aes( color=part, shape=shape, show.legend=TRUE), size = 2 )
+	pl <- ggtree::ggtree( tre, aes(color=group), ... ) %<+% d + ggtree::geom_tippoint(aes( color=partition, shape=shape, show.legend=TRUE), size = 2 )
 	#+ ggplot2::theme(legend.position="right")
 	pl
 }
 
+#' Plot TreeStructure tree with cluster and partition variables 
+#' @param x  A TreeStructure object 
+#' @param use_ggtree Toggle ggtree or ape plotting behaviour 
+#' @export 
 plot.TreeStructure <- function(x, use_ggtree = TRUE , ... )
 {
 	stopifnot( inherits( x, 'TreeStructure') )
@@ -390,13 +385,14 @@ plot.TreeStructure <- function(x, use_ggtree = TRUE , ... )
 		tr$tip.label <- as.character( x$partition[tr$tip.label]  )
 		ape::plot.phylo( tr , ... ) 
 		ape::nodelabels( '', node = x$cluster_mrca , pch = 8, cex = 3, frame = 'none') 
-		ape::tiplabels( '', pch = 15, col   =  as.vector( sp$partition ) , frame='none')
+		ape::tiplabels( '', pch = 15, col   =  as.vector( x$partition ) , frame='none')
 	}
 	
 	invisible(x)
 }
 
 
+#' @export 
 print.TreeStructure <- function(x, rows = 10, ...)
 {
 	stopifnot( inherits( x, 'TreeStructure') )
