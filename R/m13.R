@@ -361,6 +361,7 @@ while( any(shouldDig) ){
 .plot.TreeStructure.ggtree <- function(x, ... ){
 	stopifnot(  'ggtree' %in% installed.packages() )
 	stopifnot( inherits( x, 'TreeStructure') )
+cat( 'Warning: ggtree version has bugs TODO \n')
 	require(ggtree)
 	tre <- x$tree 
 	d <- x$data 
@@ -377,14 +378,14 @@ while( any(shouldDig) ){
 #' @param x  A TreeStructure object 
 #' @param use_ggtree Toggle ggtree or ape plotting behaviour 
 #' @export 
-plot.TreeStructure <- function(x, use_ggtree = TRUE , ... )
+plot.TreeStructure <- function(x, use_ggtree = FALSE , ... )
 {
 	stopifnot( inherits( x, 'TreeStructure') )
 	if ( 'ggtree' %in% installed.packages() & use_ggtree ){
 		return( .plot.TreeStructure.ggtree (x , ... ) )
 	} else{
 		tr <- x$tree 
-		tr$tip.label <- as.character( x$partition[tr$tip.label]  )
+		tr$tip.label <- as.character( x$partition  )
 		ape::plot.phylo( tr , ... ) 
 		ape::nodelabels( '', node = x$cluster_mrca , pch = 8, cex = 3, frame = 'none') 
 		ape::tiplabels( '', pch = 15, col   =  as.vector( x$partition ) , frame='none')
@@ -418,27 +419,15 @@ print.TreeStructure <- function(x, rows = 10, ...)
 	invisible(x)
 }
 
+#' @export 
 as.data.frame.TreeStructure <- function(x){
 	stopifnot( inherits( x, 'TreeStructure') )
 	x$data
 }
 
-
+#' @export 
 coef.TreeStructure <- function(x, ... )
 {
 	stopifnot( inherits( x, 'TreeStructure') )
 	x$partition
 }
-
-partition <- function(x, ... )
-{
-	stopifnot( inherits( x, 'TreeStructure') )
-	x$partition
-}
-
-cluster <- function(x, ... )
-{
-	stopifnot( inherits( x, 'TreeStructure') )
-	x$clustering
-}
-
