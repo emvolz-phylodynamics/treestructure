@@ -166,7 +166,13 @@ for (ie in 1:nrow(poedges))
 		
 		m_nd <- mean(nd)
 		sd_nd <- sd(nd)
-		abs( (rsuv - m_nd) / sd_nd )
+		return( abs( (rsuv - m_nd) / sd_nd ) )
+		
+#~ 		s <- sum(rsuv > nd )
+#~ 		p <- min( s / nsim , (nsim - s) / nsim )
+		
+#~ 		p <- sum(rsuv > nd ) / nsim 
+#~ 		abs( qnorm( p )  )
 	}
 	
 
@@ -180,7 +186,7 @@ shouldDig <- rep(FALSE, n + nnode )
 shouldDig[ rootnode ] <- TRUE 
 
 # compute z score for u descendened from claderoot 
-.calc.z <- function(u, v, nested = 0){
+.calc.z <- function(u, v, nested = 0){ 
 	if ( u <= n ) 
 	  return(0)
 	if ( v <= n ) 
@@ -213,7 +219,7 @@ shouldDig[ rootnode ] <- TRUE
 		if ( length( vtips ) == 0){
 			return( 0 )
 		}
-		.uv.diss( nsu , nsv, nested=nested )
+		return( .uv.diss( nsu , nsv, nested=nested ) ) 
 	} else{
 if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('intersect error ')
 		.uv.diss( node2nodeset[[u]] , node2nodeset[[v]], nested=nested )
@@ -330,8 +336,8 @@ while( any(shouldDig) ){
 		names(partitionNodes) <- 1:max(partinds)
 		
 	} else{
-		clustering <- as.factor( rep(1, n ))
-		partition <- as.factor( rep(1, n ))
+		clustering <- setNames(  as.factor( rep(1, n )), tre$tip.label )
+		partition <- setNames( as.factor( rep(1, n )), tre$tip.label )
 		clusters <- list( tre$tip.label )
 		partitionSets <- list( tre$tip.label )
 		remainderClade <- NULL 
