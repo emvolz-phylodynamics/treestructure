@@ -32,6 +32,10 @@ trestruct <- function( tre, minCladeSize = 20, minOverlap = -Inf, nsim = 1e3, le
 	if ( minOverlap >= minCladeSize){
 		stop('*minOverlap* should be < *minCladeSize*.')
 	}
+	if ( any(is.na(tre$tip.label)) | anyDuplicated(tre$tip.label)){
+		cat('Tree has NA or duplicated tip labels. Adding a unique id. \n')
+		tre$tip.label <- paste0( paste0( 1:(ape::Ntip(tre)), '_' ), tre$tip.label )
+	}
 	n <- ape::Ntip( tre )
 	nnode <- ape::Nnode(tre )
 	rootnode <- .get_rootnode( tre$edge )
@@ -359,16 +363,13 @@ while( any(shouldDig) ){
 
 
 .plot.TreeStructure.ggtree <- function(x, ... ){
-	stopifnot(  'ggtree' %in% installed.packages() )
+	stopifnot( require(ggtree ) )
 	stopifnot( inherits( x, 'TreeStructure') )
-cat( 'Warning: ggtree version has bugs TODO \n')
-	require(ggtree)
 	tre <- x$tree 
 	d <- x$data 
 	d$shape <-  rep('circle', ape::Ntip(tre))
 	
-	prenodes <- tre$edge[ rev( ape::postorder( tre )), 1]
-	tre <- ggtree::groupClade(tre, node=  prenodes[ prenodes %in% x$cluster_mrca ]  )
+	tre <- ggtree::groupOTU( tre, s$clusterSets ) 
 	pl <- ggtree::ggtree( tre, aes(color=group), ... ) %<+% d + ggtree::geom_tippoint(aes( color=partition, shape=shape, show.legend=TRUE), size = 2 )
 	#+ ggplot2::theme(legend.position="right")
 	pl
@@ -378,7 +379,7 @@ cat( 'Warning: ggtree version has bugs TODO \n')
 #' @param x  A TreeStructure object 
 #' @param use_ggtree Toggle ggtree or ape plotting behaviour 
 #' @export 
-plot.TreeStructure <- function(x, use_ggtree = FALSE , ... )
+plot.TreeStructure <- function(x, use_ggtree = TRUE , ... )
 {
 	stopifnot( inherits( x, 'TreeStructure') )
 	if ( 'ggtree' %in% installed.packages() & use_ggtree ){
