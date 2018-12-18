@@ -25,7 +25,7 @@
 #' tree <- rcoal(50)
 #' struct <-  trestruct( tree )
 #' @export 
-trestruct <- function( tre, minCladeSize = 20, minOverlap = -Inf, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1, ... )
+trestruct <- function( tre, minCladeSize = 20, minOverlap = -Inf, nsim = 1e3, level = .001, ncpu = 1, verbosity = 1, ... )
 {
 	stopifnot( ape::is.rooted(tre))
 	stopifnot( ape::is.binary(tre))
