@@ -115,6 +115,20 @@ for (ie in 1:nrow(poedges))
 	else 
 	  dgtrMat[ poedges[ie,1], 2] <- poedges[ie,2]
 }
+
+.ismonomono <- function( u, v){
+	# NOTE if u is direct decendant of v or vice versa than the two tip sets are mono/mono related 
+	if ( tail(ancestors[[u]],1) == v){
+		return(TRUE)
+	}
+	if ( tail(ancestors[[v]],1) == u){
+		return(TRUE)
+	}
+	!((v %in% ancestors[[u]]) | (u %in% ancestors[[v]] ))
+}
+.ismonopara <- function(u, v){
+	v %in% ancestors[[u]] 
+}
 # /PRECOMPUTE
 
 
@@ -186,7 +200,10 @@ shouldDig <- rep(FALSE, n + nnode )
 shouldDig[ rootnode ] <- TRUE 
 
 # compute z score for u descendened from claderoot 
-.calc.z <- function(u, v, nested = 0){ 
+.calc.z <- function(u, v, nested = NA){ 
+	if (is.na( nested)){
+		nested = ifelse( .ismonomono( u, v), 1, 0 )
+	}
 	if ( u <= n ) 
 	  return(0)
 	if ( v <= n ) 
@@ -299,7 +316,8 @@ while( any(shouldDig) ){
 				# overlap
 				if ( .overlap( clusterlist[[iu]] , clusterlist[[iv]] )) # 
 				{
-					D[iu,iv] <- .uv.diss ( clusterlist[[iu]] , clusterlist[[iv]], nested = 1)	
+					#~ 					D[iu,iv] <- .uv.diss ( clusterlist[[iu]] , clusterlist[[iv]], nested = 1)	
+					D[iu,iv] <- .uv.diss ( clusterlist[[iu]] , clusterlist[[iv]], nested = NA)	
 					D[iv, iu] <- D[iu, iv] 
 				}
 			}
