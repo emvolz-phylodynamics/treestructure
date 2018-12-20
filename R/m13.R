@@ -136,6 +136,7 @@ for (ie in 1:nrow(poedges))
 	t2 <- intersect( 1:(ape::Ntip(tre)), cl2 )
 	u <- ape::getMRCA(tre,  t1 )
 	v <- ape::getMRCA(tre,  t2 )
+#~ browser()
 	if ( is.null( u ) | is.null(v) ) 
 	  return(FALSE)
 	!.ispara( u, v)
@@ -182,14 +183,19 @@ for (ie in 1:nrow(poedges))
 			#nested = ifelse( .ismonomono( u, v), 1, 0 )
 			nested = ifelse( .ismonomono_cl( uset, vset ), 1, 0 )
 		}
+print(nested)
 		
 		uinternals <-  intersect( uset, inodes)
 		vinternals <- setdiff(  intersect( vset, inodes), uinternals )
+		utips <- intersect( uset, 1:n)
+		vtips <- intersect( vset, 1:n)
+		if ( (length( utips )==0) | (length(vtips) == 0) )
+		 return(0 )
 		x <- rbind( 
 		 cbind(    nhs[ uinternals ], 0 )
 		 , cbind(  nhs[ vinternals ], 0 )
-		 , cbind(  nhs[ intersect( uset, 1:n) ], 1 )
-		 , cbind(  nhs[ intersect( vset, 1:n) ], -1 )
+		 , cbind(  nhs[ utips ], 1 )
+		 , cbind(  nhs[ vtips ], -1 )
 		)
 		x <- as.vector( x[ order(x[,1] ) , 2] )
 		nd <- Cuv_ranksum_nulldist(x, nsim, nested  )
@@ -219,10 +225,7 @@ shouldDig[ rootnode ] <- TRUE
 
 # compute z score for u descendened from claderoot 
 .calc.z <- function(u, v, nested = NA){ 
-	if (is.na( nested)){
-		#nested = ifelse( .ismonomono( u, v), 1, 0 )
-		nested = ifelse( .ismonomono_cl( node2nodeset[[u]], node2nodeset[[v]]), 1, 0 )
-	}
+
 	if ( u <= n ) 
 	  return(0)
 	if ( v <= n ) 
@@ -233,6 +236,13 @@ shouldDig[ rootnode ] <- TRUE
 	  return(0 )
 	if ( u==v )
 	  return(0)
+	# TODO more robust to test v in ancestors[[u]] and vice versa 
+	nsu <-  node2nodeset[[u]]
+	nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
+	if (is.na( nested)){
+		#nested = ifelse( .ismonomono( u, v), 1, 0 )
+		nested = ifelse( .ismonomono_cl(nsu, nsv ), 1, 0 )
+	}
 	if (nested==0) {
 		if (!.au.overlap(v, u) ){
 			return(0)
@@ -243,8 +253,8 @@ shouldDig[ rootnode ] <- TRUE
 		}
 	}
 	if (nested==0){ # u under v
-		nsu <-  intersect( node2nodeset[[u]], node2nodeset[[v]] )
-		nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
+		#nsu <-  intersect( node2nodeset[[u]], node2nodeset[[v]] )
+		
 		vtips <- intersect( nsv, 1:(ape::Ntip(tre)))
 		utips <- intersect( nsu, 1:(ape::Ntip(tre)))
 		if (length( vtips ) < minCladeSize)
@@ -258,7 +268,8 @@ shouldDig[ rootnode ] <- TRUE
 		return( .uv.diss( nsu , nsv, nested=nested ) ) 
 	} else{
 #~ if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('intersect error ')
-		.uv.diss( node2nodeset[[u]] , node2nodeset[[v]], nested=nested )
+#~ 		.uv.diss( node2nodeset[[u]] , node2nodeset[[v]], nested=nested )
+		.uv.diss(nsu, nsv , nested=nested )
 	}
 }
 # find biggest outlier descend from a not counting rest of tree 
@@ -276,7 +287,7 @@ shouldDig[ rootnode ] <- TRUE
 	ustar 
 }
 # return ustar,  new exclude[a] 
-.dig.clade <- function(a){
+.dig.clade <- function(a) {
 	u <- .find.biggest.outlier( a )
 	if (is.null(u)) 
 	  return(NULL)
