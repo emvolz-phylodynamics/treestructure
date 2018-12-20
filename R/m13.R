@@ -183,7 +183,6 @@ for (ie in 1:nrow(poedges))
 			#nested = ifelse( .ismonomono( u, v), 1, 0 )
 			nested = ifelse( .ismonomono_cl( uset, vset ), 1, 0 )
 		}
-print(nested)
 		
 		uinternals <-  intersect( uset, inodes)
 		vinternals <- setdiff(  intersect( vset, inodes), uinternals )
