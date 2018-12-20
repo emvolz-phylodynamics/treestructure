@@ -126,9 +126,22 @@ for (ie in 1:nrow(poedges))
 	}
 	!((v %in% ancestors[[u]]) | (u %in% ancestors[[v]] ))
 }
-.ismonopara <- function(u, v){
-	v %in% ancestors[[u]] 
+
+.ispara <- function(u, v){
+	(v %in% ancestors[[u]]) | (u %in% ancestors[[v]])
 }
+
+.ismonomono_cl <- function( cl1, cl2){
+	t1 <- intersect( 1:(ape::Ntip(tre)), cl1 )
+	t2 <- intersect( 1:(ape::Ntip(tre)), cl2 )
+	u <- ape::getMRCA(tre,  t1 )
+	v <- ape::getMRCA(tre,  t2 )
+	if ( is.null( u ) | is.null(v) ) 
+	  return(FALSE)
+	!.ispara( u, v)
+}
+
+
 # /PRECOMPUTE
 
 
@@ -160,10 +173,15 @@ for (ie in 1:nrow(poedges))
 	
 	# test stat null distribution 
 	# nested 0 if u is nested under v, 1 if u & v are both under root
-	.uv.diss <- function(uset, vset, nested = 1){
+	.uv.diss <- function(uset, vset, nested = NA){
 		# 1 sample u
 		# 0 co 
 		# -1 sample v 
+		
+		if (is.na( nested)){
+			#nested = ifelse( .ismonomono( u, v), 1, 0 )
+			nested = ifelse( .ismonomono_cl( uset, vset ), 1, 0 )
+		}
 		
 		uinternals <-  intersect( uset, inodes)
 		vinternals <- setdiff(  intersect( vset, inodes), uinternals )
@@ -202,7 +220,8 @@ shouldDig[ rootnode ] <- TRUE
 # compute z score for u descendened from claderoot 
 .calc.z <- function(u, v, nested = NA){ 
 	if (is.na( nested)){
-		nested = ifelse( .ismonomono( u, v), 1, 0 )
+		#nested = ifelse( .ismonomono( u, v), 1, 0 )
+		nested = ifelse( .ismonomono_cl( node2nodeset[[u]], node2nodeset[[v]]), 1, 0 )
 	}
 	if ( u <= n ) 
 	  return(0)
@@ -238,7 +257,7 @@ shouldDig[ rootnode ] <- TRUE
 		}
 		return( .uv.diss( nsu , nsv, nested=nested ) ) 
 	} else{
-if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('intersect error ')
+#~ if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('intersect error ')
 		.uv.diss( node2nodeset[[u]] , node2nodeset[[v]], nested=nested )
 	}
 }
@@ -304,7 +323,6 @@ while( any(shouldDig) ){
 	}
 	
 	
-	
 # DISTANCE
 	nc <- length( clusterlist )
 	D <- matrix( NA, nrow = nc, ncol = nc )
@@ -330,7 +348,6 @@ while( any(shouldDig) ){
 	rownames(.D)  = colnames(.D) <- 1:nc
 	D <- as.dist(.D)
 # /DISTANCE 
-
 
 
 # RETURN
@@ -439,7 +456,7 @@ print.TreeStructure <- function(x, rows = 10, ...)
 	
 	print( x$data[1:min(nrow(x$data),rows), ] )
 	cat( '...\n') 
-	cat( 'For complete data, use `as.data.frame(...)` \n ' )
+	cat( 'For complete data, use `as.data.frame(...)` \n' )
 	
 	invisible(x)
 }
