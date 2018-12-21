@@ -9,6 +9,20 @@
 	setdiff( as.vector(edge), edge[,2] )
 }
 
+#' @export 
+cocluster_accuracy <- function( x, y ){
+ n <- length(x) 
+ a <- matrix( FALSE, nrow =	n , ncol = n  )
+ b <- matrix( FALSE, nrow =	n , ncol = n  )
+ sx <- split( 1:n, x )
+ sy <- split( 1:n, y )
+ for ( z in sx )
+   a[z,z] <- TRUE
+ for ( z in sy )
+   b[z,z] <- TRUE
+  
+  (sum( a == b ) - n ) / n^2
+}
 
 #' Detect cryptic population structure in time trees 
 #' 

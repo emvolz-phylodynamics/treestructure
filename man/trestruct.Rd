@@ -5,7 +5,7 @@
 \title{Detect cryptic population structure in time trees}
 \usage{
 trestruct(tre, minCladeSize = 20, minOverlap = -Inf, nsim = 1000,
-  level = 0.01, ncpu = 1, verbosity = 1, ...)
+  level = 0.001, ncpu = 1, verbosity = 1, ...)
 }
 \arguments{
 \item{tre}{A tree of type ape::phylo. Must be rooted and binary.}
