@@ -274,7 +274,8 @@ shouldDig[ rootnode ] <- TRUE
 		}
 	}
 	if (nested==0){ # u under v
-		nsu <-   node2nodeset[[u]]
+		#TODO intersect for nsu? inspect.
+		nsu <-   intersect(  node2nodeset[[u]], node2nodeset[[v]] )
 		nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
 		vtips <- intersect( nsv, 1:(ape::Ntip(tre)))
 		utips <- intersect( nsu, 1:(ape::Ntip(tre)))
@@ -295,7 +296,7 @@ shouldDig[ rootnode ] <- TRUE
 	}
 }
 # find biggest outlier descend from a not counting rest of tree 
-.find.biggest.outlier <- function(a, nested = NA ){
+.find.biggest.outlier <- function(a, nested = 0 ){
 	zs <- if ( ncpu  > 1 ){
 		unlist( parallel::mclapply(  node2nodeset[[a]], function(u)  .calc.z( u, a, nested = nested  ) 
 		 , mc.cores = ncpu ) )
