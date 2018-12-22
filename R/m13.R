@@ -203,7 +203,7 @@ for (ie in 1:nrow(poedges))
 		utips <- intersect( uset, 1:n)
 		vtips <- intersect( vset, 1:n)
 		if ( (length( utips )==0) | (length(vtips) == 0) )
-		 return(0 )
+		 return( 0 )
 		x <- rbind( 
 		 cbind(    nhs[ uinternals ], 0 )
 		 , cbind(  nhs[ vinternals ], 0 )
@@ -237,8 +237,7 @@ shouldDig <- rep(FALSE, n + nnode )
 shouldDig[ rootnode ] <- TRUE 
 
 # compute z score for u descendened from claderoot 
-.calc.z <- function(u, v, nested = NA){ 
-
+.calc.z <- function(u, v, nested = 0){ 
 	if ( u <= n ) 
 	  return(0)
 	if ( v <= n ) 
@@ -249,11 +248,20 @@ shouldDig[ rootnode ] <- TRUE
 	  return(0 )
 	if ( u==v )
 	  return(0)
-	# TODO more robust to test v in ancestors[[u]] and vice versa 
-	nsu <-  node2nodeset[[u]]
-	nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
+	
 	if (is.na( nested)){
 		#nested = ifelse( .ismonomono( u, v), 1, 0 )
+		if ( all( node2nodeset[[u]] %in% node2nodeset[[v]] ))
+		{
+			nsu <- node2nodeset[[u]]
+			nsv <- setdiff( node2nodeset[[v]] , node2nodeset[[u]] )
+		} else if ( all( node2nodeset[[v]] %in% node2nodeset[[u]]) ){
+			nsv <- node2nodeset[[v]]
+			nsu <- setdiff( node2nodeset[[u]] , node2nodeset[[v]] )
+		} else{
+				nsu <-  setdiff( node2nodeset[[u]], node2nodeset[[v]] )
+				nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
+		}
 		nested = ifelse( .ismonomono_cl(nsu, nsv ), 1, 0 )
 	}
 	if (nested==0) {
@@ -266,8 +274,8 @@ shouldDig[ rootnode ] <- TRUE
 		}
 	}
 	if (nested==0){ # u under v
-		#nsu <-  intersect( node2nodeset[[u]], node2nodeset[[v]] )
-		
+		nsu <-   node2nodeset[[u]]
+		nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
 		vtips <- intersect( nsv, 1:(ape::Ntip(tre)))
 		utips <- intersect( nsu, 1:(ape::Ntip(tre)))
 		if (length( vtips ) < minCladeSize)
@@ -280,13 +288,14 @@ shouldDig[ rootnode ] <- TRUE
 		}
 		return( .uv.diss( nsu , nsv, nested=nested ) ) 
 	} else{
-#~ if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('intersect error ')
-#~ 		.uv.diss( node2nodeset[[u]] , node2nodeset[[v]], nested=nested )
-		.uv.diss(nsu, nsv , nested=nested )
+#if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('intersect error ')
+		nsu <-  setdiff( node2nodeset[[u]], node2nodeset[[v]] )
+		nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
+		.uv.diss( nsu, nsv , nested=nested )
 	}
 }
 # find biggest outlier descend from a not counting rest of tree 
-.find.biggest.outlier <- function(a, nested = 0 ){
+.find.biggest.outlier <- function(a, nested = NA ){
 	zs <- if ( ncpu  > 1 ){
 		unlist( parallel::mclapply(  node2nodeset[[a]], function(u)  .calc.z( u, a, nested = nested  ) 
 		 , mc.cores = ncpu ) )
@@ -300,7 +309,7 @@ shouldDig[ rootnode ] <- TRUE
 	ustar 
 }
 # return ustar,  new exclude[a] 
-.dig.clade <- function(a) {
+.dig.clade <- function(a){
 	u <- .find.biggest.outlier( a )
 	if (is.null(u)) 
 	  return(NULL)
@@ -322,9 +331,14 @@ while( any(shouldDig) ){
 		if ( is.null( dc )){
 			shouldDig[a] <- FALSE
 			if ( length( node2nodeset[[a]] ) > 0 ){
-				no <- length( clusterlist)
-				clusterlist[[ no + 1 ]] <- node2nodeset[[a]] 
-				node2cl <- c( node2cl, a )
+				#  test  if tips in nodeset before adding to clusterlist 
+				ans <- node2nodeset[[a]] 
+				atips <- setdiff( ans , 1:(ape::Ntip(tre)))
+				if ( length( atips ) > 0 ){
+					no <- length( clusterlist)
+					clusterlist[[ no + 1 ]] <- node2nodeset[[a]] 
+					node2cl <- c( node2cl, a )
+				}
 			}
 		}else{
 			node2nodeset[[dc$ustar]] <- .init.nodeset( dc$ustar, setdiff(union( todig, node2cl ), a)  )
@@ -347,6 +361,7 @@ while( any(shouldDig) ){
 	}
 	
 	
+	
 # DISTANCE
 	nc <- length( clusterlist )
 	D <- matrix( NA, nrow = nc, ncol = nc )
@@ -358,8 +373,7 @@ while( any(shouldDig) ){
 				# overlap
 				if ( .overlap( clusterlist[[iu]] , clusterlist[[iv]] )) # 
 				{
-					#~ 					D[iu,iv] <- .uv.diss ( clusterlist[[iu]] , clusterlist[[iv]], nested = 1)	
-					D[iu,iv] <- .uv.diss ( clusterlist[[iu]] , clusterlist[[iv]], nested = NA)	
+					D[iu,iv] <- .uv.diss ( clusterlist[[iu]] , clusterlist[[iv]], nested = 1)	
 					D[iv, iu] <- D[iu, iv] 
 				}
 			}
@@ -372,6 +386,7 @@ while( any(shouldDig) ){
 	rownames(.D)  = colnames(.D) <- 1:nc
 	D <- as.dist(.D)
 # /DISTANCE 
+
 
 
 # RETURN
