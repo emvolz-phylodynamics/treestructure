@@ -21,7 +21,7 @@ cocluster_accuracy <- function( x, y ){
  for ( z in sy )
    b[z,z] <- TRUE
   
-  (sum( a == b ) - n ) / n^2
+  (sum( a == b ) - n ) / (n^2-n)
 }
 
 #' Detect cryptic population structure in time trees 
@@ -286,12 +286,12 @@ shouldDig[ rootnode ] <- TRUE
 	}
 }
 # find biggest outlier descend from a not counting rest of tree 
-.find.biggest.outlier <- function(a ){
+.find.biggest.outlier <- function(a, nested = 0 ){
 	zs <- if ( ncpu  > 1 ){
-		unlist( parallel::mclapply(  node2nodeset[[a]], function(u)  .calc.z( u, a ) 
+		unlist( parallel::mclapply(  node2nodeset[[a]], function(u)  .calc.z( u, a, nested = nested  ) 
 		 , mc.cores = ncpu ) )
 	} else{
-		sapply( node2nodeset[[a]], function(u)  .calc.z( u, a ) )
+		sapply( node2nodeset[[a]], function(u)  .calc.z( u, a, nested = nested ) )
 	}
 	wm <- which.max( zs )
 	ustar <- node2nodeset[[a]][ wm ]
