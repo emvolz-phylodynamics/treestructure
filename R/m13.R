@@ -450,7 +450,7 @@ while( any(shouldDig) ){
 	d <- x$data 
 	d$shape <-  rep('circle', ape::Ntip(tre))
 	
-	tre <- ggtree::groupOTU( tre, s$clusterSets ) 
+	tre <- ggtree::groupOTU( tre, x$clusterSets ) 
 	pl <- ggtree::ggtree( tre, aes(color=group), ... ) %<+% d + ggtree::geom_tippoint(aes( color=partition, shape=shape, show.legend=TRUE), size = 2 )
 	#+ ggplot2::theme(legend.position="right")
 	pl
@@ -463,7 +463,7 @@ while( any(shouldDig) ){
 plot.TreeStructure <- function(x, use_ggtree = TRUE , ... )
 {
 	stopifnot( inherits( x, 'TreeStructure') )
-	if ( 'ggtree' %in% installed.packages() & use_ggtree ){
+	if ( use_ggtree ){
 		return( .plot.TreeStructure.ggtree (x , ... ) )
 	} else{
 		tr <- x$tree 
