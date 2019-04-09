@@ -6,15 +6,15 @@
 using namespace Rcpp;
 
 // Cuv_ranksum_nulldist
-NumericVector Cuv_ranksum_nulldist(NumericVector x, int nsim, int monomono);
-RcppExport SEXP _treestructure_Cuv_ranksum_nulldist(SEXP xSEXP, SEXP nsimSEXP, SEXP monomonoSEXP) {
+NumericVector Cuv_ranksum_nulldist(NumericVector x, int nsim, int Ei);
+RcppExport SEXP _treestructure_Cuv_ranksum_nulldist(SEXP xSEXP, SEXP nsimSEXP, SEXP EiSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type nsim(nsimSEXP);
-    Rcpp::traits::input_parameter< int >::type monomono(monomonoSEXP);
-    rcpp_result_gen = Rcpp::wrap(Cuv_ranksum_nulldist(x, nsim, monomono));
+    Rcpp::traits::input_parameter< int >::type Ei(EiSEXP);
+    rcpp_result_gen = Rcpp::wrap(Cuv_ranksum_nulldist(x, nsim, Ei));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -39,7 +39,7 @@ cocluster_accuracy <- function( x, y ){
 #' tree <- rcoal(50)
 #' struct <-  trestruct( tree )
 #' @export 
-trestruct <- function( tre, minCladeSize = 20, minOverlap = -Inf, nsim = 1e3, level = .001, ncpu = 1, verbosity = 1, ... )
+trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1 )
 {
 	stopifnot( ape::is.rooted(tre))
 	stopifnot( ape::is.binary(tre))
@@ -187,15 +187,18 @@ for (ie in 1:nrow(poedges))
 	}
 	
 	# test stat null distribution 
-	# nested 0 if u is nested under v, 1 if u & v are both under root
-	.uv.diss <- function(uset, vset, nested = NA){
+	# E_i : event type (cf paper). 
+	# 1: as wiuf and donelly; u is mono relative to v; mono/mono or mono/para
+	# 2: mono / mono 
+	# 3: mono/mono OR mono/para OR para/mono
+	.uv.diss <- function(uset, vset, Ei = NA){
 		# 1 sample u
 		# 0 co 
 		# -1 sample v 
 		
-		if (is.na( nested)){
+		if (is.na( Ei)){
 			#nested = ifelse( .ismonomono( u, v), 1, 0 )
-			nested = ifelse( .ismonomono_cl( uset, vset ), 1, 0 )
+			Ei = ifelse( .ismonomono_cl( uset, vset ), 2, 3 )
 		}
 		
 		uinternals <-  intersect( uset, inodes)
@@ -211,7 +214,7 @@ for (ie in 1:nrow(poedges))
 		 , cbind(  nhs[ vtips ], -1 )
 		)
 		x <- as.vector( x[ order(x[,1] ) , 2] )
-		nd <- Cuv_ranksum_nulldist(x, nsim, nested  )
+		nd <- Cuv_ranksum_nulldist(x, nsim, Ei  )
 		
 		rsuv <- .rank.sum( uinternals, vinternals)
 		
@@ -237,7 +240,7 @@ shouldDig <- rep(FALSE, n + nnode )
 shouldDig[ rootnode ] <- TRUE 
 
 # compute z score for u descendened from claderoot 
-.calc.z <- function(u, v, nested = 0){ 
+.calc.z <- function(u, v, Ei = 1){ 
 	if ( u <= n ) 
 	  return(0)
 	if ( v <= n ) 
@@ -249,7 +252,7 @@ shouldDig[ rootnode ] <- TRUE
 	if ( u==v )
 	  return(0)
 	
-	if (is.na( nested)){
+	if (is.na( Ei)){
 		#nested = ifelse( .ismonomono( u, v), 1, 0 )
 		if ( all( node2nodeset[[u]] %in% node2nodeset[[v]] ))
 		{
@@ -262,9 +265,9 @@ shouldDig[ rootnode ] <- TRUE
 				nsu <-  setdiff( node2nodeset[[u]], node2nodeset[[v]] )
 				nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
 		}
-		nested = ifelse( .ismonomono_cl(nsu, nsv ), 1, 0 )
+		Ei = ifelse( .ismonomono_cl(nsu, nsv ), 2,1 )
 	}
-	if (nested==0) {
+	if (Ei==1) {
 		if (!.au.overlap(v, u) ){
 			return(0)
 		}
@@ -273,8 +276,7 @@ shouldDig[ rootnode ] <- TRUE
 			return(0)
 		}
 	}
-	if (nested==0){ # u under v
-		#TODO intersect for nsu? inspect.
+	if (Ei==1){ # u under v
 		nsu <-   intersect(  node2nodeset[[u]], node2nodeset[[v]] )
 		nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
 		vtips <- intersect( nsv, 1:(ape::Ntip(tre)))
@@ -287,21 +289,20 @@ shouldDig[ rootnode ] <- TRUE
 		if ( length( vtips ) == 0){
 			return( 0 )
 		}
-		return( .uv.diss( nsu , nsv, nested=nested ) ) 
+		return( .uv.diss( nsu , nsv, Ei=Ei ) ) 
 	} else{
-#if ( length( intersect(   node2nodeset[[v]], node2nodeset[[u]]) ) > 0) stop('intersect error ')
-		nsu <-  setdiff( node2nodeset[[u]], node2nodeset[[v]] )
+		nsu <- setdiff( node2nodeset[[u]], node2nodeset[[v]] )
 		nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
-		.uv.diss( nsu, nsv , nested=nested )
+		.uv.diss( nsu, nsv , Ei=Ei )
 	}
 }
 # find biggest outlier descend from a not counting rest of tree 
-.find.biggest.outlier <- function(a, nested = 0 ){
+.find.biggest.outlier <- function(a, Ei = 1 ){
 	zs <- if ( ncpu  > 1 ){
-		unlist( parallel::mclapply(  node2nodeset[[a]], function(u)  .calc.z( u, a, nested = nested  ) 
+		unlist( parallel::mclapply(  node2nodeset[[a]], function(u) .calc.z( u, a,Ei = Ei ) 
 		 , mc.cores = ncpu ) )
 	} else{
-		sapply( node2nodeset[[a]], function(u)  .calc.z( u, a, nested = nested ) )
+		sapply( node2nodeset[[a]], function(u)  .calc.z( u, a, Ei = Ei ) )
 	}
 	wm <- which.max( zs )
 	ustar <- node2nodeset[[a]][ wm ]
@@ -374,7 +375,8 @@ while( any(shouldDig) ){
 				# overlap
 				if ( .overlap( clusterlist[[iu]] , clusterlist[[iv]] )) # 
 				{
-					D[iu,iv] <- .uv.diss ( clusterlist[[iu]] , clusterlist[[iv]], nested = 1)	
+					D[iu,iv] <- .uv.diss ( clusterlist[[iu]] , clusterlist[[iv]], Ei = 3)	
+					#D[iu,iv] <- .uv.diss ( clusterlist[[iu]] , clusterlist[[iv]], Ei = 2)	
 					D[iv, iu] <- D[iu, iv] 
 				}
 			}
