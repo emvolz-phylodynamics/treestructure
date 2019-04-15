@@ -1,5 +1,9 @@
 # `treestructure`
 
+## Citation
+
+Erik Volz and Wiuf, Carsten, Time-scaled evolutionary analysis to identify cryptic population structure, in preparation
+
 
 ## Quick start 
 
