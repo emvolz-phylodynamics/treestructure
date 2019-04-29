@@ -40,9 +40,7 @@ NumericVector Cuv_ranksum_nulldist( NumericVector x, int nsim, int Ei){
 					Rikm1 = 1./(Aui*(Aui+1.)) + 1./(Avi*(Avi+1.)) - 1. / (A*(A-1.) );
 					pui = (Aui-1.) * Rim1k / ( (Aui-1.)*Rim1k + (Avi-1.)*Rikm1 ) ;
 				}
-//~ if (k==0)
-  //~ cout << Aui << " " << Avi << " " << pui  << endl; 
-				if (  Rf_runif(0,1) < pui ){
+				if ( (Aui > 1 ) && (Rf_runif(0,1) < pui) ){
 					Aui--; 
 					ranksums(k) += cocounter; 
 				} else{
