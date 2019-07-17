@@ -2,8 +2,11 @@
 
 ## Citation
 
-Erik Volz and Wiuf, Carsten, Time-scaled evolutionary analysis to identify cryptic population structure, in preparation
 
+Identification of hidden population structure in time-scaled phylogenies
+
+Erik Volz, Carsten Wiuf, Yonatan Grad, Simon Frost, Ann Dennis, Xavier Didelot,
+bioRxiv 704528; doi: https://doi.org/10.1101/704528 
 
 ## Quick start 
 
