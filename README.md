@@ -8,6 +8,16 @@ Identification of hidden population structure in time-scaled phylogenies
 Erik Volz, Carsten Wiuf, Yonatan Grad, Simon Frost, Ann Dennis, Xavier Didelot,
 bioRxiv 704528; doi: https://doi.org/10.1101/704528 
 
+## Installation
+
+To install latest development version, first install the `devtools` package and then from your R console run: 
+
+```r
+devtools::install_github( 'emvolz-phylodynamics/treestructure' )
+```
+
+Alternatively, download this repository and [follow instructions for your OS on installing packages from source](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages).
+
 ## Quick start 
 
 This example shows `trestruct` applied to a simulated structured coalescent tree that includes samples from a large constant size population and samples from three small 'outbreaks' which are growing exponentially. 
