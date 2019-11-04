@@ -5,7 +5,7 @@
 \title{Detect cryptic population structure in time trees}
 \usage{
 trestruct(tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1000,
-  level = 0.01, ncpu = 1, verbosity = 1)
+  level = 0.01, ncpu = 1, verbosity = 1, debugLevel = 0)
 }
 \arguments{
 \item{tre}{A tree of type ape::phylo. Must be rooted and binary.}
@@ -21,6 +21,8 @@ trestruct(tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1000,
 \item{ncpu}{If >1 will compute statistics in parallel using multiple CPUs}
 
 \item{verbosity}{If > 0 will print information about progress of the algorithm}
+
+\item{debugLevel}{If > 0 will produce additional data in return value}
 }
 \value{
 A TreeStructure object which includes cluster and partitition assignment for each tip of the tree.

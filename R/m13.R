@@ -33,13 +33,14 @@ cocluster_accuracy <- function( x, y ){
 #' @param level Significance level for finding new split within a set of tips 
 #' @param ncpu If >1 will compute statistics in parallel using multiple CPUs 
 #' @param verbosity If > 0 will print information about progress of the algorithm 
+#' @param debugLevel If > 0 will produce additional data in return value 
 #' @return A TreeStructure object which includes cluster and partitition assignment for each tip of the tree. 
 #' @examples 
 #' library(ape)
 #' tree <- rcoal(50)
 #' struct <-  trestruct( tree )
 #' @export 
-trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1 )
+trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1, debugLevel=0 )
 {
 	stopifnot( ape::is.rooted(tre))
 	stopifnot( ape::is.binary(tre))
@@ -191,7 +192,7 @@ for (ie in 1:nrow(poedges))
 	# 1: as wiuf and donelly; u is mono relative to v; mono/mono or mono/para
 	# 2: mono / mono 
 	# 3: mono/mono OR mono/para OR para/mono
-	.uv.diss <- function(uset, vset, Ei = NA){
+	.uv.diss <- function(uset, vset, Ei = NA, returnabs=TRUE){
 		# 1 sample u
 		# 0 co 
 		# -1 sample v 
@@ -220,7 +221,10 @@ for (ie in 1:nrow(poedges))
 		
 		m_nd <- mean(nd)
 		sd_nd <- sd(nd)
-		return( abs( (rsuv - m_nd) / sd_nd ) )
+		if ( returnabs )
+			return( abs( (rsuv - m_nd) / sd_nd ) )
+		else
+			return( (rsuv - m_nd) / sd_nd )
 		
 #~ 		s <- sum(rsuv > nd )
 #~ 		p <- min( s / nsim , (nsim - s) / nsim )
@@ -240,7 +244,7 @@ shouldDig <- rep(FALSE, n + nnode )
 shouldDig[ rootnode ] <- TRUE 
 
 # compute z score for u descendened from claderoot 
-.calc.z <- function(u, v, Ei = 1){ 
+.calc.z <- function(u, v, Ei = 1, returnabs = TRUE){ 
 	if ( u <= n ) 
 	  return(0)
 	if ( v <= n ) 
@@ -289,11 +293,11 @@ shouldDig[ rootnode ] <- TRUE
 		if ( length( vtips ) == 0){
 			return( 0 )
 		}
-		return( .uv.diss( nsu , nsv, Ei=Ei ) ) 
+		return( .uv.diss( nsu , nsv, Ei=Ei, returnabs = returnabs ) ) 
 	} else{
 		nsu <- setdiff( node2nodeset[[u]], node2nodeset[[v]] )
 		nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
-		.uv.diss( nsu, nsv , Ei=Ei )
+		.uv.diss( nsu, nsv , Ei=Ei , returnabs = returnabs)
 	}
 }
 # find biggest outlier descend from a not counting rest of tree 
@@ -322,6 +326,14 @@ shouldDig[ rootnode ] <- TRUE
 
 .init.nodeset <- function(u, digging){
 	setdiff( descendants[[u]], do.call( c, lapply( digging, function(v) node2nodeset[[v]] ) ) )
+}
+
+debugdf = NULL 
+if ( debugLevel > 0 ){
+	# store z for each node compared to root 
+	debugdf = data.frame( z = sapply( node2nodeset[[rootnode]], function(u)  .calc.z( u, rootnode, Ei =1 , returnabs = FALSE) )
+	 , cladeSize = sapply( node2nodeset[[rootnode]], function(u)  ndesc[u] )
+	 )
 }
 
 node2cl <- c()
@@ -439,6 +451,7 @@ while( any(shouldDig) ){
 		   , partition = partition
 	     , row.names = 1:ape::Ntip(tre)
 		)
+	  , debugdf = debugdf 
 	)
 	class(rv) <- 'TreeStructure'
 	rv
