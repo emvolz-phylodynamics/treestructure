@@ -333,6 +333,7 @@ if ( debugLevel > 0 ){
 	# store z for each node compared to root 
 	debugdf = data.frame( z = sapply( node2nodeset[[rootnode]], function(u)  .calc.z( u, rootnode, Ei =1 , returnabs = FALSE) )
 	 , cladeSize = sapply( node2nodeset[[rootnode]], function(u)  ndesc[u] )
+	 , node = node2nodeset[[rootnode]]
 	 )
 }
 
