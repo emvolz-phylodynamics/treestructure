@@ -18,6 +18,8 @@ devtools::install_github( 'emvolz-phylodynamics/treestructure' )
 
 Alternatively, download this repository and [follow instructions for your OS on installing packages from source](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages).
 
+A command-line interface is available. See inst/tscl. 
+
 ## Quick start 
 
 This example shows `trestruct` applied to a simulated structured coalescent tree that includes samples from a large constant size population and samples from three small 'outbreaks' which are growing exponentially. 
