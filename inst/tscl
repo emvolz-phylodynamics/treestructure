@@ -1,0 +1,95 @@
+#!/usr/bin/env Rscript
+
+if (! ('treestructure' %in% installed.packages()[,'Package'] ) ){
+	cat(' Please install treestructure. Quitting.\n')
+	q(status=1)
+}
+
+if (! ('getopt' %in% installed.packages()[,'Package'] ) ){
+	cat('tscl depends on the getopt package. Will attempt to install.\n')
+	install.packages('getopt')
+}
+
+if (! ('rmarkdown' %in% installed.packages()[,'Package'] ) ){
+	cat('tscl depends on the rmarkdown package. Will attempt to install.\n')
+	install.packages('rmarkdown')
+}
+
+
+suppressPackageStartupMessages( library(getopt) )
+suppressPackageStartupMessages( library(treestructure) )
+suppressPackageStartupMessages( library(ape) )
+suppressPackageStartupMessages( library(rmarkdown) )
+
+spec <- matrix( c( 
+	'treefn', 't', 1, 'character', 'A path to a tree in newick format. Must be rooted and binary.'
+	,'level', 'l', 2, 'double', 'Significance level for finding new split within a set of tips.'
+	,'minCladeSize', 'm', 2, 'character', 'All clusters within parititon must have at least this many tips.'
+	,'minOverlap', 'M', 2, 'character', 'Threshold time overlap required to find splits in a clade.'
+	,'nsim', 'n', 2, 'character', 'Number of simulations for computing null distribution of test statistics.'
+	,'ncpu', 'c', 2, 'character', 'If >1 will compute statistics in parallel using multiple CPUs.'
+	,'verbosity', 'v', 2, 'character', 'If > 0 will print information about progress of the algorithm.'
+	,'debugLevel', 'g', 2, 'character', 'If > 0 will produce additional data in return value.'
+	,'output', 'o', 2, 'character', 'Output will appear in this directory'
+	, 'help', 'h', 0, 'logical', 'Print usage and quit.'
+), byrow=TRUE, ncol = 5)
+
+opt = getopt(spec)
+
+invisible('
+			 tre: A tree of type ape::phylo. Must be rooted and binary.
+
+		minCladeSize: All clusters within parititon must have at least this
+				  many tips.
+
+		minOverlap: Threshold time overlap required to find splits in a clade
+
+			nsim: Number of simulations for computing null distribution of test
+				  statistics
+
+		   level: Significance level for finding new split within a set of tips
+
+			ncpu: If >1 will compute statistics in parallel using multiple CPUs
+
+		verbosity: If > 0 will print information about progress of the
+				  algorithm
+
+		debugLevel: If > 0 will produce additional data in return value
+		  treefn: sim.nwk
+		  minCladeSize: 10 
+		  minOverlap: -Inf
+		  nsim: 1000
+		  level: 0.01
+		  ncpu: 1
+		  verbosity: 1 
+		  debugLevel: 0 
+		  output: treestructure_output
+')
+
+
+if ( !is.null(opt$help) ) {
+  cat(getopt(spec, usage=TRUE))
+  q(status=1)
+}
+
+if ( is.null(opt$treefn) ) {
+  cat( '--treefn is a required argument. Please provide the path to a newick tree.\n' )
+  cat(getopt(spec, usage=TRUE))
+  q(status=1)
+}
+
+if ( is.null( opt$output)){
+	opt$output <- paste(sep='/', getwd() , 'treestructure_output' )
+}else{ 
+	opt$output <- paste(sep='/', getwd(), opt$output )
+}
+
+cat( 'Beginning analysis. Please wait...\n' )
+
+rmarkdown::render( system.file( 'treestructure.Rmd', package='treestructure' ) 
+, params=opt [intersect(names(opt) ,  spec[,1]  ) ] 
+, output_dir = opt$output 
+, quiet = TRUE
+)
+
+cat( paste0( 'Analysis complete. Results contained in ', opt$output, '\n', 'See treestructure.html for a summary.\n' ) )

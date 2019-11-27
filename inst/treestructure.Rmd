@@ -11,7 +11,7 @@ params:
   ncpu: 1
   verbosity: 1 
   debugLevel: 0 
-  output: simout
+  output: treestructure_output
 ...
 
 
@@ -40,12 +40,13 @@ debugLevel: If > 0 will produce additional data in return value
 ```
 
 ```{r, echo=FALSE}
-print( as.data.frame( params ))
+print( t( as.data.frame( params, row.names='Parameter value' )) )
 ```
 
 
 
 ```{r, echo = FALSE}
+suppressPackageStartupMessages ( library( treestructure )  )
 tr <- read.tree( params$treefn )
 ts <- trestruct( tr
  , minCladeSize = as.numeric( params$minCladeSize )
@@ -70,8 +71,8 @@ print(ts)
 
 dir.create( params$output ) 
 
-for ( k in 1:length( ts$clusterList ) ){
-  x <- ts$clusterList[[k]]
+for ( k in 1:length( ts$clusterSets ) ){
+  x <- which( as.numeric(ts$clustering)==k)
   tr1 <- keep.tip( tr, x )
   write.tree( tr1, file = paste( sep='/' , params$output, paste0('cluster' , k , '.nwk'))  )
 }
@@ -87,6 +88,11 @@ saveRDS(ts,  paste(sep='/', params$output, 'treestructure.rds' ))
 ```
 
 
-```{r, dpi = 300, fig.width=7, fig.height = 11 }
-plot(ts )
+```{r, dpi = 300, fig.width=7, fig.height = 11, echo=FALSE }
+suppressPackageStartupMessages( plot(ts ) )
+```
+
+Cluster & partition assigment: 
+```{r, echo=FALSE}
+print( as.data.frame( ts ))
 ```
