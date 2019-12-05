@@ -40,7 +40,7 @@ library(treestructure)
 Load the tree: 
 
 ```{r}
-( tree <- read.tree( system.file('sim.nwk', package='treestructure') ) ) 
+( tree <- ape::read.tree( system.file('sim.nwk', package='treestructure') ) ) 
 ```
 
 

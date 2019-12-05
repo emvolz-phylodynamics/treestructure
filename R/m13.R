@@ -474,10 +474,12 @@ while( any(shouldDig) ){
 	d <- x$data 
 	d$shape <-  rep('circle', ape::Ntip(tre))
 	
+	requireNamespace('ggtree', {
 	tre <- ggtree::groupOTU( tre, x$clusterSets ) 
-	pl <- ggtree::ggtree( tre, ggplot2::aes(color=group), ... ) ggtree::%<+% d + ggtree::geom_tippoint(ggplot2::aes( color='partition', shape='shape', show.legend=TRUE), size = 2 )
-	#+ ggplot2::theme(legend.position="right")
+	pl <- ggtree::ggtree( tre, ggplot2::aes(color=group), ... ) %<+%  d 
+	pl <- pl +  ggtree::geom_tippoint(ggplot2::aes( color='partition', shape='shape', show.legend=TRUE), size = 2 )	
 	pl
+	})
 }
 
 #' Plot TreeStructure tree with cluster and partition variables 
