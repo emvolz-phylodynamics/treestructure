@@ -1,0 +1,12 @@
+^_config\.yml$
+^\.\.Rcheck$
+^\.\.Rcheck/.*$
+^.git$
+^.*\.git$
+^.*\.git/.*$
+^figure$
+^pdftex$
+^pdflatex$
+^treestructure_.*\.tar\.gz$
+^treestructure\.Rcheck$
+^cran-comments.md$
