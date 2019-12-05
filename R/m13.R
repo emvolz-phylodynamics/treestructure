@@ -141,10 +141,10 @@ for (ie in 1:nrow(poedges))
 
 .ismonomono <- function( u, v){
 	# NOTE if u is direct decendant of v or vice versa than the two tip sets are mono/mono related 
-	if ( tail(ancestors[[u]],1) == v){
+	if ( utils::tail(ancestors[[u]],1) == v){
 		return(TRUE)
 	}
-	if ( tail(ancestors[[v]],1) == u){
+	if ( utils::tail(ancestors[[v]],1) == u){
 		return(TRUE)
 	}
 	!((v %in% ancestors[[u]]) | (u %in% ancestors[[v]] ))
@@ -468,18 +468,16 @@ while( any(shouldDig) ){
 
 
 .plot.TreeStructure.ggtree <- function(x, ... ){
-	stopifnot(  'ggtree' %in% installed.packages()[,1] ) 
+	stopifnot(  'ggtree' %in% utils::installed.packages()[,1] ) 
 	stopifnot( inherits( x, 'TreeStructure') )
 	tre <- x$tree 
 	d <- x$data 
 	d$shape <-  rep('circle', ape::Ntip(tre))
 	
-	requireNamespace('ggtree', {
 	tre <- ggtree::groupOTU( tre, x$clusterSets ) 
-	pl <- ggtree::ggtree( tre, ggplot2::aes(color=group), ... ) %<+%  d 
+	pl <- ggtree::`%<+%`( ggtree::ggtree( tre, ggplot2::aes(color='group'), ... ) ,  d  )
 	pl <- pl +  ggtree::geom_tippoint(ggplot2::aes( color='partition', shape='shape', show.legend=TRUE), size = 2 )	
 	pl
-	})
 }
 
 #' Plot TreeStructure tree with cluster and partition variables 
