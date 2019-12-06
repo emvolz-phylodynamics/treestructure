@@ -10,3 +10,4 @@
 ^treestructure_.*\.tar\.gz$
 ^treestructure\.Rcheck$
 ^cran-comments.md$
+^README.md$

@@ -44,9 +44,9 @@ cocluster_accuracy <- function( x, y ){
 #' @param debugLevel If > 0 will produce additional data in return value 
 #' @return A TreeStructure object which includes cluster and partitition assignment for each tip of the tree. 
 #' @examples 
-#' library(ape)
-#' tree <- rcoal(50)
+#' tree <- ape::rcoal(50)
 #' struct <-  trestruct( tree )
+#' 
 #' @export 
 trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1, debugLevel=0 )
 {

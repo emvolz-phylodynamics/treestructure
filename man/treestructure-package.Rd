@@ -6,7 +6,7 @@
 \alias{treestructure-package}
 \title{treestructure: Detect Population Structure Within Phylogenetic Trees}
 \description{
-This package implements algorithms for detecting population structure from the history of coalescent events recorded in phylogenetic trees. The *trestruct* method classifies each tip and internal node of a tree into disjoint sets characterized by similar coalescent patterns.
+Algorithms for detecting population structure from the history of coalescent events recorded in phylogenetic trees. The *trestruct* method classifies each tip and internal node of a tree into disjoint sets characterized by similar coalescent patterns.
 }
 \details{
 Methods for detecting structure in phylogenies. Includes the *trestruct* function for partitioning a tree and methods for printing and plotting trees with structure. 

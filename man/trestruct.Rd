@@ -31,7 +31,7 @@ A TreeStructure object which includes cluster and partitition assignment for eac
 Detect cryptic population structure in time trees
 }
 \examples{
-library(ape)
-tree <- rcoal(50)
+tree <- ape::rcoal(50)
 struct <-  trestruct( tree )
+
 }
