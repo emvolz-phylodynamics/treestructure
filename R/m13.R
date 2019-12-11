@@ -115,11 +115,6 @@ timerange <- t( sapply( 1:(n+nnode), function(u) range( descHeights[[u]]  ) ))
 # vector heights of tips descending
 descendantTipHeights <- lapply( 1:(n+nnode), function(u) nhs[ descendantTips[[u]] ] ) 
 
-
-wD <- ape::dist.nodes( tre )[-(1:n), -(1:n)]
-wD <- pmax( wD, mean(upper.tri(wD)) / nnode  )
-diag(wD) <- Inf
-
 prenodes <- unique( preedges[,1] )
 
 dgtrMat <- matrix( NA, nrow = ape::Nnode(tre)+ape::Ntip(tre), ncol =2)
