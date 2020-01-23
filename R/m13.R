@@ -33,6 +33,15 @@ cocluster_accuracy <- function( x, y ){
 }
 
 #' Detect cryptic population structure in time trees 
+#'
+#' @details 
+#' Estimates a partition of a time-scaled tree by contrasting coalescent patterns. 
+#' The algorithm is premised on a Kingman coalescent null hypothesis and a test statistic is formulated based on the rank sum of node times in the tree. 
+#' 
+#' @section References:
+#' E.M. Volz, Wiuf, C., Grad, Y., Frost, S., Dennis, A., Didelot, X.D.  (2020) Identification of hidden population structure in time-scaled phylogenies.
+#'
+#' @author Erik M Volz <erik.volz@gmail.com>
 #' 
 #' @param tre A tree of type ape::phylo. Must be rooted and binary. 
 #' @param minCladeSize All clusters within parititon must have at least this many tips. 

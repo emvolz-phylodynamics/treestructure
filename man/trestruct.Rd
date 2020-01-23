@@ -30,8 +30,20 @@ A TreeStructure object which includes cluster and partitition assignment for eac
 \description{
 Detect cryptic population structure in time trees
 }
+\details{
+Estimates a partition of a time-scaled tree by contrasting coalescent patterns. 
+The algorithm is premised on a Kingman coalescent null hypothesis and a test statistic is formulated based on the rank sum of node times in the tree.
+}
+\section{References}{
+
+E.M. Volz, Wiuf, C., Grad, Y., Frost, S., Dennis, A., Didelot, X.D.  (2020) Identification of hidden population structure in time-scaled phylogenies.
+}
+
 \examples{
 tree <- ape::rcoal(50)
 struct <-  trestruct( tree )
 
+}
+\author{
+Erik M Volz <erik.volz@gmail.com>
 }
