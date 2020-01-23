@@ -1,3 +1,11 @@
+#~ Treestructure
+#~     Copyright (C) 2019  Erik Volz
+#~     This program is free software: you can redistribute it and/or modify
+#~     it under the terms of the GNU General Public License as published by
+#~     the Free Software Foundation, either version 3 of the License, or
+#~     (at your option) any later version.
+
+
 .get_anc <- function(edge, u ){
 	edge[ edge[,2]==u ,1]
 }
@@ -9,8 +17,8 @@
 	setdiff( as.vector(edge), edge[,2] )
 }
 
-#' @export 
 cocluster_accuracy <- function( x, y ){
+# Statistic which measures overlap between equal length factors x and y
  n <- length(x) 
  a <- matrix( FALSE, nrow =	n , ncol = n  )
  b <- matrix( FALSE, nrow =	n , ncol = n  )
@@ -25,6 +33,15 @@ cocluster_accuracy <- function( x, y ){
 }
 
 #' Detect cryptic population structure in time trees 
+#'
+#' @details 
+#' Estimates a partition of a time-scaled tree by contrasting coalescent patterns. 
+#' The algorithm is premised on a Kingman coalescent null hypothesis and a test statistic is formulated based on the rank sum of node times in the tree. 
+#' 
+#' @section References:
+#' E.M. Volz, Wiuf, C., Grad, Y., Frost, S., Dennis, A., Didelot, X.D.  (2020) Identification of hidden population structure in time-scaled phylogenies.
+#'
+#' @author Erik M Volz <erik.volz@gmail.com>
 #' 
 #' @param tre A tree of type ape::phylo. Must be rooted and binary. 
 #' @param minCladeSize All clusters within parititon must have at least this many tips. 
@@ -36,9 +53,9 @@ cocluster_accuracy <- function( x, y ){
 #' @param debugLevel If > 0 will produce additional data in return value 
 #' @return A TreeStructure object which includes cluster and partitition assignment for each tip of the tree. 
 #' @examples 
-#' library(ape)
-#' tree <- rcoal(50)
+#' tree <- ape::rcoal(50)
 #' struct <-  trestruct( tree )
+#' 
 #' @export 
 trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1, debugLevel=0 )
 {
@@ -128,10 +145,10 @@ for (ie in 1:nrow(poedges))
 
 .ismonomono <- function( u, v){
 	# NOTE if u is direct decendant of v or vice versa than the two tip sets are mono/mono related 
-	if ( tail(ancestors[[u]],1) == v){
+	if ( utils::tail(ancestors[[u]],1) == v){
 		return(TRUE)
 	}
-	if ( tail(ancestors[[v]],1) == u){
+	if ( utils::tail(ancestors[[v]],1) == u){
 		return(TRUE)
 	}
 	!((v %in% ancestors[[u]]) | (u %in% ancestors[[v]] ))
@@ -146,7 +163,6 @@ for (ie in 1:nrow(poedges))
 	t2 <- intersect( 1:(ape::Ntip(tre)), cl2 )
 	u <- ape::getMRCA(tre,  t1 )
 	v <- ape::getMRCA(tre,  t2 )
-#~ browser()
 	if ( is.null( u ) | is.null(v) ) 
 	  return(FALSE)
 	!.ispara( u, v)
@@ -215,7 +231,7 @@ for (ie in 1:nrow(poedges))
 		rsuv <- .rank.sum( uinternals, vinternals)
 		
 		m_nd <- mean(nd)
-		sd_nd <- sd(nd)
+		sd_nd <- stats::sd(nd)
 		if ( returnabs )
 			return( abs( (rsuv - m_nd) / sd_nd ) )
 		else
@@ -233,7 +249,7 @@ for (ie in 1:nrow(poedges))
 
 
 # FIND OUTLIERS
-zstar  <- qnorm( 1-min(1,level)/2 )
+zstar  <- stats::qnorm( 1-min(1,level)/2 )
 node2nodeset <- descendants 
 shouldDig <- rep(FALSE, n + nnode )
 shouldDig[ rootnode ] <- TRUE 
@@ -395,14 +411,14 @@ while( any(shouldDig) ){
 	.D <- D 
 	.D[ is.na(D) | is.infinite(D)] <- 0  #
 	rownames(.D)  = colnames(.D) <- 1:nc
-	D <- as.dist(.D)
+	D <- stats::as.dist(.D)
 # /DISTANCE 
 
 
 
 # RETURN
 	# for each tip: 
-	setNames( rep(NA, ape::Ntip(tre)), tre$tip.label) -> clustervec 
+	stats::setNames( rep(NA, ape::Ntip(tre)), tre$tip.label) -> clustervec 
 	for (k in 1:nc){
 		cl <- clusterlist[[k]]
 		itip <- intersect( 1:(ape::Ntip(tre)), cl)
@@ -410,10 +426,10 @@ while( any(shouldDig) ){
 	}
 	
 	if ( nc  >  1){
-		h <- ape::as.phylo( hclust( D ) ) 
+		h <- ape::as.phylo( stats::hclust( D ) ) 
 		#~ 	h$edge.length[ h$edge.length <= zstar ] <- 0
-		partinds <- cutree( hclust( as.dist( ape::cophenetic.phylo( h ) ) ), h = zstar)
-		partition <- as.factor( setNames( partinds[ clustervec ] , tre$tip.label ) )
+		partinds <- stats::cutree( stats::hclust( stats::as.dist( ape::cophenetic.phylo( h ) ) ), h = zstar)
+		partition <- as.factor( stats::setNames( partinds[ clustervec ] , tre$tip.label ) )
 		clustering <- as.factor( clustervec )
 		clusters <- split( tre$tip.label, clustervec )
 		partitionSets <- split( tre$tip.label, partition )
@@ -421,8 +437,8 @@ while( any(shouldDig) ){
 		names(partitionNodes) <- 1:max(partinds)
 		
 	} else{
-		clustering <- setNames(  as.factor( rep(1, n )), tre$tip.label )
-		partition <- setNames( as.factor( rep(1, n )), tre$tip.label )
+		clustering <- stats::setNames(  as.factor( rep(1, n )), tre$tip.label )
+		partition <- stats::setNames( as.factor( rep(1, n )), tre$tip.label )
 		clusters <- list( tre$tip.label )
 		partitionSets <- list( tre$tip.label )
 		remainderClade <- NULL 
@@ -446,6 +462,7 @@ while( any(shouldDig) ){
 		   , cluster = clustering
 		   , partition = partition
 	     , row.names = 1:ape::Ntip(tre)
+	     , stringsAsFactors=FALSE
 		)
 	  , debugdf = debugdf 
 	)
@@ -455,21 +472,22 @@ while( any(shouldDig) ){
 
 
 .plot.TreeStructure.ggtree <- function(x, ... ){
-	stopifnot( require(ggtree ) )
+	stopifnot(  'ggtree' %in% utils::installed.packages()[,1] ) 
 	stopifnot( inherits( x, 'TreeStructure') )
 	tre <- x$tree 
 	d <- x$data 
 	d$shape <-  rep('circle', ape::Ntip(tre))
 	
 	tre <- ggtree::groupOTU( tre, x$clusterSets ) 
-	pl <- ggtree::ggtree( tre, aes(color=group), ... ) %<+% d + ggtree::geom_tippoint(aes( color=partition, shape=shape, show.legend=TRUE), size = 2 )
-	#+ ggplot2::theme(legend.position="right")
+	pl <- ggtree::`%<+%`( ggtree::ggtree( tre, ggplot2::aes(color='group'), ... ) ,  d  )
+	pl <- pl +  ggtree::geom_tippoint(ggplot2::aes( color='partition', shape='shape', show.legend=TRUE), size = 2 )	
 	pl
 }
 
 #' Plot TreeStructure tree with cluster and partition variables 
 #' @param x  A TreeStructure object 
 #' @param use_ggtree Toggle ggtree or ape plotting behaviour 
+#' @param ... Additional arguments passed to ggtree or ape::plot.phylo
 #' @export 
 plot.TreeStructure <- function(x, use_ggtree = TRUE , ... )
 {
@@ -489,7 +507,7 @@ plot.TreeStructure <- function(x, use_ggtree = TRUE , ... )
 
 
 #' @export 
-print.TreeStructure <- function(x, rows = 10, ...)
+print.TreeStructure <- function(x, rows = 0, ...)
 {
 	stopifnot( inherits( x, 'TreeStructure') )
 	
@@ -499,13 +517,21 @@ print.TreeStructure <- function(x, rows = 10, ...)
 	cat( 'Call: \n' )
 	print( x$call )
 	cat('\n')
+	cat ( paste( 'Significance level:', x$level, '\n' ) )
 	
 	cat ( paste( 'Number of clusters:', nc , '\n') )
 	cat ( paste( 'Number of partitions:', npart, '\n' ) )
-	cat ( paste( 'Significance level:', x$level, '\n' ) )
-	cat ('Cluster and partition assignment: \n')
 	
-	print( x$data[1:min(nrow(x$data),rows), ] )
+	cat( 'Number of taxa in each cluster:\n' )
+	print( table( x$clustering) )
+	cat( 'Number of taxa in each partition:\n' )
+	print( table( x$partition ))
+	
+	if ( rows > 0 ){
+		cat ('Cluster and partition assignment: \n')
+		print( x$data[1:min(nrow(x$data),rows), ] )
+	}
+	
 	cat( '...\n') 
 	cat( 'For complete data, use `as.data.frame(...)` \n' )
 	
@@ -513,14 +539,16 @@ print.TreeStructure <- function(x, rows = 10, ...)
 }
 
 #' @export 
-as.data.frame.TreeStructure <- function(x){
+as.data.frame.TreeStructure <- function(x, row.names=NULL, optional=FALSE, ...){
 	stopifnot( inherits( x, 'TreeStructure') )
+	if ( !is.null(row.names))
+		rownames(x$data) <- row.names
 	x$data
 }
 
 #' @export 
-coef.TreeStructure <- function(x, ... )
+coef.TreeStructure <- function(object, ... )
 {
-	stopifnot( inherits( x, 'TreeStructure') )
-	x$partition
+	stopifnot( inherits( object, 'TreeStructure') )
+	object$partition
 }

@@ -1,0 +1,17 @@
+^_config\.yml$
+^\.\.Rcheck$
+^\.\.Rcheck/.*$
+^.git$
+^.*\.git$
+^.*\.git/.*$
+^figure$
+^pdftex$
+^pdflatex$
+^treestructure_.*\.tar\.gz$
+^treestructure\.Rcheck$
+^cran-comments.md$
+^README.md$
+^inst/.*html$
+^inst/simout$
+^inst/treestructure_output$
+^vignettes/structuredCoalescent.html$

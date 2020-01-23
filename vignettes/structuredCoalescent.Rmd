@@ -1,0 +1,98 @@
+---
+title: "treestructure applied to structured coalescent simulation"
+author: "Erik Volz"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{structuredCoalescent}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width=7,
+  fig.height=11
+)
+```
+
+
+# `treestructure`
+
+## Citation
+
+
+Identification of hidden population structure in time-scaled phylogenies
+
+Erik Volz, Carsten Wiuf, Yonatan Grad, Simon Frost, Ann Dennis, Xavier Didelot,
+bioRxiv 704528; [https://doi.org/10.1101/704528](https://doi.org/10.1101/704528)
+
+## Structured coalescent simulation 
+
+This example shows `trestruct` applied to a simulated structured coalescent tree that includes samples from a large constant size population and samples from three small 'outbreaks' which are growing exponentially. These simulations were generated with the `phydynR` [package](https://github.com/emvolz-phylodynamics/phydynR). 
+
+```{r message=FALSE}
+library(treestructure)
+```
+
+Load the tree: 
+
+```{r}
+( tree <- ape::read.tree( system.file('sim.nwk', package='treestructure') ) ) 
+```
+
+
+Note that the tip labels corresponds to the deme of each sample. '1' is the constant size reservoir, and '0' is the exponentially growing deme. 
+
+
+This will run the treestructure algorithm under default setting: 
+```{r message=FALSE}
+s <- trestruct( tree ) 
+```
+
+You can print the results: 
+
+```{r}
+print(s) 
+```
+
+The default plotting behavior uses the `ggtree` package if available. 
+
+```{r message=FALSE}
+plot(s)  + ggtree::geom_tiplab() 
+```
+
+If not, or if desired, `ape` plots are available
+
+```{r}
+plot( s, use_ggtree = FALSE )
+```
+
+
+For subsequent analysis, you may want to turn the treestructure result into a dataframe: 
+```{r}
+structureData <- as.data.frame( s ) 
+head( structureData )
+```
+
+Each cluster and partition assignment is stored as a factor. You could use `split` to get a data frame for each partition. 
+Suppose we want a tree corresponding to partition 1: 
+```{r}
+with ( structureData, 
+	ape::keep.tip(s$tree,  taxon[ partition==1 ] ) 
+) -> partition1
+partition1
+plot(partition1)
+```
+
+Two parameters will have large influence on results: 
+
+1. `level` is the significance level for subdividing a clade into a new cluster. To detect more clusters, increase `p`, but note that this will also increase the false positive rate. 
+2. `minCladeSize` controls the smallest allowed cluster size in terms of the number of tips. With a smaller value, smaller clusters may be detected, but computation time will increase. 
+
+Example: 
+```{r message=FALSE}
+trestruct( tree, level = .05, minCladeSize = 5 )
+```

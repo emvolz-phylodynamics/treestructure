@@ -10,6 +10,8 @@
 \item{x}{A TreeStructure object}
 
 \item{use_ggtree}{Toggle ggtree or ape plotting behaviour}
+
+\item{...}{Additional arguments passed to ggtree or ape::plot.phylo}
 }
 \description{
 Plot TreeStructure tree with cluster and partition variables
