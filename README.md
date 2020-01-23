@@ -2,11 +2,7 @@
 
 ## Citation
 
-
-Identification of hidden population structure in time-scaled phylogenies
-
-Erik Volz, Carsten Wiuf, Yonatan Grad, Simon Frost, Ann Dennis, Xavier Didelot,
-bioRxiv 704528; doi: https://doi.org/10.1101/704528 
+E.M. Volz, Wiuf, C., Grad, Y., Frost, S., Dennis, A., Didelot, X.D. (2020) Identification of hidden population structure in time-scaled phylogenies. https://doi.org/10.1101/704528 
 
 ## Installation
 
