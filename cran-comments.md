@@ -13,20 +13,7 @@ Platform: Windows via Win-builder
 
 ## R CMD check results
 
-Linux: There were no ERRORs or WARNINGs. 
-
-There is 1 NOTE:
-
-* Undefined global functions or variables
-	- These variables are defined within the scope of a ggplot2 plotting function. 
+Linux: There were no ERRORs or WARNINGs or NOTEs. 
 
 
-
-Win-builder: 2 NOTEs: 
-
-* Undefined global functions or variables
-	- These variables are defined within the scope of a ggplot2 plotting function. 
-
-
-* Possibly mis-spelled words in DESCRIPTION: trestruct (8:135)
-	- This is the name of the main funciton 
+Win-builder: There were no ERRORs or WARNINGs or NOTEs. 
