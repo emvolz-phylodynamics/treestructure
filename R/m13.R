@@ -65,7 +65,10 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e3, le
 		stop('*minOverlap* should be < *minCladeSize*.')
 	}
 	if ( any(is.na(tre$tip.label)) | anyDuplicated(tre$tip.label)){
-		cat('Tree has NA or duplicated tip labels. Adding a unique id. \n')
+		if ( verbosity > 0 )
+			cat('Tree has NA or duplicated tip labels. Adding a unique id.\n')
+		else
+			message('Tree has NA or duplicated tip labels. Adding a unique id.')
 		tre$tip.label <- paste0( paste0( 1:(ape::Ntip(tre)), '_' ), tre$tip.label )
 	}
 	n <- ape::Ntip( tre )
