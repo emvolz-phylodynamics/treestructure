@@ -4,8 +4,16 @@
 \alias{trestruct}
 \title{Detect cryptic population structure in time trees}
 \usage{
-trestruct(tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1000,
-  level = 0.01, ncpu = 1, verbosity = 1, debugLevel = 0)
+trestruct(
+  tre,
+  minCladeSize = 25,
+  minOverlap = -Inf,
+  nsim = 1000,
+  level = 0.01,
+  ncpu = 1,
+  verbosity = 1,
+  debugLevel = 0
+)
 }
 \arguments{
 \item{tre}{A tree of type ape::phylo. Must be rooted and binary.}

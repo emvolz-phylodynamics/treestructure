@@ -1,7 +1,7 @@
 Package: treestructure
 Type: Package
 Title: Detect Population Structure Within Phylogenetic Trees
-Version: 0.1.0
+Version: 0.1.1
 Date: 2020-01-20
 Author: Erik Volz
 Maintainer: Erik Volz <erik.volz@gmail.com>
@@ -11,5 +11,4 @@ Suggests: ggtree,ggplot2,knitr
 Imports: ape (>= 5.0)
 LinkingTo: Rcpp
 VignetteBuilder: knitr
-RoxygenNote: 6.1.0
-
+RoxygenNote: 7.1.0
