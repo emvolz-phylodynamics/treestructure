@@ -235,7 +235,7 @@ treestructure.test <- function( tre, x, y, nsim = 1e4 )
 {
 	stopifnot( ape::is.rooted(tre))
 	stopifnot( ape::is.binary(tre))
-	stopifnot( length( intersect( x, y )) > 0 )
+	stopifnot( length( intersect( x, y )) == 0 )
 	if ( any(is.na(tre$tip.label)) | anyDuplicated(tre$tip.label)){
 		message('Tree has NA or duplicated tip labels. Adding a unique id.')
 		tre$tip.label <- paste0( paste0( 1:(ape::Ntip(tre)), '_' ), tre$tip.label )
@@ -268,7 +268,7 @@ treestructure.test <- function( tre, x, y, nsim = 1e4 )
 	  , std.err = sd ( uvd$nd )
 	  , conf.int =  quantile( uvd$null, c(0.025 , 0.975) ) 
 	  , null.value = median( uvd$null )
-	  , alternative='Rank sum differs from coalescent distribution'
+	  , alternative='Alternative hypothesis: Rank sum differs from coalescent distribution'
 	  , method = 'Two tailed simulation quantiles'
 	  , data.name = 'tre'
 	  , data = tre 
@@ -284,7 +284,7 @@ treestructure.test <- function( tre, x, y, nsim = 1e4 )
 
 
 #' @export 
-print.treestructure.test <- function(x, ... ){
+print.treestructure.htest <- function(x, ... ){
 	stopifnot( inherits( x, 'treestructure.htest' ))
 	#~ 		One Sample t-test
 
