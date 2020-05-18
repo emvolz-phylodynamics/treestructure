@@ -221,6 +221,7 @@ cocluster_accuracy <- function( x, y ){
 	  , descendantTipHeights = descendantTipHeights 
 	  , prenodes = prenodes 
 	  , dgtrMat = dgtrMat 
+	  , tre = tre 
 	)
 }
 
