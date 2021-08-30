@@ -187,7 +187,14 @@ cocluster_accuracy <- function( x, y ){
 	# number tips desc 
 	ndesc <- sapply( 1:(n+nnode), function(u) length( descendantTips[[u]] ) )
 	
-
+	# max dist to tip 
+	maxDistToTip <- rep( 0, n + nnode )
+	for (ie in 1:nrow(poedges)){
+		a <- poedges[ie,1]
+		u <- poedges[ie,2]
+		maxDistToTip[a] <- max( maxDistToTip[a] , maxDistToTip[u] + 1)
+	}
+	
 	# vector heights of all descending 
 	descHeights <- lapply( 1:(n+nnode), function(u) nhs[ descendants[[u]] ] )
 	descInternalHeights <- lapply( 1:(n+nnode), function(u) nhs[ descInternal[[u]] ] )
@@ -221,9 +228,215 @@ cocluster_accuracy <- function( x, y ){
 	  , descendantTipHeights = descendantTipHeights 
 	  , prenodes = prenodes 
 	  , dgtrMat = dgtrMat 
+	  , maxDistToTip = maxDistToTip
 	  , tre = tre 
 	)
 }
+
+#' Detect cryptic population structure in time trees. This is a fast/approximate version that does a single postorder tree traversal. 
+#'
+#' @details 
+#' Estimates a partition of a time-scaled tree by contrasting coalescent patterns. 
+#' The algorithm is premised on a Kingman coalescent null hypothesis and a test statistic is formulated based on the rank sum of node times in the tree. 
+#' 
+#' @section References:
+#' E.M. Volz, Wiuf, C., Grad, Y., Frost, S., Dennis, A., Didelot, X.D.  (2020) Identification of hidden population structure in time-scaled phylogenies.
+#'
+#' @author Erik M Volz <erik.volz@gmail.com>
+#' 
+#' @param tre A tree of type ape::phylo. Must be rooted and binary. 
+#' @param minCladeSize All clusters within parititon must have at least this many tips. 
+#' @param minOverlap Threshold time overlap required to find splits in a clade  
+#' @param nsim Number of simulations for computing null distribution of test statistics 
+#' @param level Significance level for finding new split within a set of tips 
+#' @param ncpu If >1 will compute statistics in parallel using multiple CPUs 
+#' @param verbosity If > 0 will print information about progress of the algorithm 
+#' @param debugLevel If > 0 will produce additional data in return value 
+#' @param compute_partititons If TRUE will also compute the partition variable which can aggregate multiple clusters (may be slow)
+#' @return A TreeStructure object which includes cluster and partitition assignment for each tip of the tree. 
+#' @examples 
+#' tree <- ape::rcoal(50)
+#' struct <-  trestruct( tree )
+#' 
+#' @export  
+trestruct.fast <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1, debugLevel=0 , compute_partitions = FALSE)
+{
+	stopifnot( ape::is.rooted(tre))
+	stopifnot( ape::is.binary(tre))
+	if ( minOverlap >= minCladeSize){
+		stop('*minOverlap* should be < *minCladeSize*.')
+	}
+	if ( any(is.na(tre$tip.label)) | anyDuplicated(tre$tip.label)){
+		if ( verbosity > 0 )
+			cat('Tree has NA or duplicated tip labels. Adding a unique id.\n')
+		else
+			message('Tree has NA or duplicated tip labels. Adding a unique id.')
+		tre$tip.label <- paste0( paste0( 1:(ape::Ntip(tre)), '_' ), tre$tip.label )
+	}
+
+	tredat = .tredat( tre )
+	attach( tredat ) 
+	
+	debugdf = NULL 
+	zstar  <- stats::qnorm( 1-min(1,level)/2 )
+	node2cl <- c()
+	clusterlist <- list()
+	
+	# -> 
+	clustered <- c() 
+	ponodes <- unique( tredat$poedges[,1] )
+	message( paste( Sys.time(), 'Start post-order clustering' ))
+	reportnodes <- ponodes[ floor(length( ponodes ) * seq(1,100,by=1)/100) ]
+	cluster_z <- c() # z used to cluster
+	
+	ddts <- setdiff( sort ( unique( maxDistToTip ) ), 0 )
+	for ( ddt in ddts ){
+		as <- which(  maxDistToTip == ddt  )
+		zs = parallel::mclapply( as, function(a) {
+			u <- tredat$dgtrMat[a,1]
+			v <- tredat$dgtrMat[a,2]
+			#A <- tail( ancestors[[a]], 1 )
+			
+			uset <- setdiff( descendants[[u]], clustered )
+			vset <- setdiff( descendants [[v]] , clustered )
+			utips <- uset[ uset <= n ]
+			vtips <- vset[ vset <= n ]
+			z = 0 
+			if ( ( length( utips ) > minCladeSize) & (length( vtips ) > minCladeSize ) ){
+				z = .uv.diss(uset, vset, nsim , Ei = 2)
+			}
+			if ( a %in% reportnodes ){
+				cat( paste(Sys.time(), 'traversed', a, paste0(round(100*which( a==reportnodes)/100), '%'), '\n'))
+			}
+			z
+		}, mc.cores = ncpu )
+		zs <- unlist( zs )
+		if ( any ( is.na( zs ))){
+			# debug 
+			.as <- as[ which ( is.na( zs ) ) ]
+			a <- .as[1]
+			u <- tredat$dgtrMat[a,1]
+			v <- tredat$dgtrMat[a,2]
+			uset <- setdiff( descendants[[u]], clustered )
+			vset <- setdiff( descendants[[v]], clustered )
+			browser()
+		}
+		zs[ is.na( zs ) ] <- 0 
+		zs1 <- zs[ zs >= zstar ]
+		as1 <- as[ zs >= zstar ]
+		for ( i in seq_along( as1 ) ){
+			a <- as1[ i ]
+			zz <- zs1[ i ]
+			u <- tredat$dgtrMat[a,1]
+			v <- tredat$dgtrMat[a,2]
+			uset <- setdiff( descendants[[u]], clustered )
+			vset <- setdiff( descendants [[v]] , clustered )
+			node2cl <- c( node2cl, u )
+			clusterlist[[ length(clusterlist)+1 ]] <- uset 
+			node2cl <- c( node2cl, v )
+			clusterlist[[ length(clusterlist)+1 ]] <- vset 
+			clustered <- c( clustered , uset, vset  )
+			cluster_z <- c( cluster_z , zz, zz )
+		}
+	}
+	
+	message( paste( Sys.time(), 'Post-order clustering complete.'  ) )
+	# <-
+	
+	names( clusterlist ) <- node2cl 
+	no <- length(clusterlist)
+	x <- setdiff( c( 1:n, inodes), do.call( c, clusterlist )) # remainder 
+	if (length(x) > 0){
+		clusterlist[[no + 1]] <- x
+	}
+	
+	# DISTANCE
+	nc <- length( clusterlist )
+	D <- matrix( NA, nrow = nc, ncol = nc )
+	diag(D) <- 0
+	if ( compute_partitions  ){
+		# 1) fill in D where ancestry/size/overlap req's are met 
+		if ( nc  > 1){
+			for (iu in 1:(nc-1)){
+				x = (iu+1):nc
+				Diviu = unlist( parallel::mclapply( x , function( iv ){
+					.uv.diss ( clusterlist[[iu]] , clusterlist[[iv]], nsim = nsim,  Ei = 3)	
+				}, mc.cores = ncpu  ) )
+				D[iu, x ] <- Diviu 
+				D[ x, iu ] <- Diviu 
+			} 
+		}
+		# 2) impute any missing 
+		# impute and remaining missingness using weighted mean; weights based on tree distance 
+		.D <- D 
+		.D[ is.na(D) | is.infinite(D)] <- median( .D[ !(is.na(.D) | is.infinite(.D)) ] ) #0  #
+	} else{
+		D[ is.na(D) ] <- 100
+		.D <- D 
+	}
+	
+	rownames(.D)  = colnames(.D) <- 1:nc
+	D <- stats::as.dist(.D)
+	# /DISTANCE 
+	
+	message( paste( Sys.time(), 'Cluster distance matrix complete.' ))
+	
+	# RETURN
+	# for each tip: 
+	stats::setNames( rep(NA, ape::Ntip(tre)), tre$tip.label) -> clustervec 
+	for (k in 1:nc){
+		cl <- clusterlist[[k]]
+		itip <- intersect( 1:(ape::Ntip(tre)), cl)
+		clustervec[ itip ] <- k 
+	}
+	
+	if ( nc  >  1){
+		h <- ape::as.phylo( stats::hclust( D ) ) 
+		#~ 	h$edge.length[ h$edge.length <= zstar ] <- 0
+		partinds <- stats::cutree( stats::hclust( stats::as.dist( ape::cophenetic.phylo( h ) ) ), h = zstar)
+		partition <- as.factor( stats::setNames( partinds[ clustervec ] , tre$tip.label ) )
+		clustering <- as.factor( clustervec )
+		clusters <- split( tre$tip.label, clustervec )
+		partitionSets <- split( tre$tip.label, partition )
+		partitionNodes <-  lapply( 1:max(partinds), function(i) as.numeric(names(partinds))[ partinds==i ] )#
+		names(partitionNodes) <- 1:max(partinds)
+		
+	} else {
+		clustering <- stats::setNames(  as.factor( rep(1, n )), tre$tip.label )
+		partition <- stats::setNames( as.factor( rep(1, n )), tre$tip.label )
+		clusters <- list( tre$tip.label )
+		partitionSets <- list( tre$tip.label )
+		remainderClade <- NULL 
+		partitionNodes <- NULL 
+	}
+	
+	rv = list(
+	  clustering = clustering 
+	  , partition = partition 
+	  , clusterSets  = clusters
+	  , partitionSets = partitionSets
+	  , partitionNodes =  partitionNodes
+	  , D = D 
+	  , clusterList = clusterlist 
+	  , tree = tre
+	  , level = level
+	  , zstar = zstar 
+	  , cluster_mrca  = node2cl 
+	  , call = match.call() 
+	  , data =  data.frame( taxon = tre$tip.label
+		   , cluster = clustering
+		   , partition = partition
+	     , row.names = 1:ape::Ntip(tre)
+	     , stringsAsFactors=FALSE
+		)
+	  , debugdf = debugdf 
+	  , cluster_z = cluster_z
+	)
+	class(rv) <- 'TreeStructure'
+	detach( tredat )
+	rv
+}
+
 
 #' Test the hypothesis that two clades within a tree were generated by the same coalescent process. 
 #'
@@ -391,6 +604,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e3, le
 
 
 	# FIND OUTLIERS
+	debugdf = NULL 
 	zstar  <- stats::qnorm( 1-min(1,level)/2 )
 	node2nodeset <- descendants 
 	shouldDig <- rep(FALSE, n + nnode )
@@ -481,7 +695,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e3, le
 		setdiff( descendants[[u]], do.call( c, lapply( digging, function(v) node2nodeset[[v]] ) ) )
 	}
 
-	debugdf = NULL 
+	
 	if ( debugLevel > 0 ){
 		# store z for each node compared to root 
 		debugdf = data.frame( z = sapply( node2nodeset[[rootnode]], function(u)  .calc.z( u, rootnode, Ei =1 , returnabs = FALSE) )
@@ -611,6 +825,8 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e3, le
 	detach( tredat )
 	rv
 }
+
+
 
 
 .plot.TreeStructure.ggtree <- function(x, ... ){
