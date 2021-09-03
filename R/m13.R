@@ -319,7 +319,8 @@ trestruct.fast <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e
 			v <- tredat$dgtrMat[a,2]
 			uset <- setdiff( descendants[[u]], clustered )
 			vset <- setdiff( descendants[[v]], clustered )
-			browser()
+			#browser()
+			warning(paste( 'NA in computed z scores for nodes (setting to zero): ', paste(.as, collapse = ',')   ) )
 		}
 		zs[ is.na( zs ) ] <- 0 
 		zs1 <- zs[ zs >= zstar ]
