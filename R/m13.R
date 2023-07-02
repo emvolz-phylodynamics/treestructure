@@ -399,8 +399,6 @@ trestruct.fast <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e
 		clustering <- as.factor( clustervec )
 		clusters <- split( tre$tip.label, clustervec )
 		partitionSets <- split( tre$tip.label, partition )
-		partitionNodes <-  lapply( 1:max(partinds), function(i) as.numeric(names(partinds))[ partinds==i ] )#
-		names(partitionNodes) <- 1:max(partinds)
 		
 	} else {
 		clustering <- stats::setNames(  as.factor( rep(1, n )), tre$tip.label )
@@ -408,7 +406,6 @@ trestruct.fast <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e
 		clusters <- list( tre$tip.label )
 		partitionSets <- list( tre$tip.label )
 		remainderClade <- NULL 
-		partitionNodes <- NULL 
 	}
 	
 	rv = list(
@@ -416,7 +413,6 @@ trestruct.fast <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e
 	  , partition = partition 
 	  , clusterSets  = clusters
 	  , partitionSets = partitionSets
-	  , partitionNodes =  partitionNodes
 	  , D = D 
 	  , clusterList = clusterlist 
 	  , tree = tre
@@ -789,8 +785,6 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e3, le
 		clustering <- as.factor( clustervec )
 		clusters <- split( tre$tip.label, clustervec )
 		partitionSets <- split( tre$tip.label, partition )
-		partitionNodes <-  lapply( 1:max(partinds), function(i) as.numeric(names(partinds))[ partinds==i ] )#
-		names(partitionNodes) <- 1:max(partinds)
 		
 	} else{
 		clustering <- stats::setNames(  as.factor( rep(1, n )), tre$tip.label )
@@ -798,7 +792,6 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e3, le
 		clusters <- list( tre$tip.label )
 		partitionSets <- list( tre$tip.label )
 		remainderClade <- NULL 
-		partitionNodes <- NULL 
 	}
 	
 	rv = list(
@@ -806,7 +799,6 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nsim = 1e3, le
 	  , partition = partition 
 	  , clusterSets  = clusters
 	  , partitionSets = partitionSets
-	  , partitionNodes =  partitionNodes
 	  , D = D 
 	  , clusterList = clusterlist 
 	  , tree = tre
