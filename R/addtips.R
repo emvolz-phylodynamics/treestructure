@@ -27,61 +27,60 @@
 #' @export
 addtips <- function(trst, tre)
 {
-        notintree <- setdiff( trst$data$taxon , tre$tip.label)
-        if ( length( notintree ) > 0 )
-        {
-                message( 'Some taxa in *trst* were not found in tre. These will be excluded from the output. 
-                        ' )
-        }
-        clusterSets <- lapply( trst$clusterSets, function(x) intersect( x, tre$tip.label ))
-        mrcas <- sapply( clusterSets, function(x) ape::getMRCA( tre, x )) 
+	notintree <- setdiff( trst$data$taxon , tre$tip.label)
+	if ( length( notintree ) > 0 )
+	{
+		message( 'Some taxa in *trst* were not found in tre. These will be excluded from the output. 
+			' )
+	}
+	clusterSets <- lapply( trst$phylotypeSets, function(x) intersect( x, tre$tip.label ))
+	mrcas <- sapply( clusterSets, function(x) ape::getMRCA( tre, x )) 
 
-        poe <- postorder( tre )
-        desc <- lapply( 1:(Ntip(tre)+Nnode(tre)), function(x) c() )
-        for ( ie in poe )
-        {
-                a <- tre$edge[ie,1]
-                u <- tre$edge[ie,2]
-                desc[[a]] <- c( desc[[a]], desc[[u]], u)
-        }
+	poe <- ape::postorder( tre )
+	desc <- lapply( 1:(ape::Ntip(tre)+ape::Nnode(tre)), function(x) c() )
+	for ( ie in poe )
+	{
+		a <- tre$edge[ie,1]
+		u <- tre$edge[ie,2]
+		desc[[a]] <- c( desc[[a]], desc[[u]], u)
+	}
 
-        toadd <- setdiff( tre$tip.label ,  trst$data$taxon )
-        toadd_nodes <- match( toadd, tre$tip.label )
+	toadd <- setdiff( tre$tip.label ,  trst$data$taxon )
+	toadd_nodes <- match( toadd, tre$tip.label )
 
-        cluster_desc <- desc[mrcas]
-        cluster_ranks <- sapply( cluster_desc, function(x) sum(mrcas %in% x))
-        .assign <- function(u){
-                whcl <- sapply( cluster_desc, function(x) u%in%x ) |> which() 
-                v <- whcl[ which.min(cluster_ranks[whcl]) ]
-                v
-        }
-        sapply( toadd_nodes, .assign) -> newclust
-        stdf0 <- trst$data[ !duplicated(trst$data$cluster ), ]
-        cl2pa <- setNames( stdf0$partition, stdf0$cluster )
-        stdf <- rbind( 
-                      trst$data 
-                      , data.frame( 
-                                   taxon = toadd 
-                                   , cluster = newclust 
-                                   , partition = cl2pa[ as.character(newclust ) ]
-                                   , stringsAsFactors = FALSE 
-                      )
-                      )
-        rownames(stdf) <- 1:nrow(stdf)
-        stdf <- stdf[ stdf$taxon %in% tre$tip.label,  ]
-        stdf <- stdf[ match(stdf$taxon, tre$tip.label), ]
-        
-        trst_out <- trst
-        
-        trst_out$data <- stdf 
-        trst_out$clustering <- as.factor( stdf$cluster  ) |> setNames( stdf$taxon )
-        trst_out$partition <- as.factor( stdf$partition ) |> setNames( stdf$taxon )
-        trst_out$clusterSets <- lapply( split(stdf, stdf$cluster), function(x) x$taxon )
-        trst_out$partitionSets <- lapply( split(stdf, stdf$partition), function(x) x$taxon )
-        trst_out$D <- NULL 
-        trst_out$tree <- tre 
-        trst_out$cluster_mrca <- mrcas 
-        trst_out
+	cluster_desc <- desc[mrcas]
+	cluster_ranks <- sapply( cluster_desc, function(x) sum(mrcas %in% x))
+	.assign <- function(u){
+		whcl <- sapply( cluster_desc, function(x) u%in%x ) |> which() 
+		v <- whcl[ which.min(cluster_ranks[whcl]) ]
+		v
+	}
+	sapply( toadd_nodes, .assign) -> newclust
+	stdf0 <- trst$data[ !duplicated(trst$data$cluster ), ]
+	cl2pa <- setNames( stdf0$partition, stdf0$cluster )
+	stdf <- rbind( 
+		      trst$data 
+		      , data.frame( 
+				   taxon = toadd 
+				   # , cluster = newclust 
+				   , phylotype = newclust
+				   , partition = cl2pa[ as.character(newclust ) ]
+				   , stringsAsFactors = FALSE 
+		      )
+		      )
+	rownames(stdf) <- 1:nrow(stdf)
+	stdf <- stdf[ stdf$taxon %in% tre$tip.label,  ]
+	stdf <- stdf[ match(stdf$taxon, tre$tip.label), ]
+	
+	trst_out <- trst
+	
+	trst_out$data <- stdf 
+	trst_out$clustering <- as.factor( stdf$cluster  ) |> setNames( stdf$taxon )
+	trst_out$partition <- as.factor( stdf$partition ) |> setNames( stdf$taxon )
+	trst_out$phylotypeSets <- lapply( split(stdf, stdf$cluster), function(x) x$taxon )
+	trst_out$partitionSets <- lapply( split(stdf, stdf$partition), function(x) x$taxon )
+	trst_out$D <- NULL 
+	trst_out$tree <- tre 
+	trst_out$cluster_mrca <- mrcas 
+	trst_out
 }
-
-

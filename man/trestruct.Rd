@@ -18,7 +18,7 @@ trestruct(
 \arguments{
 \item{tre}{A tree of type ape::phylo. Must be rooted and binary.}
 
-\item{minCladeSize}{All clusters within parititon must have at least this many tips.}
+\item{minCladeSize}{All phylotypes within parititon must have at least this many tips.}
 
 \item{minOverlap}{Threshold time overlap required to find splits in a clade}
 
@@ -33,7 +33,7 @@ trestruct(
 \item{debugLevel}{If > 0 will produce additional data in return value}
 }
 \value{
-A TreeStructure object which includes cluster and partitition assignment for each tip of the tree.
+A TreeStructure object which includes phylotype and partitition assignment for each tip of the tree.
 }
 \description{
 Detect cryptic population structure in time trees
