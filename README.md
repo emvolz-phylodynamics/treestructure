@@ -2,7 +2,7 @@
 
 ## Citation
 
-E.M. Volz, Wiuf, C., Grad, Y., Frost, S., Dennis, A., Didelot, X.D. (2020) Identification of hidden population structure in time-scaled phylogenies. Systematic Biology (in press). https://doi.org/10.1101/704528 
+E.M. Volz, Wiuf, C., Grad, Y., Frost, S., Dennis, A., Didelot, X.D. (2020) Identification of hidden population structure in time-scaled phylogenies. Systematic Biology. https://doi.org/10.1101/704528 
 
 ## Installation
 
