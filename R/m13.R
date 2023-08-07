@@ -381,7 +381,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	if (!is.binary(tre)){# must be done after node labels are finalised 
 		tre <- multi2di( tre, random=FALSE) # maintain node order in case node labels present 
 	}
-	if (is.logical(nodeSupportValues) & length(nodeSupportValues)==0){
+	if (is.logical(nodeSupportValues) & length(nodeSupportValues)==1){
 		if ( nodeSupportValues ) {
 			# stop('Not Implemented: Tree parsing node support values' ) 
 			nodeSupportValues <- tre$node.label 
@@ -394,8 +394,11 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 			if ( max( nodeSupportValues ) < 1 )
 				nodeSupportValues <- round( 100 * nodeSupportValues )
 			useNodeSupport <- TRUE 
+			nodeSupportValues <- c( rep(NA, ape::Ntip(tre)), nodeSupportValues )
 		}
-	}
+	} 
+	if ( is.logical(nodeSupportValues) & length(nodeSupportValues)!=1)
+		stop('Failure to parse node support. Must be a single logical or a numeric vector with length equal to number of internal nodes in the tree. If numeric, these values should be between 0 and 100. If logical, node support should be included in labeled nodes of the tree.')
 	
 	tredat = .tredat( tre )
 	attach( tredat ) 
@@ -448,16 +451,17 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		  return(0 )
 		if ( u==v )
 		  return(0)
-		if ( useNodeSupport ){
-			if ( min(nodeSupportValues[c(u,v)]) < nodeSupportThreshold ){
-				return(0)
-			}
-		}
 		if ( is.na( node2edgelength[ u ] ) )
 			return(0)
 		if ( node2edgelength[ u ] == 0 )
 			return(0)
-		
+		if ( useNodeSupport ){
+			if (!is.na( nodeSupportValues[u] ) ){
+				if ( nodeSupportValues[u] < nodeSupportThreshold ){
+					return(0)
+				}
+			}
+		}
 		if (is.na( Ei)){
 			#nested = ifelse( .ismonomono( u, v), 1, 0 )
 			if ( all( node2nodeset[[u]] %in% node2nodeset[[v]] ))
