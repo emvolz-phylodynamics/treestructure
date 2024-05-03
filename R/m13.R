@@ -346,7 +346,7 @@ invisible(x)
 #' @param ncpu If >1 will compute statistics in parallel using multiple CPUs 
 #' @param verbosity If > 0 will print information about progress of the algorithm 
 #' @param debugLevel If > 0 will produce additional data in return value 
-#' @return A TreeStructure object which includes phylotype and partitition assignment for each tip of the tree. 
+#' @return A TreeStructure object which includes cluster and partitition assignment for each tip of the tree. 
 #' @examples 
 #' tree <- ape::rcoal(50)
 #' struct <-  trestruct( tree )
@@ -639,11 +639,11 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	  clustering = clustering 
 	  , partition = partition 
 	  # , clusterSets  = clusters
-	  , phylotypeSets = clusters
+	  , clusterSets = clusters
 	  , partitionSets = partitionSets
 	  , D = D 
 	  , clusterList = clusterlist 
-	  , phylotypeList = clusterlist 
+	  , clusterList = clusterlist 
 	  , tree = tre
 	  , level = level
 	  , zstar = zstar 
@@ -651,7 +651,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	  , call = match.call() 
 	  , data =  data.frame( taxon = tre$tip.label
 		   # , cluster = clustering
-		   , phylotype = clustering
+		   , cluster = clustering
 		   , partition = partition
 	     , row.names = 1:ape::Ntip(tre)
 	     , stringsAsFactors=FALSE
@@ -673,7 +673,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	d <- x$data 
 	d$shape <-  rep('circle', ape::Ntip(tre))
 	
-	tre <- ggtree::groupOTU( tre, x$phylotypeSets) 
+	tre <- ggtree::groupOTU( tre, x$clusterSets) 
 	pl <- ggtree::`%<+%`( ggtree::ggtree( tre, ggplot2::aes_(color=~group), ... ) ,  d  )
 	pl <- pl +  ggtree::geom_tippoint(ggplot2::aes_( color=~partition, shape=~shape, show.legend=TRUE), size = 2 )	
 	pl
@@ -714,16 +714,16 @@ print.TreeStructure <- function(x, rows = 0, ...)
 	cat('\n')
 	cat ( paste( 'Significance level:', x$level, '\n' ) )
 	
-	cat ( paste( 'Number of phylotypes:', nc , '\n') )
+	cat ( paste( 'Number of clusters:', nc , '\n') )
 	cat ( paste( 'Number of partitions:', npart, '\n' ) )
 	
-	cat( 'Number of taxa in each phylotype:\n' )
+	cat( 'Number of taxa in each cluster:\n' )
 	print( table( x$clustering) )
 	cat( 'Number of taxa in each partition:\n' )
 	print( table( x$partition ))
 	
 	if ( rows > 0 ){
-		cat ('Phylotype and partition assignment: \n')
+		cat ('Cluster and partition assignment: \n')
 		print( x$data[1:min(nrow(x$data),rows), ] )
 	}
 	
