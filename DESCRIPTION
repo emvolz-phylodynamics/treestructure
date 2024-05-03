@@ -1,8 +1,8 @@
 Package: treestructure
 Type: Package
 Title: Detect Population Structure Within Phylogenetic Trees
-Version: 0.3.2
-Date: 2023-12-29
+Version: 0.3.3
+Date: 2024-05-03
 Author: Erik Volz
 Maintainer: Erik Volz <erik.volz@gmail.com>
 Description: Algorithms for detecting population structure from the history of coalescent events recorded in phylogenetic trees. This method classifies each tip and internal node of a tree into disjoint sets characterized by similar coalescent patterns. The methods are described in Volz, E., Wiuf, C., Grad, Y., Frost, S., Dennis, A., & Didelot, X. (2020) <doi:10.1093/sysbio/syaa009>.
