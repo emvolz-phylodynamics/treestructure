@@ -33,7 +33,7 @@ addtips <- function(trst, tre)
 		message( 'Some taxa in *trst* were not found in tre. These will be excluded from the output. 
 			' )
 	}
-	clusterSets <- lapply( trst$phylotypeSets, function(x) intersect( x, tre$tip.label ))
+	clusterSets <- lapply( trst$clusterSets, function(x) intersect( x, tre$tip.label ))
 	mrcas <- sapply( clusterSets, function(x) ape::getMRCA( tre, x )) 
 
 	poe <- ape::postorder( tre )
@@ -63,7 +63,7 @@ addtips <- function(trst, tre)
 		      , data.frame( 
 				   taxon = toadd 
 				   # , cluster = newclust 
-				   , phylotype = newclust
+				   , cluster = newclust
 				   , partition = cl2pa[ as.character(newclust ) ]
 				   , stringsAsFactors = FALSE 
 		      )
@@ -77,7 +77,7 @@ addtips <- function(trst, tre)
 	trst_out$data <- stdf 
 	trst_out$clustering <- as.factor( stdf$cluster  ) |> setNames( stdf$taxon )
 	trst_out$partition <- as.factor( stdf$partition ) |> setNames( stdf$taxon )
-	trst_out$phylotypeSets <- lapply( split(stdf, stdf$cluster), function(x) x$taxon )
+	trst_out$clusterSets <- lapply( split(stdf, stdf$cluster), function(x) x$taxon )
 	trst_out$partitionSets <- lapply( split(stdf, stdf$partition), function(x) x$taxon )
 	trst_out$D <- NULL 
 	trst_out$tree <- tre 

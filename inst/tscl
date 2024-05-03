@@ -24,7 +24,7 @@ suppressPackageStartupMessages( library(rmarkdown) )
 spec <- matrix( c( 
 	'treefn', 't', 1, 'character', 'A path to a tree in newick format. Must be rooted and binary.'
 	,'level', 'l', 2, 'double', 'Significance level for finding new split within a set of tips.'
-	,'minCladeSize', 'm', 2, 'character', 'All clusters within parititon must have at least this many tips.'
+	,'minCladeSize', 'm', 2, 'character', 'All clusters within partition must have at least this many tips.'
 	,'minOverlap', 'M', 2, 'character', 'Threshold time overlap required to find splits in a clade.'
 	,'nsim', 'n', 2, 'character', 'Number of simulations for computing null distribution of test statistics.'
 	,'ncpu', 'c', 2, 'character', 'If >1 will compute statistics in parallel using multiple CPUs.'
@@ -39,7 +39,7 @@ opt = getopt(spec)
 invisible('
 			 tre: A tree of type ape::phylo. Must be rooted and binary.
 
-		minCladeSize: All clusters within parititon must have at least this
+		minCladeSize: All clusters within partition must have at least this
 				  many tips.
 
 		minOverlap: Threshold time overlap required to find splits in a clade

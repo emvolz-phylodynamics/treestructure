@@ -337,7 +337,7 @@ invisible(x)
 #' @author Erik M Volz <erik.volz@gmail.com>
 #' 
 #' @param tre A tree of type ape::phylo. Must be rooted. If the tree has multifurcations, it will be converted to a binary tree before processing.  
-#' @param minCladeSize All clusters within parititon must have at least this many tips. 
+#' @param minCladeSize All clusters within partition must have at least this many tips. 
 #' @param minOverlap Threshold time overlap required to find splits in a clade  
 #' @param nodeSupportValues Node support values such as produced by bootrap or Bayesian credibility scores. Must be logical or vector with length equal to number of internal nodes in the tree. If numeric, these values should be between 0 and 100.   
 #' @param nodeSupportThreshold Threshold node support value between 0 and 100. Nodes with support lower than this threshold will not be tested.  
@@ -346,7 +346,7 @@ invisible(x)
 #' @param ncpu If >1 will compute statistics in parallel using multiple CPUs 
 #' @param verbosity If > 0 will print information about progress of the algorithm 
 #' @param debugLevel If > 0 will produce additional data in return value 
-#' @return A TreeStructure object which includes cluster and partitition assignment for each tip of the tree. 
+#' @return A TreeStructure object which includes cluster and partition assignment for each tip of the tree. 
 #' @examples 
 #' tree <- ape::rcoal(50)
 #' struct <-  trestruct( tree )
