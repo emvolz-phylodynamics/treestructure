@@ -20,7 +20,7 @@ Available options:
 ```
      tre: A tree of type ape::phylo. Must be rooted and binary.
 
-minCladeSize: All clusters within parititon must have at least this
+minCladeSize: All clusters within partition must have at least this
           many tips.
 
 minOverlap: Threshold time overlap required to find splits in a clade

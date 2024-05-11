@@ -337,7 +337,7 @@ invisible(x)
 #' @author Erik M Volz <erik.volz@gmail.com>
 #' 
 #' @param tre A tree of type ape::phylo. Must be rooted. If the tree has multifurcations, it will be converted to a binary tree before processing.  
-#' @param minCladeSize All clusters within parititon must have at least this many tips. 
+#' @param minCladeSize All clusters within partition must have at least this many tips. 
 #' @param minOverlap Threshold time overlap required to find splits in a clade  
 #' @param nodeSupportValues Node support values such as produced by bootrap or Bayesian credibility scores. Must be logical or vector with length equal to number of internal nodes in the tree. If numeric, these values should be between 0 and 100.   
 #' @param nodeSupportThreshold Threshold node support value between 0 and 100. Nodes with support lower than this threshold will not be tested.  
@@ -346,7 +346,7 @@ invisible(x)
 #' @param ncpu If >1 will compute statistics in parallel using multiple CPUs 
 #' @param verbosity If > 0 will print information about progress of the algorithm 
 #' @param debugLevel If > 0 will produce additional data in return value 
-#' @return A TreeStructure object which includes cluster and partitition assignment for each tip of the tree. 
+#' @return A TreeStructure object which includes cluster and partition assignment for each tip of the tree. 
 #' @examples 
 #' tree <- ape::rcoal(50)
 #' struct <-  trestruct( tree )
@@ -626,8 +626,6 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		clustering <- as.factor( clustervec )
 		clusters <- split( tre$tip.label, clustervec )
 		partitionSets <- split( tre$tip.label, partition )
-		partitionNodes <-  lapply( 1:max(partinds), function(i) as.numeric(names(partinds))[ partinds==i ] )#
-		names(partitionNodes) <- 1:max(partinds)
 		
 	} else{
 		clustering <- stats::setNames(  as.factor( rep(1, n )), tre$tip.label )
@@ -635,15 +633,13 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		clusters <- list( tre$tip.label )
 		partitionSets <- list( tre$tip.label )
 		remainderClade <- NULL 
-		partitionNodes <- NULL 
 	}
 	
 	rv = list(
 	  clustering = clustering 
 	  , partition = partition 
-	  , clusterSets  = clusters
+	  , clusterSets = clusters
 	  , partitionSets = partitionSets
-	  , partitionNodes =  partitionNodes
 	  , D = D 
 	  , clusterList = clusterlist 
 	  , tree = tre
@@ -652,6 +648,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	  , cluster_mrca  = node2cl 
 	  , call = match.call() 
 	  , data =  data.frame( taxon = tre$tip.label
+		   # , cluster = clustering
 		   , cluster = clustering
 		   , partition = partition
 	     , row.names = 1:ape::Ntip(tre)
@@ -674,7 +671,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	d <- x$data 
 	d$shape <-  rep('circle', ape::Ntip(tre))
 	
-	tre <- ggtree::groupOTU( tre, x$clusterSets ) 
+	tre <- ggtree::groupOTU( tre, x$clusterSets) 
 	pl <- ggtree::`%<+%`( ggtree::ggtree( tre, ggplot2::aes_(color=~group), ... ) ,  d  )
 	pl <- pl +  ggtree::geom_tippoint(ggplot2::aes_( color=~partition, shape=~shape, show.legend=TRUE), size = 2 )	
 	pl
