@@ -638,11 +638,9 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	rv = list(
 	  clustering = clustering 
 	  , partition = partition 
-	  # , clusterSets  = clusters
 	  , clusterSets = clusters
 	  , partitionSets = partitionSets
 	  , D = D 
-	  , clusterList = clusterlist 
 	  , clusterList = clusterlist 
 	  , tree = tre
 	  , level = level
