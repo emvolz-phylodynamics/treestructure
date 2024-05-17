@@ -14,3 +14,7 @@
 ^inst/simout$
 ^inst/treestructure_output$
 
+^.*\.Rproj$
+^\.Rproj\.user$
+^doc$
+^Meta$
