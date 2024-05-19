@@ -1,0 +1,83 @@
+---
+title: "Considering node support values on designations and update previous treestructure object with new sequences"
+author: "Vinicius Franceschi"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Considering node support values on designations and update previous treestructure object with new sequences}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width=7,
+  fig.height=11
+)
+```
+
+## Considering node support values (e.g. bootstrap) on designations and update previous treestructure object with new sequences
+
+This example uses SARS-CoV-2 public data available [here](https://hgdownload.soe.ucsc.edu/goldenPath/wuhCor1/UShER_SARS-CoV-2//2022/04/02/) to demonstrate the use of node support values from e.g. parametric bootstrap to avoid designating population structure in badly supported clades. It also demonstrates how to update previous cluster designations (an existing treestructure object) using a new rooted maximum likelihood tree incorporating more sequences. The new tips are added to the cluster which shares its MRCA.
+
+For a step-by-step guide to replicate the complete workflow please see [here](https://github.com/vinibfranc/demo_treestructure/blob/main/R/prepare.R).
+
+Briefly, we downloaded SARS-CoV-2 public metadata, a treefile, and multiple sequence alignment from the UShER index. Then we extracted sequences up to the end of February 2020 (n<1000 sequences). We then estimated a maximum likelihood tree with IQTREE v2.2.2.6 with 1000 ultrafast bootstraps, a time-scaled tree using treedater (strict clock, 0.0008 subst./site/year), removed outliers by root-to-tip regression, an then re-estimated the timetree without the outliers (n=916).
+
+Let's load the resulting ML tree with bootstrap values and timetree:
+
+```{r message=FALSE}
+library(treestructure)
+```
+
+```{r}
+mltr2_outl_rm <- readRDS( system.file('mltr2_outl_rm_sc2_feb2020.rds', package='treestructure') )
+ggtree::ggtree(mltr2_outl_rm)
+```
+
+```{r}
+timetr2_phylo <- readRDS( system.file('timetr2_phylo_sc2_feb2020.rds', package='treestructure') )
+ggtree::ggtree(timetr2_phylo)
+```
+
+Firstly, we will assign clusters without using bootstrap support:
+
+```{r}
+trestruct_res_nobt <- trestruct(timetr2_phylo, minCladeSize=30, nodeSupportValues=FALSE, level=0.01)
+plot(trestruct_res_nobt, use_ggtree = T) + ggtree::geom_tippoint()
+```
+
+It results in 9 clusters.
+
+Now let's add the support values to a vector that we will pass to `trestruct`:
+
+```{r}
+timetr2_boot <- as.integer(mltr2_outl_rm$node.label)
+timetr2_boot[is.na(timetr2_boot)] <- 95
+print(timetr2_boot)
+```
+
+And finally designate clusters that have at least 80% bootstrap support:
+
+```{r}
+trestruct_res <- trestruct(timetr2_phylo, minCladeSize=30, nodeSupportValues=timetr2_boot, nodeSupportThreshold=80, level=0.01)
+plot(trestruct_res, use_ggtree = T) + ggtree::geom_tippoint()
+```
+
+Now we have only 5 well-supported clusters with differences in coalescent patterns.
+
+To update the previous treestructure object with new sequences, we extracted SARS-CoV-2 sequences up to 15 March 2020 (n>6500 sequences). We then estimated a new ML tree including all those sequences as before.
+
+```{r}
+mltr_addtips <- readRDS( system.file('mltr_addtips_mar2020.rds', package='treestructure') )
+ggtree::ggtree(mltr_addtips)
+```
+
+And without the need to re-estimate a timetree or re-run `trestruct` from scratch, we are now able to add the new sequences to the existing treestructure object:
+
+```{r}
+trestruct_add_tips <- addtips(trst=trestruct_res, tre=mltr_addtips)
+plot(trestruct_add_tips, use_ggtree = T) + ggtree::geom_tippoint()
+```
