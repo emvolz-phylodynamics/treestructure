@@ -352,7 +352,8 @@ invisible(x)
 #' struct <-  trestruct( tree )
 #' 
 #' @export 
-trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportValues = FALSE, nodeSupportThreshold = 95, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1, debugLevel=0 )
+trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportValues = FALSE, nodeSupportThreshold = 95, nsim = 1e4, level = .01, ncpu = 1, verbosity = 1, debugLevel=0
+	, levellb = 1e-3, levelub = 1e-1, res = 11)
 {
 	stopifnot( ape::is.rooted(tre))
 	# stopifnot( ape::is.binary(tre))  
@@ -401,6 +402,30 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		stop('Failure to parse node support. Must be a single logical or a numeric vector with length equal to number of internal nodes in the tree. If numeric, these values should be between 0 and 100. If logical, node support should be included in labeled nodes of the tree.')
 	
 	tredat = .tredat( tre )
+	stopifnot( !is.null(level) & !is.numeric(level) )
+	if( !is.null( level ) & is.numeric(level))
+		return( .trestruct( tre, minCladeSize, minOverlap , nodeSupportValues , nodeSupportThreshold , nsim , level[1] , ncpu , verbosity , debugLevel
+		, useNodeSupport, tredat) )
+	if (is.null(level))
+	{
+		levels <- seq( levellb, levelub, length.out=res )
+		tss <- lapply( levels, function(l)
+		{
+			.trestruct( tre, minCladeSize, minOverlap , nodeSupportValues , nodeSupportThreshold , nsim , l, ncpu , verbosity , debugLevel, useNodeSupport, tredat)
+		})
+		chs <- sapply( tss, .ch )
+		return( tss[[ which.max(chs) ]] )
+	}
+}
+
+.ch <- function(trstr)
+{
+	# TODO 
+}
+
+.trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportValues = FALSE, nodeSupportThreshold = 95, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1, debugLevel=0 
+	, useNodeSupport, tredat)
+
 	attach( tredat ) 
 	
 	.ismonomono <- function( u, v){
@@ -430,7 +455,6 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		rv
 	}
 	# /DISSIMILARITY FUNCTIONS 
-
 
 	# FIND OUTLIERS
 	debugdf = NULL 
