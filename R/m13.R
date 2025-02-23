@@ -411,6 +411,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		levels <- seq( levellb, levelub, length.out=res )
 		tss <- lapply( levels, function(l)
 		{
+			# TODO message 
 			.trestruct( tre, minCladeSize, minOverlap , nodeSupportValues , nodeSupportThreshold , nsim , l, ncpu , verbosity , debugLevel, useNodeSupport, tredat)
 		})
 		chs <- sapply( tss, .ch )
@@ -418,14 +419,9 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	}
 }
 
-.ch <- function(trstr)
-{
-	# TODO 
-}
-
 .trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportValues = FALSE, nodeSupportThreshold = 95, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1, debugLevel=0 
 	, useNodeSupport, tredat)
-
+{
 	attach( tredat ) 
 	
 	.ismonomono <- function( u, v){
@@ -686,6 +682,23 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 }
 
 
+.ch <- function(trstr)
+{
+	cldf <- trstr$data # .computeclusters( tre, node2z, zth, rescale=FALSE )
+	ints <- node.depth.edgelength( trstr$tree )[(ape::Ntip(trstr$tree)+1):(ape::Ntip(trstr$tree)+ape::Nnode(trstr$tree))] # internalnode times
+	clnts <- lapply( split( cldf, cldf$cluster), function(d){
+		tr1 <- ape::keep.tip( trstr$tree, d$tip.label )
+		ints1 <- node.depth.edgelength( tr1 )[(ape::Ntip(tr1)+1):(ape::Ntip(tr1)+ape::Nnode(tr1))] # internalnode times
+	})
+	cln <- sapply( clnts , length ) 
+	clmeans <- sapply( clnts, mean )
+	oz <- mean( ints )
+	bcss <- sum( cln * (clmeans - oz )^2 )
+	wcss <- sapply( clnts, function(x) mean( (x-mean(x))^2 ) ) |> sum() 
+	n <- sum( cln )
+	k <- length( clnts ) 
+	(bcss/(k-1)) / (wcss/(n-k))
+}
 
 
 .plot.TreeStructure.ggtree <- function(x, ... ){
