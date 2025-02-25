@@ -96,3 +96,10 @@ Example:
 ```{r message=FALSE}
 trestruct( tree, level = .05, minCladeSize = 5 )
 ```
+
+In practice, clustering thresholds are always subjective and the best value of the `level` parameter will depend on your application. 
+One way to choose an appropriate `level` would be to use additional data associated with each sample. You can select the `level` which gives a set of clusters that explains the most variance in the data of interest (e.g. use the cluster as a factor in an ANOVA). 
+Alternatively, in the absence of any additional data, the `treestructure` package supports using the CH index (\url{https://en.wikipedia.org/wiki/Calinski–Harabasz_index}) to compare different `level`s. This statistic is based on the ratio of the between-cluster and within-cluster variance of the time of each node (distance from the root) and returns the `level` such that this ratio is maximised. If you wish to use the CH index, pass `level=NULL` to `trestruct`, and read documentation for the `levellb`,`levelub`, and `res` parameters. 
+
+
+

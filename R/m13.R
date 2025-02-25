@@ -327,9 +327,10 @@ invisible(x)
 #'
 #' @details 
 #' Estimates a partition of a time-scaled tree by contrasting coalescent patterns. 
-#' The algorithm is premised on a Kingman coalescent null hypothesis and a test statistic is formulated based on the rank sum of node times in the tree.
+#' The algorithm is premised on a Kingman coalescent null hypothesis for the ordering of node heights when contrasting two clades, and a test statistic is formulated based on the rank sum of node times in the tree.
 #' If node support values are available (as computed by bootstrap procedures), the method can optionally exclude designation of structure on poorly supported nodes. 
 #' The method will not designate structure on nodes with zero branch length relative to their immediate ancestor. 
+#' The significance level for detecting significant partitions of the tree can be provided, or a range of values can be examined. The CH index (\url{https://en.wikipedia.org/wiki/Calinski-Harabasz_index}) based on within- and between-cluster variance in node heights can be used to select a significance level if none is provided. 
 #' 
 #' @section References:
 #' E.M. Volz, Wiuf, C., Grad, Y., Frost, S., Dennis, A., Didelot, X.D.  (2020) Identification of hidden population structure in time-scaled phylogenies.
@@ -342,10 +343,13 @@ invisible(x)
 #' @param nodeSupportValues Node support values such as produced by bootrap or Bayesian credibility scores. Must be logical or vector with length equal to number of internal nodes in the tree. If numeric, these values should be between 0 and 100.   
 #' @param nodeSupportThreshold Threshold node support value between 0 and 100. Nodes with support lower than this threshold will not be tested.  
 #' @param nsim Number of simulations for computing null distribution of test statistics 
-#' @param level Significance level for finding new split within a set of tips 
+#' @param level Significance level for finding new split within a set of tips. Can also be NULL, in which case the optimal level is found according to the CH index
 #' @param ncpu If >1 will compute statistics in parallel using multiple CPUs 
 #' @param verbosity If > 0 will print information about progress of the algorithm 
 #' @param debugLevel If > 0 will produce additional data in return value 
+#' @param levellb If optimising the `level` parameter, this is the lower bound for the search 
+#' @param levelub If optimising the `level` parameter, this is the upper bound for the search 
+#' @param res If optimising the `level` parameter, this is the number of values to test
 #' @return A TreeStructure object which includes cluster and partition assignment for each tip of the tree. 
 #' @examples 
 #' tree <- ape::rcoal(50)
@@ -402,7 +406,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		stop('Failure to parse node support. Must be a single logical or a numeric vector with length equal to number of internal nodes in the tree. If numeric, these values should be between 0 and 100. If logical, node support should be included in labeled nodes of the tree.')
 	
 	tredat = .tredat( tre )
-	stopifnot( !is.null(level) & !is.numeric(level) )
+	stopifnot( is.null(level) | is.numeric(level) )
 	if( !is.null( level ) & is.numeric(level))
 		return( .trestruct( tre, minCladeSize, minOverlap , nodeSupportValues , nodeSupportThreshold , nsim , level[1] , ncpu , verbosity , debugLevel
 		, useNodeSupport, tredat) )
@@ -411,11 +415,16 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		levels <- seq( levellb, levelub, length.out=res )
 		tss <- lapply( levels, function(l)
 		{
-			# TODO message 
+			message( paste('Running treestructure with significance level', round(l,3) ))
+			message('')
 			.trestruct( tre, minCladeSize, minOverlap , nodeSupportValues , nodeSupportThreshold , nsim , l, ncpu , verbosity , debugLevel, useNodeSupport, tredat)
 		})
 		chs <- sapply( tss, .ch )
-		return( tss[[ which.max(chs) ]] )
+		chdf <- data.frame( level = levels, CH = chs, optimal= '' )
+		chdf$optimal[ which.max( chs ) ] <- '***' 
+		ts <-  tss[[ which.max(chs) ]] 
+		ts$chdf <- chdf 
+		return(ts)
 	}
 }
 
@@ -687,7 +696,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	cldf <- trstr$data # .computeclusters( tre, node2z, zth, rescale=FALSE )
 	ints <- node.depth.edgelength( trstr$tree )[(ape::Ntip(trstr$tree)+1):(ape::Ntip(trstr$tree)+ape::Nnode(trstr$tree))] # internalnode times
 	clnts <- lapply( split( cldf, cldf$cluster), function(d){
-		tr1 <- ape::keep.tip( trstr$tree, d$tip.label )
+		tr1 <- ape::keep.tip( trstr$tree, d$taxon )
 		ints1 <- node.depth.edgelength( tr1 )[(ape::Ntip(tr1)+1):(ape::Ntip(tr1)+ape::Nnode(tr1))] # internalnode times
 	})
 	cln <- sapply( clnts , length ) 
@@ -699,7 +708,6 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	k <- length( clnts ) 
 	(bcss/(k-1)) / (wcss/(n-k))
 }
-
 
 .plot.TreeStructure.ggtree <- function(x, ... ){
 	stopifnot(  'ggtree' %in% utils::installed.packages()[,1] ) 
@@ -744,9 +752,9 @@ print.TreeStructure <- function(x, rows = 0, ...)
 	npart <- nlevels( x$partition)
 	nc <- nlevels( x$clustering )
 	tre <- x$tree 
-	cat( 'Call: \n' )
+	cat( 'Call: \r\n' )
 	print( x$call )
-	cat('\n')
+	cat('\r\n')
 	cat ( paste( 'Significance level:', x$level, '\n' ) )
 	
 	cat ( paste( 'Number of clusters:', nc , '\n') )
@@ -761,8 +769,16 @@ print.TreeStructure <- function(x, rows = 0, ...)
 		cat ('Cluster and partition assignment: \n')
 		print( x$data[1:min(nrow(x$data),rows), ] )
 	}
+
+	if (!is.null( x$chdf ))
+	{
+		cat('\r\n')
+		cat( ' CH index ' )
+		cat('\r\n')
+		print( x$chdf )
+	}
 	
-	cat( '...\n') 
+	cat( '...\r\n') 
 	cat( 'For complete data, use `as.data.frame(...)` \n' )
 	
 	invisible(x)
