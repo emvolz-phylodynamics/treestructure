@@ -16,3 +16,13 @@
 \description{
 Plot TreeStructure tree with cluster and partition variables
 }
+\examples{
+
+tree <- ape::read.tree( system.file('sim.nwk', package = 'treestructure') )
+
+(struc <- trestruct( tree ))
+
+#plot treestructure object
+
+plot(struc)
+}

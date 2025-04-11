@@ -26,19 +26,12 @@ knitr::opts_chunk$set(
 ```
 
 
-# Citation
-
-Erik Volz, Wiuf Carsten, Yonatan Grad, Simon Frost, Ann Dennis, Xavier Didelot, 
-(2020); [Identification of hidden population structure in time-scaled phylogenies](https://academic.oup.com/sysbio/article/69/5/884/5734655); 
-Systemantic Biology, 69: 884–896.
-
-
 # Structured coalescent simulation 
 
 This example shows the function `trestruct` applied to a simulated structured 
 coalescent tree that includes samples from a large constant size population and 
 samples from three small 'outbreaks' which are growing exponentially. 
-These simulations were generated with the [`phydynR` package](https://emvolz-phylodynamics.github.io/phydynR). 
+These simulations were generated with the [phydynR package](https://emvolz-phylodynamics.github.io/phydynR). 
 
 ```{r message=FALSE}
 library(treestructure)
@@ -121,10 +114,12 @@ with each sample. You can select the `level` which gives a set of clusters that
 explains the most variance in the data of interest (e.g. use the cluster as a 
 factor in an ANOVA). 
 
+### CH index
+
 Alternatively, in the absence of any additional data, the `treestructure` package 
-supports using the CH index (\url{https://en.wikipedia.org/wiki/Calinski–Harabasz_index}) 
+supports using the [CH index](https://en.wikipedia.org/wiki/Calinski–Harabasz_index) 
 to compare different `level`s. This statistic is based on the ratio of the 
 between-cluster and within-cluster variance of the time of each node 
 (distance from the root) and returns the `level` such that this ratio is maximised. 
 If you wish to use the CH index, pass `level = NULL` to `trestruct`, and 
-read documentation for the `levellb`,`levelub`, and `res` parameters. 
+read documentation for the `levellb`, `levelub`, and `res` parameters. 

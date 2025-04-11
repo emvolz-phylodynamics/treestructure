@@ -1,6 +1,5 @@
 ---
-title: "Considering node support values on designations and update previous 
-    treestructure object with new sequences"
+title: "Node support values and update of treestructure object with new sequences"
 author: "Vinicius Franceschi"
 date: "`r Sys.Date()`"
 output: 
@@ -12,8 +11,7 @@ pkgdown:
   as_is: true
 fontsize: 12pt
 vignette: >
-  %\VignetteIndexEntry{Considering node support values on designations and 
-      update previous treestructure object with new sequences}
+  %\VignetteIndexEntry{Node support values and update of treestructure object with new sequences}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -75,19 +73,32 @@ timetr2_phylo <- readRDS( system.file('timetr2_phylo_sc2_feb2020.rds',
 ggtree::ggtree(timetr2_phylo)
 ```
 
+
+## Assign clusters without using node support
+
 Firstly, we will assign clusters without using bootstrap support:
-```{r}
+```{r eval=FALSE}
 trestruct_res_nobt <- trestruct(timetr2_phylo, 
                                 minCladeSize = 30, 
                                 nodeSupportValues = FALSE, 
                                 level = 0.01)
+```
+
+Because running `treestructure` will take several minutes to run, we can load the results:
+
+```{r}
+trestruct_res_nobt <- readRDS( system.file('trestruct_res_nobt.rds',
+                                           package='treestructure') )
 
 plot(trestruct_res_nobt, use_ggtree = T) + ggtree::geom_tippoint()
 ```
 
 The `treestructure` analyses resulted in 9 clusters.
 
-Now let's add the support values to a vector that we will pass to `trestruct`:
+
+## Assign clusters using bootstrap support
+
+Let's add the support values to a vector that we will pass to `trestruct`:
 
 ```{r}
 timetr2_boot <- as.integer(mltr2_outl_rm$node.label)
@@ -107,16 +118,28 @@ when estimating a tree with IQ-TREE, you should use the flag `-keep-ident`. See
 
 And, finally, we designate clusters that have at least 80% bootstrap support:
 
-```{r}
+```{r eval=FALSE}
 trestruct_res <- trestruct(timetr2_phylo, 
                            minCladeSize = 30, 
                            nodeSupportValues = timetr2_boot, 
                            nodeSupportThreshold = 80, 
                            level = 0.01)
+```
+
+Because it will take a minute to run `treestructure`, we can load the result instead.
+
+```{r}
+trestruct_res <- readRDS( system.file('trestruct_res.rds',
+                                      package='treestructure') )
+
 plot(trestruct_res, use_ggtree = T) + ggtree::geom_tippoint()
 ```
 
+
 Now we have only 5 well-supported clusters with differences in coalescent patterns.
+
+
+## Update a previous treestrucuture object with new sequences 
 
 To update the previous `treestructure` object with new sequences, we extracted 
 SARS-CoV-2 sequences up to 15 March 2020 (n > 6,500 sequences). We then estimated 

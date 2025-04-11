@@ -91,6 +91,7 @@ Systematic Biology 2020; 69(5):884-896.
 \examples{
 tree <- ape::rcoal(50)
 struct <-  trestruct( tree )
+print(struct)
 
 }
 \author{

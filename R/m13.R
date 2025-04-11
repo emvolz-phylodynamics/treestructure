@@ -245,6 +245,18 @@ cocluster_accuracy <- function( x, y ){
 #'    can include internal node numbers.
 #' @param y as x, but must be disjoint with x
 #' @param nsim Number of simulations (larger = slower and more accurate)
+#'
+#' @examples
+#' tree <- ape::read.tree( system.file('sim.nwk', package = 'treestructure') )
+#'
+#' (struc <- trestruct( tree ))
+#'
+#' #run the test
+#'
+#' results <- treestructure.test(tree, x = struc$clusterSets[[1]],
+#'                               y = struc$clusterSets[[2]])
+#'
+#' print(results)
 #' @export
 treestructure.test <- function( tre, x, y, nsim = 1e4 )
 {
@@ -385,6 +397,7 @@ invisible(x)
 #' @examples
 #' tree <- ape::rcoal(50)
 #' struct <-  trestruct( tree )
+#' print(struct)
 #'
 #' @export
 trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportValues = FALSE, nodeSupportThreshold = 95, nsim = 1e4, level = .01, ncpu = 1, verbosity = 1, debugLevel=0
@@ -758,6 +771,15 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 #' @param use_ggtree Toggle ggtree or ape plotting behaviour
 #' @param ... Additional arguments passed to ggtree or ape::plot.phylo
 #' @export
+#' @examples
+#'
+#' tree <- ape::read.tree( system.file('sim.nwk', package = 'treestructure') )
+#'
+#' (struc <- trestruct( tree ))
+#'
+#' #plot treestructure object
+#'
+#' plot(struc)
 plot.TreeStructure <- function(x, use_ggtree = TRUE , ... )
 {
 	stopifnot( inherits( x, 'TreeStructure') )

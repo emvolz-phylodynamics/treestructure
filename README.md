@@ -1,101 +1,52 @@
-# `treestructure`
+# treestructure
 
-## Citation
+The R package treestructure contains function to detect population structure from 
+the history of coalescent events recorded in phylogenetic trees. 
+This method classifies each tip and internal node of a tree into disjoint sets 
+characterized by similar coalescent patterns.
 
-E.M. Volz, Wiuf, C., Grad, Y., Frost, S., Dennis, A., Didelot, X.D. (2020) Identification of hidden population structure in time-scaled phylogenies. Systematic Biology. https://doi.org/10.1101/704528 
+It also possible to use node support values (i.e. bootstrap values) to avoid 
+designating population structure in badly supported clades.
+
+
 
 ## Installation
 
-To install latest development version, first install the `devtools` package and then from your R console run: 
-
 ```r
-devtools::install_github( 'emvolz-phylodynamics/treestructure' )
+# You will need to install the R package devtools 
+# (https://github.com/r-lib/devtools)
+
+install.packages("devtools")
+devtools::install_github("emvolz-phylodynamics/treestructure")
 ```
 
-Alternatively, download this repository and [follow instructions for your OS on installing packages from source](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages).
+Alternatively, you can download this repository from [here](https://github.com/emvolz-phylodynamics/treestructure/) and [follow instructions for your OS on installing packages from source](https://cran.r-project.org/doc/manuals/r-release/R-admin.html#Installing-packages).
 
-A command-line interface is available. See inst/tscl. 
+We also provide a command-line interface for `treestructure`. See `inst/tscl`.
+If you would like to use the command-line interface you will need to install
+the R package [getopt](https://github.com/trevorld/r-getopt).
 
-## Quick start 
-
-This example shows `trestruct` applied to a simulated structured coalescent tree that includes samples from a large constant size population and samples from three small 'outbreaks' which are growing exponentially. 
-
-```r
-library(treestructure)
-```
-
-```
-## Loading required package: ape
-```
-
-```r
-( tree <- read.tree( system.file('sim.nwk', package='treestructure') ) ) 
-```
-
-```
-## 
-## Phylogenetic tree with 275 tips and 274 internal nodes.
-## 
-## Tip labels:
-## 	1, 1, 1, 1, 1, 1, ...
-## 
-## Rooted; includes branch lengths.
-```
-
-```r
-s <- trestruct( tree ) 
-```
-
-```
-## Finding splits under nodes: 276 
-## Finding splits under nodes: 276 280 
-## Finding splits under nodes: 276 447 
-## Finding splits under nodes: 276 498
-```
-
-You can print the results: 
-
-```r
-print(s) 
-```
-
-```
-## Call: 
-## trestruct(tre = tree)
-## 
-## Number of clusters: 4 
-## Number of partitions: 2 
-## Significance level: 0.01 
-## Cluster and partition assignment: 
-##    taxon cluster partition
-## 1      1       1         1
-## 2      1       1         1
-## 3      1       1         1
-## 4      1       1         1
-## 5      1       1         1
-## 6      1       1         1
-## 7      1       1         1
-## 8      1       1         1
-## 9      1       1         1
-## 10     1       1         1
-## ...
-## For complete data, use `as.data.frame(...)` 
-## 
-```
-
-The default plotting behavior uses the `ggtree` package if available. 
-
-```r
-plot(s)  + ggtree::geom_tiplab() 
-```
+You can then use the flag `-h` for how to use the `treestructure` command-line 
+interface direct in a terminal.
 
 
-![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png)
+## Tutorials 
 
-If not, or if desired, `ape` plots are available
+* We recommend that you read the [Get started](http://emvolz-phylodynamics.github.io/treestructure/articles/treestructure.html) to 
+understand the basic functions in `treestructure`.
 
-```r
-plot( s, use_ggtree = FALSE )
-```
+* For an additional tutorial on how to include branch support to avoid designating 
+population structure in badly supported clades, see this 
+[example](http://emvolz-phylodynamics.github.io/treestructure/articles/supportValsUpdate.html) for SARS-CoV-2.
 
-![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png)
+
+## Author
+
+treestructure has been developed by [Erik Volz](https://profiles.imperial.ac.uk/e.volz).
+
+
+## Citation
+
+Erik Volz, Wiuf Carsten, Yonatan Grad, Simon Frost, Ann Dennis, Xavier Didelot, 
+(2020); [Identification of hidden population structure in time-scaled phylogenies](https://academic.oup.com/sysbio/article/69/5/884/5734655); 
+Systemantic Biology, 69: 884–896.

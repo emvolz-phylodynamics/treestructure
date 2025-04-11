@@ -1,0 +1,50 @@
+url: https://emvolz-phylodynamics.github.io/treestructure/
+template:
+  bootstrap: 5
+  light-switch: yes
+  math-rendering: mathjax
+authors:
+  Erik Volz:
+    href: https://profiles.imperial.ac.uk/e.volz
+  Vinicius B. Franceschi:
+    href: https://profiles.imperial.ac.uk/v.franceschi
+  Fabricia F. Nascimento:
+    href: https://thednainus.wordpress.com/me/
+footer:
+  structure:
+    left: custom_contributor
+  components:
+    custom_contributor: "<p>Website developed by <a href='https://profiles.imperial.ac.uk/f.ferreira-do-nascimento'>Fabricia F. Nascimento</a></p>"
+    authors: false  # Disable automatic contributor listing
+navbar:
+  structure:
+    left:
+    - intro
+    - reference
+    - articles
+    - tutorials
+    - news
+    right:
+    - search
+    - github
+    - lightswitch
+  components:
+    reference:
+      text: Functions
+      href: reference/index.html
+    intro:
+      text: Get started
+      href: articles/treestructure.html
+    articles:
+      text: Tutorials
+      menu:
+      - text: Node support values and update of treestructure object with nee sequences
+        href: articles/supportValsUpdate.html
+reference:
+- title: Functions included in treestructure
+  contents:
+  - trestruct
+  - addtips
+  - plot.TreeStructure
+  - treestructure.test
+
