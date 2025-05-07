@@ -38,7 +38,7 @@ navbar:
     articles:
       text: Tutorials
       menu:
-      - text: Node support values and update of treestructure object with nee sequences
+      - text: Node support values and update of treestructure object with new sequences
         href: articles/supportValsUpdate.html
 reference:
 - title: Functions included in treestructure
