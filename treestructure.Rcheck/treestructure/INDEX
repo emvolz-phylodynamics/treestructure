@@ -1,7 +1,0 @@
-addtips                 Compare and add tips into new treestructure
-                        object
-plot.TreeStructure      Plot TreeStructure tree with cluster and
-                        partition variables
-treestructure.test      Test treestructure hypothesis
-trestruct               Detect cryptic population structure in time
-                        trees
