@@ -9,3 +9,5 @@ src/*.dll
 /doc/
 /Meta/
 docs
+test_treestructure/
+check_cran_status/
