@@ -10,3 +10,4 @@ src/*.dll
 /Meta/
 docs
 check_cran_status/
+test_treestructure/
