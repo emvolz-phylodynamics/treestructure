@@ -1,0 +1,34 @@
+Hmm ... looks like a package
+Converting parsed Rd's to LaTeX 
+Creating pdf output from LaTeX ...
+
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+LaTeX2e <2024-06-01> patch level 2
+L3 programming layer <2024-08-30>
+(./Rd2.tex
+(/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/base/book.cls
+Document Class: book 2024/02/08 v1.4n Standard LaTeX document class
+(/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/base/bk10.clo)) (/Library/Frameworks/R.framework/Resources/share/texmf/tex/latex/Rd.sty (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/base/ifthen.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/iftex/iftex.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/tools/longtable.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/tools/bm.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/base/alltt.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/tools/verbatim.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/url/url.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/base/textcomp.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/amsmath/amstext.sty (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/amsmath/amsgen.sty)) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/amsmath/amsbsy.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/amsmath/amsopn.sty)) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/amsfonts.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/amssymb.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/eucal.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/base/fontenc.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/psnfss/times.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/inconsolata/zi4.sty `inconsolata-zi4' v1.12, 2019/05/17 Text macros for Inconsolata (msharpe) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/xkeyval/xkeyval.sty (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/xkeyval/xkeyval.tex (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/xkeyval/xkvutils.tex (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/xkeyval/keyval.tex))))) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/graphics/color.sty (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/graphics-cfg/color.cfg) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/graphics-def/pdftex.def) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/graphics/mathcolor.ltx)) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/pdfescape/pdfescape.sty (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/infwarerr/infwarerr.sty))) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/hycolor/hycolor.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/hyperref/nameref.sty (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/refcount/refcount.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/kvoptions/kvoptions.sty))) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/etoolbox/etoolbox.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/stringenc/stringenc.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/intcalc/intcalc.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/hyperref/puenc.def) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/bitset/bitset.sty (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty)) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/base/atbegshi-ltx.sty)) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/hyperref/hpdftex.def (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/base/atveryend-ltx.sty) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty (/Users/sofia/Library/TinyTeX/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/base/makeidx.sty)
+Writing index file Rd2.idx
+(/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/psnfss/t1ptm.fd) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def) (/private/var/folders/7l/l2wtbhm944gcx_tvrlsdj4s40000gn/T/RtmpwNHzWW/Rd2pdf27eb3b02bfb5/Rd2.aux) (/private/var/folders/7l/l2wtbhm944gcx_tvrlsdj4s40000gn/T/RtmpwNHzWW/Rd2pdf27eb3b02bfb5/Rd2.out) (/private/var/folders/7l/l2wtbhm944gcx_tvrlsdj4s40000gn/T/RtmpwNHzWW/Rd2pdf27eb3b02bfb5/Rd2.out) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/inconsolata/t1zi4.fd) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd) (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd) (/private/var/folders/7l/l2wtbhm944gcx_tvrlsdj4s40000gn/T/RtmpwNHzWW/Rd2pdf27eb3b02bfb5/Rd2.toc)
+[1{/Users/sofia/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/Users/sofia/Library/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}{/Users/sofia/Library/TinyTeX/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-0.enc}] (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/psnfss/ts1ptm.fd)
+[2] (/Users/sofia/Library/TinyTeX/texmf-dist/tex/latex/inconsolata/ts1zi4.fd)
+[3{/Users/sofia/Library/TinyTeX/texmf-dist/fonts/enc/dvips/inconsolata/i4-ts1.enc}]
+[4]
+Overfull \hbox (1.80806pt too wide) in paragraph at lines 258--262
+[]\T1/ptm/m/n/10 Node sup-port val-ues such as pro-duced by boos-t-rap or Bayesian cred-i-bil-ity scores.
+
+[5]
+No file Rd2.ind.
+
+[6] (/private/var/folders/7l/l2wtbhm944gcx_tvrlsdj4s40000gn/T/RtmpwNHzWW/Rd2pdf27eb3b02bfb5/Rd2.aux) )
+(see the transcript file for additional information)</Users/sofia/Library/TinyTeX/texmf-dist/fonts/type1/public/inconsolata/Inconsolata-zi4r.pfb></Users/sofia/Library/TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></Users/sofia/Library/TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></Users/sofia/Library/TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></Users/sofia/Library/TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on Rd2.pdf (6 pages, 88860 bytes).
+Transcript written on Rd2.log.
+Saving output to ‘treestructure-manual.pdf’ ...
+Done
+You may want to clean up by 'rm -Rf /var/folders/7l/l2wtbhm944gcx_tvrlsdj4s40000gn/T//RtmpwNHzWW/Rd2pdf27eb3b02bfb5'

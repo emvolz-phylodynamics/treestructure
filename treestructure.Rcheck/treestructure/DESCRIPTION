@@ -1,0 +1,44 @@
+Package: treestructure
+Type: Package
+Title: Detect Population Structure Within Phylogenetic Trees
+Version: 0.6.0
+Date: 2025-02-25
+Authors@R: 
+    c(person(given = "Erik",
+             family = "Volz",
+             role = c("aut", "cre"),
+             email = "erik@erikvolz.info",
+             comment = c(ORCID = "0000-0001-6268-8937")),
+      person(given = "Fabricia",
+             family = "F. Nascimento",
+             email = "thednainus@yahoo.com",
+             role = "ctb",
+             comment = c(ORCID = "0000-0001-9426-6835")),
+      person(given = "Vinicius",
+             family = "B. Franceschi",
+             email = "vinibfranc@gmail.com",
+             role = "ctb",
+             comment = c(ORCID = "0000-0002-0006-9337")))
+Description: Algorithms for detecting population structure from the history of 
+    coalescent events recorded in phylogenetic trees. This method classifies each 
+    tip and internal node of a tree into disjoint sets characterized by similar 
+    coalescent patterns.
+License: GPL (>= 2)
+Suggests: ggtree, ggplot2, knitr, rmarkdown, getopt, bookdown
+Imports: ape (>= 5.0)
+LinkingTo: Rcpp
+VignetteBuilder: knitr
+RoxygenNote: 7.3.2
+Encoding: UTF-8
+URL: http://emvolz-phylodynamics.github.io/treestructure/,
+        https://github.com/emvolz-phylodynamics/treestructure,
+        https://emvolz-phylodynamics.github.io/treestructure/
+BugReports: https://github.com/emvolz-phylodynamics/treestructure/issues
+NeedsCompilation: yes
+Packaged: 2025-05-14 09:11:55 UTC; sofia
+Author: Erik Volz [aut, cre] (<https://orcid.org/0000-0001-6268-8937>),
+  Fabricia F. Nascimento [ctb] (<https://orcid.org/0000-0001-9426-6835>),
+  Vinicius B. Franceschi [ctb] (<https://orcid.org/0000-0002-0006-9337>)
+Maintainer: Erik Volz <erik@erikvolz.info>
+Depends: R (>= 3.5.0)
+Built: R 4.4.1; aarch64-apple-darwin20; 2025-05-14 09:12:16 UTC; unix
