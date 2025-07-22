@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 *.Rproj
+.DS_Store
 src/*.o
 src/*.so
 src/*.dll
@@ -11,3 +12,5 @@ src/*.dll
 docs
 check_cran_status/
 test_treestructure/
+older/
+
