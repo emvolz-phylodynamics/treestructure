@@ -440,7 +440,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 			if ( all( is.na( nodeSupportValues)))
 				stop('Failure to parse tree node labels as node support values. These should be provided as numbers between 0 and 100.')
 			nodeSupportValues[ is.na( nodeSupportValues ) ] <- 0
-			if ( max( nodeSupportValues ) < 1 )
+			if ( max( nodeSupportValues ) <= 1 )
 				nodeSupportValues <- round( 100 * nodeSupportValues )
 			useNodeSupport <- TRUE
 			nodeSupportValues <- c( rep(NA, ape::Ntip(tre)), nodeSupportValues )

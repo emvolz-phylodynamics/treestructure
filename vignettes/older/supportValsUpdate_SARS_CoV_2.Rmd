@@ -1,0 +1,195 @@
+---
+title: "Node support values and update of treestructure object with new sequences"
+author: "Vinicius Franceschi"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::html_vignette2:
+  #rmarkdown::html_vignette
+  #bookdown::pdf_book:
+    toc: TRUE
+pkgdown:
+  as_is: true
+fontsize: 12pt
+vignette: >
+  %\VignetteIndexEntry{Node support values and update of treestructure object with new sequences}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 11
+)
+```
+
+# Introduction
+
+In this tutorial, we will consider node support values (e.g. bootstrap) on 
+cluster designations and update previous `treestructure` object with new sequences.
+
+This tutorial uses SARS-CoV-2 public data available [here](https://hgdownload.soe.ucsc.edu/goldenPath/wuhCor1/UShER_SARS-CoV-2//2022/04/02/) 
+to demonstrate the use of node support values from e.g. parametric bootstrap to 
+avoid designating population structure in badly supported clades. 
+This tutorial also demonstrates how to update previous cluster designations 
+(an existing `treestructure` object) using a new rooted maximum likelihood tree 
+incorporating more sequences. The new tips are added to the cluster which shares 
+its MRCA (most recent common ancestor).
+
+# Workflow to analyse SARS-CoV-2 sequence data
+
+For a step-by-step guide to replicate the complete workflow please see [here](https://github.com/vinibfranc/demo_treestructure/blob/main/R/prepare.R).
+
+Briefly, we downloaded SARS-CoV-2 public metadata, a treefile, and multiple 
+sequence alignments from the UShER index. Then we extracted sequences up to the 
+end of February 2020 (n < 1,000 sequences). We then estimated a maximum 
+likelihood (ML) tree with [IQ-TREE](http://www.iqtree.org/) v2.2.2.6 with 1,000 
+ultrafast bootstraps, a time-scaled tree using 
+[`treedater`](https://github.com/emvolz/treedater) (strict clock and 0.0008 subst./site/year), 
+removed outliers by root-to-tip regression, 
+an then re-estimated the timetree without the outliers (n = 891).
+
+
+Let's load the resulting ML tree with bootstrap values:
+```{r message=FALSE}
+library(treestructure)
+```
+
+
+```{r}
+mltr2_outl_rm <- readRDS( system.file('mltr2_outl_rm_sc2_feb2020.rds', 
+                                      package='treestructure') )
+
+ggtree::ggtree(mltr2_outl_rm)
+```
+
+And here you can load the timetree:
+```{r}
+timetr2_phylo <- readRDS( system.file('timetr2_phylo_sc2_feb2020.rds', 
+                                      package='treestructure') )
+
+ggtree::ggtree(timetr2_phylo)
+```
+
+
+## Assign clusters without using node support
+
+Firstly, we will assign clusters without using bootstrap support:
+```{r eval=FALSE}
+trestruct_res_nobt <- trestruct(timetr2_phylo, 
+                                minCladeSize = 30, 
+                                nodeSupportValues = FALSE, 
+                                level = 0.01)
+```
+
+Because `treestructure` will take several minutes to run, we can load the results:
+
+```{r}
+trestruct_res_nobt <- readRDS( system.file('trestruct_res_nobt.rds',
+                                           package='treestructure') )
+
+plot(trestruct_res_nobt, use_ggtree = T) + ggtree::geom_tippoint()
+```
+
+The `treestructure` analyses resulted in 13 clusters.
+
+
+## Assign clusters using bootstrap support
+
+Let's add the support values to a vector that we will pass to `trestruct`:
+
+```{r}
+timetr2_boot <- as.integer(mltr2_outl_rm$node.label)
+
+#note that IQ-TREE does not give a node support for the "root" of the tree,
+#You, as a user with knowledge of your data, will decide if this should be 
+#a high or low support value.
+timetr2_boot[is.na(timetr2_boot)] <- 95
+
+#show the first 6 node support values.
+print(head(timetr2_boot))
+```
+
+
+Finally, we designate clusters that have at least 80% bootstrap support. This
+is achieved by setting to 80 the parameter _nodeSupportThreshold_ in the **trestruct**
+function.
+
+```{r eval=FALSE}
+trestruct_res <- trestruct(timetr2_phylo, 
+                           minCladeSize = 30, 
+                           nodeSupportValues = timetr2_boot, 
+                           nodeSupportThreshold = 80, 
+                           level = 0.01)
+```
+
+Because it will take a minute to run `treestructure`, we can load the result instead.
+
+```{r}
+trestruct_res <- readRDS( system.file('trestruct_res.rds',
+                                      package='treestructure') )
+
+plot(trestruct_res, use_ggtree = T) + ggtree::geom_tippoint()
+```
+
+
+Now we have only 4 well-supported clusters with differences in coalescent patterns.
+Note that this might change if you use a higher or lower value for the
+*nodeSupportThreshold* in the **trestruct** function.
+
+
+## Update a previous treestrucuture object with new sequences 
+
+To update the previous `treestructure` object with new sequences, we extracted 
+SARS-CoV-2 sequences up to 15 March 2020 (n > 6,712 sequences). We then estimated 
+a new ML tree including all those sequences as before.
+
+Note that this new tree must be rooted, but does not need to be time-scaled or 
+binary.
+
+```{r}
+#Note that this tree has more sequences than the previous tree used in this
+#tutorial.
+mltr_addtips <- readRDS( system.file('mltr_addtips_mar2020.rds', 
+                                     package='treestructure') )
+ggtree::ggtree(mltr_addtips)
+```
+
+And without the need to re-estimate a timetree or re-run `trestruct` from scratch, 
+we are now able to add the new sequences to the existing `treestructure` object:
+
+```{r}
+trestruct_add_tips <- addtips(trst = trestruct_res, tre = mltr_addtips)
+plot(trestruct_add_tips, use_ggtree = T) + ggtree::geom_tippoint()
+```
+
+
+If you would like to compare the sequence names that comprise each cluster in
+each tree, you can do:
+
+```{r}
+
+#compare sequences in cluster 1 from trestruct_res object and the 
+#trestruct_add_tips object
+
+tree1_cluster1 <- trestruct_res$clusterSets$`1`
+tree2_cluster1 <- trestruct_add_tips$clusterSets$`1`
+
+length(tree1_cluster1)
+length(tree2_cluster1)
+
+```
+
+Note that the length of tree1_cluster1 and tree2_cluster1 is different.
+That is because we _added_ tips from the ML tree, _mltr_addtips_, to the 
+`treestructure` object, _trestruct_res_.
+
+You can also see that all elements in tree1_cluster1 is contained in tree2_cluster1
+
+```{r}
+
+sum(tree1_cluster1 %in% tree2_cluster1)
+
+```
