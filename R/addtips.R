@@ -63,7 +63,7 @@ addtips <- function(trst, tre)
 	}
 	sapply( toadd_nodes, .assign) -> newclust
 	stdf0 <- trst$data[ !duplicated(trst$data$cluster ), ]
-	cl2pa <- setNames( stdf0$partition, stdf0$cluster )
+	cl2pa <- stats::setNames( stdf0$partition, stdf0$cluster )
 	stdf <- rbind(
 		      trst$data
 		      , data.frame(
@@ -81,8 +81,8 @@ addtips <- function(trst, tre)
 	trst_out <- trst
 
 	trst_out$data <- stdf
-	trst_out$clustering <- as.factor( stdf$cluster  ) |> setNames( stdf$taxon )
-	trst_out$partition <- as.factor( stdf$partition ) |> setNames( stdf$taxon )
+	trst_out$clustering <- as.factor( stdf$cluster  ) |> stats::setNames( stdf$taxon )
+	trst_out$partition <- as.factor( stdf$partition ) |> stats::setNames( stdf$taxon )
 	trst_out$clusterSets <- lapply( split(stdf, stdf$cluster), function(x) x$taxon )
 	trst_out$partitionSets <- lapply( split(stdf, stdf$partition), function(x) x$taxon )
 	trst_out$D <- NULL

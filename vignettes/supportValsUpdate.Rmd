@@ -1,5 +1,5 @@
 ---
-title: "Node support values and update of treestructure object with new sequences"
+title: "Node support values using treestructure"
 author: "Vinicius Franceschi and Fabricia F Nascimento"
 date: "`r Sys.Date()`"
 output: 
@@ -7,11 +7,12 @@ output:
   #rmarkdown::html_vignette
   #bookdown::pdf_book:
     toc: TRUE
+bibliography: bib/tutorials.bib
 pkgdown:
   as_is: true
 fontsize: 12pt
 vignette: >
-  %\VignetteIndexEntry{Node support values and update of treestructure object with new sequences}
+  %\VignetteIndexEntry{Node support values using treestructure}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -25,19 +26,16 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Introduction
+# Introductions
 
-In this tutorial, we will consider node support values (e.g. bootstrap and posterior probability) on 
-cluster designations and update previous `treestructure` object with new sequences.
+This tutorial uses the public data available for Ebola [here](https://github.com/ebov/space-time) to demonstrate the use of node support 
+values (e.g. bootstrap and posterior probability) to avoid designating population 
+structure in badly supported clades. 
 
-This tutorial uses the public data available for Ebola [here](https://github.com/ebov/space-time) to demonstrate the use of node support values to 
-avoid designating population structure in badly supported clades. 
-
-We will use a [time-scaled phylogenetic tree](https://github.com/ebov/space-time/blob/master/Data/Makona_1610_cds_ig.GLM.MCC.tree) estimated with [BEAST](https://beast.community).
+We will use their [time-scaled phylogenetic tree](https://github.com/ebov/space-time/blob/master/Data/Makona_1610_cds_ig.GLM.MCC.tree) estimated with [BEAST](https://beast.community).
 
 
-Before we load this time-scaled tree, we will load the R packages we will use 
-in this tutorial.
+First, we need to load the R package we will use in this tutorial.
 
 
 ```{r message=FALSE}
@@ -47,28 +45,54 @@ library(treestructure)
 ```
 
 
-Let's load this time-scaled tree with posterior probability support values:
-```{r}
-mltr2_outl_rm <- readRDS( system.file('mltr2_outl_rm_sc2_feb2020.rds', 
-                                      package='treestructure') )
+Now, we will load the time-scaled phylogenetic tree with posterior probability 
+support values:
 
-ggtree::ggtree(mltr2_outl_rm)
+```{r}
+#get the dated tree
+beast_tree <- read.beast(system.file('Makona_1610_cds_ig.GLM.MCC.tree',
+                                     package='treestructure') )
 ```
 
-And here you can load the timetree:
-```{r}
-timetr2_phylo <- readRDS( system.file('timetr2_phylo_sc2_feb2020.rds', 
-                                      package='treestructure') )
 
-ggtree::ggtree(timetr2_phylo)
+Then we need to convert the tree to a `phylo` object and add the posterior 
+probability information from the Bayesian tree to the `phylo` object tree.
+
+If we use the `ape:read.nexus` to read the tree that was estimated with BEAST, 
+we won't get the posterior probability associated to the clades.
+
+We now convert the dated tree to `phylo` object.
+
+```{r}
+dated_tre <- as.phylo(beast_tree)
 ```
+
+Now we add the posterior probability from the BEAST tree to the dated_tree
+object.
+
+```{r}
+# Get number of tips
+n_tips <- length(dated_tre$tip.label)
+
+# Get BEAST tree as tibble (it will include node numbers and posterior probabilities)
+tree_data <- as_tibble(beast_tree)
+
+#get posterior probability
+posterior <- as.numeric(tree_data$posterior[(n_tips + 1):nrow(tree_data)])
+
+#add the posterior probability information to the `phylo` object
+dated_tre$node.label <- posterior
+```
+
 
 
 ## Assign clusters without using node support
 
-Firstly, we will assign clusters without using bootstrap support:
+Firstly, we will assign clusters without using node support values. Note that
+the parameter `nodeSupportValues` is set to FALSE.
+
 ```{r eval=FALSE}
-trestruct_res_nobt <- trestruct(timetr2_phylo, 
+trestruct_res_nobt <- trestruct(dated_tre, 
                                 minCladeSize = 30, 
                                 nodeSupportValues = FALSE, 
                                 level = 0.01)
@@ -83,39 +107,37 @@ trestruct_res_nobt <- readRDS( system.file('trestruct_res_nobt.rds',
 plot(trestruct_res_nobt, use_ggtree = T) + ggtree::geom_tippoint()
 ```
 
-The `treestructure` analyses resulted in 13 clusters.
+The `treestructure` analyses resulted in 23 clusters.
 
 
-## Assign clusters using bootstrap support
+## Assign clusters using branch support
 
-Let's add the support values to a vector that we will pass to `trestruct`:
-
-```{r}
-timetr2_boot <- as.integer(mltr2_outl_rm$node.label)
-
-#note that IQ-TREE does not give a node support for the "root" of the tree,
-#You, as a user with knowledge of your data, will decide if this should be 
-#a high or low support value.
-timetr2_boot[is.na(timetr2_boot)] <- 95
-
-#show the first 6 node support values.
-print(head(timetr2_boot))
-```
+Now, we will assign clusters using the information on branch support.
+As we are analyzing a dated tree estimated with BEAST, the branch support is 
+the posterior probability.
 
 
-Finally, we designate clusters that have at least 80% bootstrap support. This
-is achieved by setting to 80 the parameter _nodeSupportThreshold_ in the **trestruct**
-function.
+We designate clusters that have at least 0.95 posterior probability. This
+is achieved by setting to 95 the parameter _nodeSupportThreshold_ in the **trestruct**
+function. 
+
+Note that now the parameter `nodeSupportValues` is set to TRUE, which tells
+the algorithm that the node support values is provided with the `phylo` object
+as `node.label`.
+
+You can also provide the `nodeSupportValues` as a vector with length equal to 
+the number of internal nodes in the tree.
 
 ```{r eval=FALSE}
-trestruct_res <- trestruct(timetr2_phylo, 
+trestruct_res <- trestruct(dated_tre, 
                            minCladeSize = 30, 
-                           nodeSupportValues = timetr2_boot, 
-                           nodeSupportThreshold = 80, 
+                           nodeSupportValues = TRUE, 
+                           nodeSupportThreshold = 95, 
                            level = 0.01)
 ```
 
-Because it will take a minute to run `treestructure`, we can load the result instead.
+Because it will take a minute or so to run `treestructure`, we can load the result 
+instead.
 
 ```{r}
 trestruct_res <- readRDS( system.file('trestruct_res.rds',
@@ -125,61 +147,67 @@ plot(trestruct_res, use_ggtree = T) + ggtree::geom_tippoint()
 ```
 
 
-Now we have only 4 well-supported clusters with differences in coalescent patterns.
+Now we have only 6 well-supported clusters with differences in coalescent patterns.
+
 Note that this might change if you use a higher or lower value for the
 *nodeSupportThreshold* in the **trestruct** function.
 
 
-## Update a previous treestrucuture object with new sequences 
+## Using the CH-index 
 
-To update the previous `treestructure` object with new sequences, we extracted 
-SARS-CoV-2 sequences up to 15 March 2020 (n > 6,712 sequences). We then estimated 
-a new ML tree including all those sequences as before.
+The CH-index will compare different values for the parameter `levels` in the
+`treestructure` algorithm. We will need to specify `level` = NULL and 
+specify the lower and upper bound to optimize the parameter `level`.
 
-Note that this new tree must be rooted, but does not need to be time-scaled or 
-binary.
+Note that we will also take into consideration the use of branch support.
 
-```{r}
-#Note that this tree has more sequences than the previous tree used in this
-#tutorial.
-mltr_addtips <- readRDS( system.file('mltr_addtips_mar2020.rds', 
-                                     package='treestructure') )
-ggtree::ggtree(mltr_addtips)
-```
+```{r eval = FALSE}
 
-And without the need to re-estimate a timetree or re-run `trestruct` from scratch, 
-we are now able to add the new sequences to the existing `treestructure` object:
-
-```{r}
-trestruct_add_tips <- addtips(trst = trestruct_res, tre = mltr_addtips)
-plot(trestruct_add_tips, use_ggtree = T) + ggtree::geom_tippoint()
-```
-
-
-If you would like to compare the sequence names that comprise each cluster in
-each tree, you can do:
-
-```{r}
-
-#compare sequences in cluster 1 from trestruct_res object and the 
-#trestruct_add_tips object
-
-tree1_cluster1 <- trestruct_res$clusterSets$`1`
-tree2_cluster1 <- trestruct_add_tips$clusterSets$`1`
-
-length(tree1_cluster1)
-length(tree2_cluster1)
+trestruct_chindex <- trestruct(dated_tre,
+                               minCladeSize = 30, 
+                               nodeSupportValues = TRUE, 
+                               nodeSupportThreshold = 95,
+                               level = NULL,
+                               levellb = 0.0001, 
+                               levelub = 0.001)
 
 ```
 
-Note that the length of tree1_cluster1 and tree2_cluster1 is different.
-That is because we _added_ tips from the ML tree, _mltr_addtips_, to the 
-`treestructure` object, _trestruct_res_.
-
-You can also see that all elements in tree1_cluster1 is contained in tree2_cluster1
+Because it will also take a minute or so to run `treestructure`, we can load the result instead.
 
 ```{r}
+trestruct_chindex <- readRDS( system.file('trestruct_chindex.rds',
+                                      package='treestructure') )
 
-sum(tree1_cluster1 %in% tree2_cluster1)
-
+plot(trestruct_chindex, use_ggtree = T) + ggtree::geom_tippoint()
 ```
+
+Now we have only 2 well-supported clusters with differences in coalescent 
+patterns after optimizing the significance level.
+
+In this example, instead of using level = 0.01 (as in the default ), the optimization
+of level by using the CH-index identified level as 0.00073.
+
+
+### Final considerations
+
+The function `trestruct` has a parameter named `nsim` that refers to the number
+of simulations for computing the null distribution of the test statistics [@Volz2020].
+
+The `nsim` parameter in the `trestruct` function is is set to the default value of 
+10,000, which is a good value if the level parameter is set to 0.01 (which is the 
+default value).
+
+If decreasing the value of the level parameter, the value of `nsim` should be 
+increased. In the above example using CH-index, the algorithm identified a 
+significance level of 0.00073. However, the analyses were carried out using the
+default `nsim` of 10,000 simulations. We have future plans to automatically detect
+the adequate number of simulations (`nsim` value) given the sizes of clades being 
+compared and the threshold p-value used in the test.
+
+As treestructure is implemented in the moment, you should run a sensitive analyses 
+on your own dataset, if you use a significance level smaller than 0.01. For example, 
+if you use a significance `level` of 0.001 and a `nsim` > 10,000, then you can run your analysis twice and compare the results obtained in both runs, which should be very similar.
+If results are very different, you should increase the value of `nsim`.
+
+# References

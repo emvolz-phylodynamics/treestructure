@@ -39,24 +39,24 @@ cocluster_accuracy <- function( x, y ){
 # test statistic comparing two internals
 
 # req ancestors
-.ispara <- function(u, v){
+.ispara <- function(u, v, ancestors){
 	(v %in% ancestors[[u]]) | (u %in% ancestors[[v]])
 }
 
 
-# requres tre
-.ismonomono_cl <- function( cl1, cl2){
+# requires tre
+.ismonomono_cl <- function( tre, ancestors, cl1, cl2){
 	t1 <- intersect( 1:(ape::Ntip(tre)), cl1 )
 	t2 <- intersect( 1:(ape::Ntip(tre)), cl2 )
 	u <- ape::getMRCA(tre,  t1 )
 	v <- ape::getMRCA(tre,  t2 )
 	if ( is.null( u ) | is.null(v) )
 	  return(FALSE)
-	!.ispara( u, v)
+	!.ispara( u, v, ancestors)
 }
 
 # req nhs
-.rank.sum <- function( uinternals, vinternals ) {
+.rank.sum <- function( nhs, uinternals, vinternals ) {
 	x =rbind(
 	 cbind(  nhs[ uinternals ], 1 )
 	 , cbind(  nhs[ vinternals ], 0 )
@@ -70,15 +70,15 @@ cocluster_accuracy <- function( x, y ){
 # 1: as wiuf and donelly; u is mono relative to v; mono/mono or mono/para
 # 2: mono / mono
 # 3: mono/mono OR mono/para OR para/mono
-# requres nhs , tre , inodes
-.uv.diss <- function(uset, vset, nsim , Ei = NA, returnabs=TRUE, detailedOut = FALSE){
+# requires nhs , tre , inodes
+.uv.diss <- function(tre, nhs, inodes, n, ancestors, uset, vset, nsim , Ei = NA, returnabs=TRUE, detailedOut = FALSE){
 	# 1 sample u
 	# 0 co
 	# -1 sample v
 
 	if (is.na( Ei)){
 		#nested = ifelse( .ismonomono( u, v), 1, 0 )
-		Ei = ifelse( .ismonomono_cl( uset, vset ), 2, 3 )
+		Ei = ifelse( .ismonomono_cl( tre, ancestors, uset, vset ), 2, 3 )
 	}
 
 	uinternals <-  intersect( uset, inodes)
@@ -100,7 +100,7 @@ cocluster_accuracy <- function( x, y ){
 	x <- as.vector( x[ order(x[,1] ) , 2] )
 	nd <- Cuv_ranksum_nulldist(x, nsim, Ei  )
 
-	rsuv <- .rank.sum( uinternals, vinternals)
+	rsuv <- .rank.sum(nhs, uinternals, vinternals)
 
 	m_nd <- mean(nd)
 	sd_nd <- stats::sd(nd)
@@ -268,43 +268,43 @@ treestructure.test <- function( tre, x, y, nsim = 1e4 )
 		tre$tip.label <- paste0( paste0( 1:(ape::Ntip(tre)), '_' ), tre$tip.label )
 	}
 	tredat = .tredat( tre )
-	attach( tredat )
+	#attach( tredat )
 
 	if ( is.numeric( x ))
 		uset = x
 	else
-		uset = match( x, tre$tip.label )
+		uset = match( x, tredat$tre$tip.label )
 	if ( is.numeric(y))
 		vset = y
 	else
-		vset = match( y, tre$tip.label )
+		vset = match( y, tredat$tre$tip.label )
 
 	if ( any( is.na( uset ) ) | any (is.na( vset )) )
 		stop ( 'Some tip labels in x or y could not be matched tre$tip.label. Check inputs.' )
 
-	Uset = unique( c(uset,  do.call( c, ancestors[uset] ) ) )
-	Uset <- setdiff( Uset, ancestors[[ ape::getMRCA( tre, uset ) ]] )
-	Vset = unique( c( vset, do.call( c, ancestors[vset] )) )
-	Vset = setdiff( Vset , ancestors[[ ape::getMRCA( tre, vset ) ]] )
-	uvd = .uv.diss(Uset, Vset, nsim = nsim, returnabs=FALSE, detailedOut = TRUE)
+	Uset = unique( c(uset,  do.call( c, tredat$ancestors[uset] ) ) )
+	Uset <- setdiff( Uset, tredat$ancestors[[ ape::getMRCA( tredat$tre, uset ) ]] )
+	Vset = unique( c( vset, do.call( c, tredat$ancestors[vset] )) )
+	Vset = setdiff( Vset , tredat$ancestors[[ ape::getMRCA( tredat$tre, vset ) ]] )
+	uvd = .uv.diss(tredat$tre, tredat$nhs, tredat$inodes, tredat$n, tredat$ancestors, Uset, Vset, nsim = nsim, returnabs=FALSE, detailedOut = TRUE)
 
 	res = structure( list(
 	  statistic = uvd$statistic
 	  , p.value = with (uvd,  min( mean(statistic < null), mean( statistic> null) ) )
 	  , estimate = with (uvd,  mean( statistic> null))
-	  , std.err = sd ( uvd$nd )
-	  , conf.int =  quantile( uvd$null, c(0.025 , 0.975) )
-	  , null.value = median( uvd$null )
+	  , std.err = stats::sd ( uvd$nd )
+	  , conf.int = stats::quantile( uvd$null, c(0.025 , 0.975) )
+	  , null.value = stats::median( uvd$null )
 	  , alternative='Alternative hypothesis: Rank sum differs from coalescent distribution'
 	  , method = 'Two tailed simulation quantiles'
 	  , data.name = 'tre'
-	  , data = tre
+	  , data = tredat$tre
 	  , nsim = nsim
 	)
 	, class = 'treestructure.htest'
 	)
 
-	detach( tredat )
+	#detach( tredat )
 	res$null = uvd$null
 	invisible(res)
 }
@@ -475,29 +475,29 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 .trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportValues = FALSE, nodeSupportThreshold = 95, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1, debugLevel=0
 	, useNodeSupport, tredat)
 {
-	attach( tredat )
+	#attach( tredat )
 
 	.ismonomono <- function( u, v){
 		# NOTE if u is direct decendant of v or vice versa than the two tip sets are mono/mono related
-		if ( utils::tail(ancestors[[u]],1) == v){
+		if ( utils::tail(tredat$ancestors[[u]],1) == v){
 			return(TRUE)
 		}
-		if ( utils::tail(ancestors[[v]],1) == u){
+		if ( utils::tail(tredat$ancestors[[v]],1) == u){
 			return(TRUE)
 		}
-		!((v %in% ancestors[[u]]) | (u %in% ancestors[[v]] ))
+		!((v %in% tredat$ancestors[[u]]) | (u %in% tredat$ancestors[[v]] ))
 	}
 
 	# DISSIMILARITY FUNCTIONS
 	# do clades u and v overlap in time?
 	.au.overlap <- function(a,u) {
-		a_range <- range( nhs[ setdiff( descendants[[a]], descendants[[u]] ) ] )
-		nu <- sum( (descInternalHeights[[u]]  > a_range[1]) & (descInternalHeights[[u]]  <= a_range[2]))
+		a_range <- range( tredat$nhs[ setdiff( tredat$descendants[[a]], tredat$descendants[[u]] ) ] )
+		nu <- sum( (tredat$descInternalHeights[[u]]  > a_range[1]) & (tredat$descInternalHeights[[u]]  <= a_range[2]))
 		( nu > minOverlap )
 	}
 	.overlap <- function( uset, vset){
-		uhs <- nhs[ intersect( uset, inodes) ]
-		vhs <- nhs[ intersect(vset, inodes) ]
+		uhs <- tredat$nhs[ intersect( uset, tredat$inodes) ]
+		vhs <- tredat$nhs[ intersect(vset, tredat$inodes) ]
 		nu <- sum( (uhs > min(vhs)) & (uhs < max(vhs)))
 		nv <- sum( (vhs > min(uhs)) & (vhs < max(uhs)))
 		rv = ( min(nu,nv) > minOverlap )
@@ -508,25 +508,25 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	# FIND OUTLIERS
 	debugdf = NULL
 	zstar  <- stats::qnorm( 1-min(1,level)/2 )
-	node2nodeset <- descendants
-	shouldDig <- rep(FALSE, n + nnode )
-	shouldDig[ rootnode ] <- TRUE
+	node2nodeset <- tredat$descendants
+	shouldDig <- rep(FALSE, tredat$n + tredat$nnode )
+	shouldDig[ tredat$rootnode ] <- TRUE
 
 	# compute z score for u descendened from claderoot
 	.calc.z <- function(u, v, Ei = 1, returnabs = TRUE){
-		if ( u <= n )
+		if ( u <= tredat$n )
 		  return(0)
-		if ( v <= n )
+		if ( v <= tredat$n )
 		  return(0)
-		if ( ndesc[u] < minCladeSize )
+		if ( tredat$ndesc[u] < minCladeSize )
 		  return(0 )
-		if ( ndesc[v] < minCladeSize )
+		if ( tredat$ndesc[v] < minCladeSize )
 		  return(0 )
 		if ( u==v )
 		  return(0)
-		if ( is.na( node2edgelength[ u ] ) )
+		if ( is.na( tredat$node2edgelength[ u ] ) )
 			return(0)
-		if ( node2edgelength[ u ] == 0 )
+		if ( tredat$node2edgelength[ u ] == 0 )
 			return(0)
 		if ( useNodeSupport ){
 			if (!is.na( nodeSupportValues[u] ) ){
@@ -548,7 +548,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 					nsu <-  setdiff( node2nodeset[[u]], node2nodeset[[v]] )
 					nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
 			}
-			Ei = ifelse( .ismonomono_cl(nsu, nsv ), 2,1 )
+			Ei = ifelse( .ismonomono_cl(tredat$tre, tredat$ancestors, nsu, nsv ), 2,1 )
 		}
 		if (Ei==1) {
 			if (!.au.overlap(v, u) ){
@@ -562,8 +562,8 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		if (Ei==1){ # u under v
 			nsu <-   intersect(  node2nodeset[[u]], node2nodeset[[v]] )
 			nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
-			vtips <- intersect( nsv, 1:(ape::Ntip(tre)))
-			utips <- intersect( nsu, 1:(ape::Ntip(tre)))
+			vtips <- intersect( nsv, 1:(ape::Ntip(tredat$tre)))
+			utips <- intersect( nsu, 1:(ape::Ntip(tredat$tre)))
 			if (length( vtips ) < minCladeSize)
 			  return(0)
 			if (length( utips ) < minCladeSize)
@@ -572,11 +572,11 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 			if ( length( vtips ) == 0){
 				return( 0 )
 			}
-			return( .uv.diss( nsu , nsv, nsim = nsim , Ei=Ei, returnabs = returnabs ) )
+			return( .uv.diss( tredat$tre, tredat$nhs, tredat$inodes, tredat$n, tredat$ancestors, nsu , nsv, nsim = nsim , Ei=Ei, returnabs = returnabs ) )
 		} else{
 			nsu <- setdiff( node2nodeset[[u]], node2nodeset[[v]] )
 			nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
-			.uv.diss( nsu, nsv, nsim = nsim  , Ei=Ei , returnabs = returnabs)
+			.uv.diss( tredat$tre, tredat$nhs, tredat$inodes, tredat$n, tredat$ancestors, nsu, nsv, nsim = nsim , Ei=Ei , returnabs = returnabs)
 		}
 	}
 	# find biggest outlier descend from a not counting rest of tree
@@ -599,19 +599,19 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		if (is.null(u))
 		  return(NULL)
 		list( ustar = u
-		  , newnodeset_a = setdiff( node2nodeset[[a]], descendants[[u]] )
+		  , newnodeset_a = setdiff( node2nodeset[[a]], tredat$descendants[[u]] )
 		)
 	}
 
 	.init.nodeset <- function(u, digging){
-		setdiff( descendants[[u]], do.call( c, lapply( digging, function(v) node2nodeset[[v]] ) ) )
+		setdiff( tredat$descendants[[u]], do.call( c, lapply( digging, function(v) node2nodeset[[v]] ) ) )
 	}
 
 	if ( debugLevel > 0 ){
 		# store z for each node compared to root
-		debugdf = data.frame( z = sapply( node2nodeset[[rootnode]], function(u)  .calc.z( u, rootnode, Ei =1 , returnabs = FALSE) )
-		 , cladeSize = sapply( node2nodeset[[rootnode]], function(u)  ndesc[u] )
-		 , node = node2nodeset[[rootnode]]
+		debugdf = data.frame( z = sapply( node2nodeset[[tredat$rootnode]], function(u)  .calc.z( u, tredat$rootnode, Ei =1 , returnabs = FALSE) )
+		 , cladeSize = sapply( node2nodeset[[tredat$rootnode]], function(u)  tredat$ndesc[u] )
+		 , node = node2nodeset[[tredat$rootnode]]
 		 )
 	}
 
@@ -626,7 +626,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 				if ( length( node2nodeset[[a]] ) > 0 ){
 					#  test  if tips in nodeset before adding to clusterlist
 					ans <- node2nodeset[[a]]
-					atips <- setdiff( ans , 1:(ape::Ntip(tre)))
+					atips <- setdiff( ans , 1:(ape::Ntip(tredat$tre)))
 					if ( length( atips ) > 0 ){
 						no <- length( clusterlist)
 						clusterlist[[ no + 1 ]] <- node2nodeset[[a]]
@@ -648,7 +648,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 
 	names( clusterlist ) <- node2cl
 	no <- length(clusterlist)
-	x <- setdiff( c( 1:n, inodes), do.call( c, clusterlist )) # remainder
+	x <- setdiff( c( 1:tredat$n, tredat$inodes), do.call( c, clusterlist )) # remainder
 	if (length(x) > 0){
 		clusterlist[[no + 1]] <- x
 	}
@@ -666,8 +666,8 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 				# overlap
 				if ( .overlap( clusterlist[[iu]] , clusterlist[[iv]] )) #
 				{
-					D[iu,iv] <- .uv.diss ( clusterlist[[iu]] , clusterlist[[iv]], nsim = nsim,  Ei = 3)
-					D[iv, iu] <- D[iu, iv]
+				  D[iu,iv] <- .uv.diss ( tredat$tre, tredat$nhs, tredat$inodes, tredat$n, tredat$ancestors, clusterlist[[iu]] , clusterlist[[iv]], nsim = nsim,  Ei = 3)
+				  D[iv, iu] <- D[iu, iv]
 				}
 			}
 		}
@@ -678,16 +678,17 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	.D[ is.na(D) | is.infinite(D)] <- 0  #
 	rownames(.D)  = colnames(.D) <- 1:nc
 	D <- stats::as.dist(.D)
+
 	# /DISTANCE
 
 
 
 	# RETURN
 	# for each tip:
-	stats::setNames( rep(NA, ape::Ntip(tre)), tre$tip.label) -> clustervec
+	stats::setNames( rep(NA, ape::Ntip(tredat$tre)), tredat$tre$tip.label) -> clustervec
 	for (k in 1:nc){
 		cl <- clusterlist[[k]]
-		itip <- intersect( 1:(ape::Ntip(tre)), cl)
+		itip <- intersect( 1:(ape::Ntip(tredat$tre)), cl)
 		clustervec[ itip ] <- k
 	}
 
@@ -695,16 +696,16 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		h <- ape::as.phylo( stats::hclust( D ) )
 		#~ 	h$edge.length[ h$edge.length <= zstar ] <- 0
 		partinds <- stats::cutree( stats::hclust( stats::as.dist( ape::cophenetic.phylo( h ) ) ), h = zstar)
-		partition <- as.factor( stats::setNames( partinds[ clustervec ] , tre$tip.label ) )
+		partition <- as.factor( stats::setNames( partinds[ clustervec ] , tredat$tre$tip.label ) )
 		clustering <- as.factor( clustervec )
-		clusters <- split( tre$tip.label, clustervec )
-		partitionSets <- split( tre$tip.label, partition )
+		clusters <- split( tredat$tre$tip.label, clustervec )
+		partitionSets <- split( tredat$tre$tip.label, partition )
 
 	} else{
-		clustering <- stats::setNames(  as.factor( rep(1, n )), tre$tip.label )
-		partition <- stats::setNames( as.factor( rep(1, n )), tre$tip.label )
-		clusters <- list( tre$tip.label )
-		partitionSets <- list( tre$tip.label )
+		clustering <- stats::setNames(  as.factor( rep(1, tredat$n )), tredat$tre$tip.label )
+		partition <- stats::setNames( as.factor( rep(1, tredat$n )), tredat$tre$tip.label )
+		clusters <- list( tredat$tre$tip.label )
+		partitionSets <- list( tredat$tre$tip.label )
 		remainderClade <- NULL
 	}
 
@@ -715,7 +716,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	  , partitionSets = partitionSets
 	  , D = D
 	  , clusterList = clusterlist
-	  , tree = tre
+	  , tree = tredat$tre
 	  , level = level
 	  , zstar = zstar
 	  , cluster_mrca  = node2cl
@@ -724,13 +725,13 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		   # , cluster = clustering
 		   , cluster = clustering
 		   , partition = partition
-	     , row.names = 1:ape::Ntip(tre)
+	     , row.names = 1:ape::Ntip(tredat$tre)
 	     , stringsAsFactors=FALSE
 		)
 	  , debugdf = debugdf
 	)
 	class(rv) <- 'TreeStructure'
-	detach( tredat )
+	#detach( tredat )
 	rv
 }
 

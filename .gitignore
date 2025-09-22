@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 *.Rproj
+.DS_Store
 src/*.o
 src/*.so
 src/*.dll
@@ -10,7 +11,8 @@ src/*.dll
 /doc/
 /Meta/
 docs
-test_treestructure/
 check_cran_status/
-joss/
+test_treestructure/
 older/
+joss/
+dairy_cattle_treestrc_globalVariables.rda
