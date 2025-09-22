@@ -1,6 +1,6 @@
 ---
 title: "Node support values and update of treestructure object with new sequences"
-author: "Vinicius Franceschi"
+author: "Vinicius Franceschi and Fabricia F Nascimento"
 date: "`r Sys.Date()`"
 output: 
   bookdown::html_vignette2:
@@ -27,37 +27,27 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-In this tutorial, we will consider node support values (e.g. bootstrap) on 
+In this tutorial, we will consider node support values (e.g. bootstrap and posterior probability) on 
 cluster designations and update previous `treestructure` object with new sequences.
 
-This tutorial uses SARS-CoV-2 public data available [here](https://hgdownload.soe.ucsc.edu/goldenPath/wuhCor1/UShER_SARS-CoV-2//2022/04/02/) 
-to demonstrate the use of node support values from e.g. parametric bootstrap to 
+This tutorial uses the public data available for Ebola [here](https://github.com/ebov/space-time) to demonstrate the use of node support values to 
 avoid designating population structure in badly supported clades. 
-This tutorial also demonstrates how to update previous cluster designations 
-(an existing `treestructure` object) using a new rooted maximum likelihood tree 
-incorporating more sequences. The new tips are added to the cluster which shares 
-its MRCA (most recent common ancestor).
 
-# Workflow to analyse SARS-CoV-2 sequence data
-
-For a step-by-step guide to replicate the complete workflow please see [here](https://github.com/vinibfranc/demo_treestructure/blob/main/R/prepare.R).
-
-Briefly, we downloaded SARS-CoV-2 public metadata, a treefile, and multiple 
-sequence alignments from the UShER index. Then we extracted sequences up to the 
-end of February 2020 (n < 1,000 sequences). We then estimated a maximum 
-likelihood (ML) tree with [IQ-TREE](http://www.iqtree.org/) v2.2.2.6 with 1,000 
-ultrafast bootstraps, a time-scaled tree using 
-[`treedater`](https://github.com/emvolz/treedater) (strict clock and 0.0008 subst./site/year), 
-removed outliers by root-to-tip regression, 
-an then re-estimated the timetree without the outliers (n = 891).
+We will use a [time-scaled phylogenetic tree](https://github.com/ebov/space-time/blob/master/Data/Makona_1610_cds_ig.GLM.MCC.tree) estimated with [BEAST](https://beast.community).
 
 
-Let's load the resulting ML tree with bootstrap values:
+Before we load this time-scaled tree, we will load the R packages we will use 
+in this tutorial.
+
+
 ```{r message=FALSE}
+library(stringr)
+library(treeio)
 library(treestructure)
 ```
 
 
+Let's load this time-scaled tree with posterior probability support values:
 ```{r}
 mltr2_outl_rm <- readRDS( system.file('mltr2_outl_rm_sc2_feb2020.rds', 
                                       package='treestructure') )
