@@ -14,4 +14,6 @@ check_cran_status/
 test_treestructure/
 older/
 joss/
+dairy_cattle_treestrc_globalVariables.rda
+.gitignore
 
