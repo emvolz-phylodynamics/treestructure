@@ -765,7 +765,8 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	tre <- ggtree::groupOTU( tre, x$clusterSets)
 	pl <- ggtree::`%<+%`( ggtree::ggtree( tre, ggplot2::aes(color=group), ... ) ,  d  )
 
-	pl <- pl +  ggtree::geom_tippoint(ggplot2::aes( color=partition, shape=shape, show.legend=TRUE), size = 2 )
+	pl <- pl +  ggtree::geom_tippoint(ggplot2::aes( color=partition,
+	                                                shape=shape, show.legend=TRUE), size = 2 )
 	pl
 }
 
