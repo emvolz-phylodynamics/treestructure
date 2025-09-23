@@ -1,0 +1,11 @@
+pandoc: 3.6.3
+pkgdown: 2.1.1
+pkgdown_sha: ~
+articles:
+  supportValues: supportValues.html
+  treestructure: treestructure.html
+  updating_treestructure: updating_treestructure.html
+last_built: 2025-09-23T16:45Z
+urls:
+  reference: https://emvolz-phylodynamics.github.io/treestructure/reference
+  article: https://emvolz-phylodynamics.github.io/treestructure/articles
