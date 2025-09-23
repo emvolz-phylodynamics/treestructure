@@ -348,10 +348,11 @@ invisible(x)
 #' @param minCladeSize All clusters within partition must have at least this many
 #'    tips.
 #' @param minOverlap Threshold time overlap required to find splits in a clade.
-#' @param nodeSupportValues Node support values such as produced by boostrap or
+#' @param nodeSupportValues Node support values such as produced by bootstrap or
 #'    Bayesian credibility scores. Must be logical or vector with length equal
-#'    to number of internal nodes in the tree. If numeric, these values should be
-#'    between 0 and 100.
+#'    to number of internal nodes in the tree. If nodeSupportValues = TRUE, then
+#'    the function will get the information on node support from the tree.
+#'    If numeric vector, these values should be between 0 and 100.
 #' @param nodeSupportThreshold Threshold node support value between 0 and 100.
 #'    Nodes with support lower than this threshold will not be tested.
 #' @param nsim Number of simulations for computing null distribution of test

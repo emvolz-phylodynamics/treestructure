@@ -1,6 +1,6 @@
 ---
 title: "Node support values using treestructure"
-author: "Vinicius Franceschi and Fabricia F Nascimento"
+author: "Vinicius Franceschi and Fabricia F. Nascimento"
 date: "`r Sys.Date()`"
 output: 
   bookdown::html_vignette2:

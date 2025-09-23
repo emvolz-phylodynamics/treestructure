@@ -39,7 +39,9 @@ navbar:
       text: Tutorials
       menu:
       - text: Node support values
-        href: articles/supportValsUpdate.html
+        href: articles/supportValues.html
+      - text: Updating a treestructure object
+        href: articles/updating_treestructure.html
 reference:
 - title: Functions included in treestructure
   contents:
