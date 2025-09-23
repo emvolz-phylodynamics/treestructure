@@ -37,7 +37,7 @@ understand the basic functions in `treestructure`.
 
 * For an additional tutorial on how to include branch support to avoid designating 
 population structure in badly supported clades, see this 
-[example](http://emvolz-phylodynamics.github.io/treestructure/articles/supportValsUpdate.html) for SARS-CoV-2.
+[example](http://emvolz-phylodynamics.github.io/treestructure/articles/supportValues.html) for Ebola.
 
 
 ## Author
@@ -49,4 +49,4 @@ treestructure has been developed by [Erik Volz](https://profiles.imperial.ac.uk/
 
 Erik Volz, Wiuf Carsten, Yonatan Grad, Simon Frost, Ann Dennis, Xavier Didelot, 
 (2020); [Identification of hidden population structure in time-scaled phylogenies](https://academic.oup.com/sysbio/article/69/5/884/5734655); 
-Systemantic Biology, 69: 884–896.
+Systematic Biology, 69: 884–896.

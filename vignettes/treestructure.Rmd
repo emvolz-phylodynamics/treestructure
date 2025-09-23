@@ -120,6 +120,6 @@ Alternatively, in the absence of any additional data, the `treestructure` packag
 supports using the [CH index](https://en.wikipedia.org/wiki/Calinski–Harabasz_index) 
 to compare different `level`s. This statistic is based on the ratio of the 
 between-cluster and within-cluster variance of the time of each node 
-(distance from the root) and returns the `level` such that this ratio is maximised. 
+(distance from the root) and returns the `level` such that this ratio is maximized. 
 If you wish to use the CH index, pass `level = NULL` to `trestruct`, and 
 read documentation for the `levellb`, `levelub`, and `res` parameters. 

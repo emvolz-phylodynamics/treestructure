@@ -51,13 +51,13 @@ CH index (see details).}
 
 \item{debugLevel}{If > 0 will produce additional data in return value.}
 
-\item{levellb}{If optimising the `level` parameter, this is the lower bound
+\item{levellb}{If optimizing the `level` parameter, this is the lower bound
 for the search.}
 
-\item{levelub}{If optimising the `level` parameter, this is the upper bound
+\item{levelub}{If optimizing the `level` parameter, this is the upper bound
 for the search.}
 
-\item{res}{If optimising the `level` parameter, this is the number of values
+\item{res}{If optimizing the `level` parameter, this is the number of values
 to test.}
 }
 \value{

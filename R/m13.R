@@ -363,11 +363,11 @@ invisible(x)
 #' @param ncpu If > 1 will compute statistics in parallel using multiple CPUs.
 #' @param verbosity If > 0 will print information about progress of the algorithm.
 #' @param debugLevel If > 0 will produce additional data in return value.
-#' @param levellb If optimising the `level` parameter, this is the lower bound
+#' @param levellb If optimizing the `level` parameter, this is the lower bound
 #'    for the search.
-#' @param levelub If optimising the `level` parameter, this is the upper bound
+#' @param levelub If optimizing the `level` parameter, this is the upper bound
 #'    for the search.
-#' @param res If optimising the `level` parameter, this is the number of values
+#' @param res If optimizing the `level` parameter, this is the number of values
 #'    to test.
 #' @return A TreeStructure object which includes cluster and partition assignment
 #'    for each tip of the tree.
@@ -770,7 +770,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 
 #' Plot TreeStructure tree with cluster and partition variables
 #' @param x  A TreeStructure object
-#' @param use_ggtree Toggle ggtree or ape plotting behaviour
+#' @param use_ggtree Toggle ggtree or ape plotting behavior
 #' @param ... Additional arguments passed to ggtree or ape::plot.phylo
 #' @export
 #' @examples

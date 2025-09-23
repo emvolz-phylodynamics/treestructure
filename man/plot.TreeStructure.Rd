@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{A TreeStructure object}
 
-\item{use_ggtree}{Toggle ggtree or ape plotting behaviour}
+\item{use_ggtree}{Toggle ggtree or ape plotting behavior}
 
 \item{...}{Additional arguments passed to ggtree or ape::plot.phylo}
 }
