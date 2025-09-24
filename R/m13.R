@@ -794,7 +794,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 #'
 #' #plot treestructure object
 #'
-#' plot(struc)
+#' suppressWarnings(plot(struc))
 plot.TreeStructure <- function(x, use_ggtree = TRUE , ... )
 {
 	stopifnot( inherits( x, 'TreeStructure') )

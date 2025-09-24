@@ -28,7 +28,7 @@ Suggests: ggtree, ggplot2, knitr, rmarkdown, getopt, bookdown, phangorn
 Imports: ape (>= 5.0)
 LinkingTo: Rcpp
 VignetteBuilder: knitr
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Encoding: UTF-8
 URL: http://emvolz-phylodynamics.github.io/treestructure/, https://github.com/emvolz-phylodynamics/treestructure, https://emvolz-phylodynamics.github.io/treestructure/
 BugReports: https://github.com/emvolz-phylodynamics/treestructure/issues

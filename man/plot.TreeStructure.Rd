@@ -24,5 +24,5 @@ tree <- ape::read.tree( system.file('sim.nwk', package = 'treestructure') )
 
 #plot treestructure object
 
-plot(struc)
+suppressWarnings(plot(struc))
 }
