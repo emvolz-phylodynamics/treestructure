@@ -87,7 +87,8 @@
 object with new sequences using a down sampled version of the <a href="https://github.com/ebov/space-time/blob/master/Data/Makona_1610_cds_ig.GLM.MCC.tree" class="external-link">Ebola dated tree</a>, which is publicly available.</p>
 <p>First, we will load all the R packages that we will use in this tutorial.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://emvolz-phylodynamics.github.io/treestructure/" class="external-link">treestructure</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/emmanuelparadis/ape" class="external-link">ape</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://emvolz-phylodynamics.github.io/treestructure/" class="external-link">treestructure</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KlausVigo/phangorn" class="external-link">phangorn</a></span><span class="op">)</span></span></code></pre></div>
 <p>Now we can read the down-sampled time-tree for Ebola. In this pruned tree, we
 have 1,310 tips.</p>
@@ -124,11 +125,11 @@ binary.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#Note that this tree has more sequences than the previous tree used in this</span></span>
 <span><span class="co">#tutorial.</span></span>
-<span><span class="va">new_tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/read.nexus.html" class="external-link">read.nexus</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'Makona_1610_genomes_2016-06-23.ml.tree'</span>, </span>
-<span>                                    package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">new_tree</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/read.nexus.html" class="external-link">read.nexus</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'Makona_1610_genomes_2016-06-23.ml.tree'</span>,</span>
+<span>                                         package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="co">#now we can root the tree using mid-point rooting for illustration</span></span>
-<span><span class="va">ml_rooted_tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://klausvigo.github.io/phangorn/reference/midpoint.html" class="external-link">midpoint</a></span><span class="op">(</span><span class="va">new_tree</span><span class="op">)</span></span>
+<span><span class="va">ml_rooted_tree</span> <span class="op">&lt;-</span> <span class="fu">phangorn</span><span class="fu">::</span><span class="fu"><a href="https://klausvigo.github.io/phangorn/reference/midpoint.html" class="external-link">midpoint</a></span><span class="op">(</span><span class="va">new_tree</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">#now we need to remove the quotes from the tip names (to avoid an error with </span></span>
 <span><span class="co">#treestructure function)</span></span>
