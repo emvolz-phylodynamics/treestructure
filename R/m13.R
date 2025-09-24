@@ -765,8 +765,19 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	tre <- ggtree::groupOTU( tre, x$clusterSets)
 	pl <- ggtree::`%<+%`( ggtree::ggtree( tre, ggplot2::aes(color=group), ... ) ,  d  )
 
+	#depending on the tree, the ggtree::groupOTU might add some group = 0,
+	#which does not reflect the number of clusters.
+	#so, we will replace group == 0 with NA; and then we will omit the NA from the
+	#legend in the plot using ggplot2::scale_color_discrete(na.translate = FALSE)
+	pl$data$group[pl$data$group == 0] <- NA
+
+	pl$data$group <- factor(pl$data$group,
+	                        levels = sort(as.numeric(as.character(unique(pl$data$group)))))
+
 	pl <- pl +  ggtree::geom_tippoint(ggplot2::aes( color=partition,
-	                                                shape=shape, show.legend=TRUE), size = 2 )
+	                                                shape=shape, show.legend = TRUE), size = 2 ) +
+	  ggplot2::scale_color_discrete(na.translate = FALSE)
+
 	pl
 }
 

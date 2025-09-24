@@ -1,8 +1,8 @@
 Package: treestructure
 Type: Package
 Title: Detect Population Structure Within Phylogenetic Trees
-Version: 0.6.0
-Date: 2025-02-25
+Version: 0.7.0
+Date: 2025-09-24
 Authors@R:
     c(person(given = "Erik",
              family = "Volz",
