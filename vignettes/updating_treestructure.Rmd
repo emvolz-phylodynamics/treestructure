@@ -36,6 +36,7 @@ object with new sequences using a down sampled version of the [Ebola dated tree]
 
 First, we will load all the R packages that we will use in this tutorial.
 ```{r message=FALSE}
+library(ape)
 library(treestructure)
 library(phangorn)
 ```
@@ -87,11 +88,11 @@ binary.
 ```{r}
 #Note that this tree has more sequences than the previous tree used in this
 #tutorial.
-new_tree <- read.nexus( system.file('Makona_1610_genomes_2016-06-23.ml.tree', 
-                                    package='treestructure') )
+new_tree <- ape::read.nexus( system.file('Makona_1610_genomes_2016-06-23.ml.tree',
+                                         package='treestructure') )
 
 #now we can root the tree using mid-point rooting for illustration
-ml_rooted_tree <- midpoint(new_tree)
+ml_rooted_tree <- phangorn::midpoint(new_tree)
 
 #now we need to remove the quotes from the tip names (to avoid an error with 
 #treestructure function)

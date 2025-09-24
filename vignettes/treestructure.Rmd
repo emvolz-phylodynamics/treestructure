@@ -36,7 +36,9 @@ samples from three small 'outbreaks' which are growing exponentially.
 These simulations were generated with the [phydynR package](https://emvolz-phylodynamics.github.io/phydynR). 
 
 ```{r message=FALSE}
+library(ape)
 library(treestructure)
+library(ggtree)
 ```
 
 Load the tree: 

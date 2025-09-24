@@ -41,8 +41,8 @@ First, we need to load the R package we will use in this tutorial.
 
 
 ```{r message=FALSE}
-library(stringr)
 library(treeio)
+library(ggtree)
 library(treestructure)
 ```
 
@@ -51,9 +51,15 @@ Now, we will load the time-scaled phylogenetic tree with posterior probability
 support values:
 
 ```{r}
-#get the dated tree
-beast_tree <- read.beast(system.file('Makona_1610_cds_ig.GLM.MCC.tree',
-                                     package='treestructure') )
+#get the dated tree by first downloading it from the URL below
+tree_url <- "https://raw.githubusercontent.com/ebov/space-time/master/Data/Makona_1610_cds_ig.GLM.MCC.tree"
+tmp_file <- tempfile(fileext = ".tree")
+
+#Download BEAST tree to a tmp file
+download.file(tree_url, tmp_file, mode = "wb")
+
+#read the downloaded tree
+beast_tree <- read.beast(tmp_file)
 ```
 
 

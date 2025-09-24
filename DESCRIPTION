@@ -24,7 +24,7 @@ Description: Algorithms for detecting population structure from the history of
     tip and internal node of a tree into disjoint sets characterized by similar 
     coalescent patterns.
 License: GPL (>= 2)
-Suggests: ggtree, ggplot2, knitr, rmarkdown, getopt, bookdown, phangorn
+Suggests: ggtree, ggplot2, knitr, rmarkdown, getopt, bookdown, phangorn, treeio
 Imports: ape (>= 5.0)
 LinkingTo: Rcpp
 VignetteBuilder: knitr

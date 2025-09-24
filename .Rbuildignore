@@ -22,3 +22,12 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+
+older/
+joss/
+dairy_cattle_treestrc_globalVariables.rda
+check_cran_status/
+test_treestructure/
+docs/
+figure/
+test_treestructure/
