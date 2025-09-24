@@ -6,11 +6,17 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Node support values using treestructure • treestructure</title>
-<script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
+  window.MathJax = {
+    chtml: {
+      fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
+    }
+  };
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="../deps/MathJax-3.2.2/tex-chtml.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Node support values using treestructure">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Node support values using treestructure">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -20,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">treestructure</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,7 +37,7 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/treestructure.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-tutorials" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Tutorials</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials">
 <li><a class="dropdown-item" href="../articles/supportValues.html">Node support values</a></li>
@@ -66,9 +72,9 @@
       <h1>Node support values using treestructure</h1>
                         <h4 data-toc-skip class="author">Vinicius Franceschi and Fabricia F. Nascimento</h4>
             
-            <h4 data-toc-skip class="date">2025-09-23</h4>
+            <h4 data-toc-skip class="date">2025-09-24</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/emvolz-phylodynamics/treestructure/blob/HEAD/vignettes/supportValues.Rmd" class="external-link"><code>vignettes/supportValues.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/emvolz-phylodynamics/treestructure/blob/master/vignettes/supportValues.Rmd" class="external-link"><code>vignettes/supportValues.Rmd</code></a></small>
       <div class="d-none name"><code>supportValues.Rmd</code></div>
     </div>
 
@@ -84,13 +90,13 @@ structure in badly supported clades.</p>
 <p>First, we need to load the R package we will use in this tutorial.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://stringr.tidyverse.org" class="external-link">stringr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/YuLab-SMU/treeio" class="external-link">treeio</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://yulab-smu.top/contribution-tree-data/" class="external-link">treeio</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://emvolz-phylodynamics.github.io/treestructure/" class="external-link">treestructure</a></span><span class="op">)</span></span></code></pre></div>
 <p>Now, we will load the time-scaled phylogenetic tree with posterior probability
 support values:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#get the dated tree</span></span>
-<span><span class="va">beast_tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://docs.ropensci.org/treeio/reference/beast-parser.html" class="external-link">read.beast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'Makona_1610_cds_ig.GLM.MCC.tree'</span>,</span>
+<span><span class="va">beast_tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/treeio/man/beast-parser.html" class="external-link">read.beast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'Makona_1610_cds_ig.GLM.MCC.tree'</span>,</span>
 <span>                                     package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
 <p>Then we need to convert the tree to a <code>phylo</code> object and add the posterior
 probability information from the Bayesian tree to the <code>phylo</code> object tree.</p>
@@ -128,7 +134,20 @@ the parameter <code>nodeSupportValues</code> is set to FALSE.</p>
 <code class="sourceCode R"><span><span class="va">trestruct_res_nobt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'trestruct_res_nobt.rds'</span>,</span>
 <span>                                           package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_res_nobt</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_res_nobt</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: `aes_()` was deprecated in ggplot2 3.0.0.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use tidy evaluation idioms with `aes()`</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The deprecated feature was likely used in the <span style="color: #0000BB;">ggtree</span> package.</span></span>
+<span><span class="co">#&gt;   Please report the issue at <span style="color: #0000BB; font-style: italic;">&lt;https://github.com/YuLab-SMU/ggtree/issues&gt;</span>.</span></span>
+<span><span class="co">#&gt; This warning is displayed once every 8 hours.</span></span>
+<span><span class="co">#&gt; Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span>
+<span><span class="co">#&gt; generated.</span></span>
+<span><span class="co">#&gt; Warning in fortify(data, ...): Arguments in `...` must be used.</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> Problematic arguments:</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> as.Date = as.Date</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> yscale_mapping = yscale_mapping</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> hang = hang</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Did you misspell an argument name?</span></span></code></pre></div>
 <p><img src="supportValues_files/figure-html/unnamed-chunk-6-1.png"><!-- --></p>
 <p>The <code>treestructure</code> analyses resulted in 23 clusters.</p>
 </div>
@@ -158,7 +177,13 @@ instead.</p>
 <code class="sourceCode R"><span><span class="va">trestruct_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'trestruct_res.rds'</span>,</span>
 <span>                                      package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_res</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_res</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in fortify(data, ...): Arguments in `...` must be used.</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> Problematic arguments:</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> as.Date = as.Date</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> yscale_mapping = yscale_mapping</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> hang = hang</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Did you misspell an argument name?</span></span></code></pre></div>
 <p><img src="supportValues_files/figure-html/unnamed-chunk-8-1.png"><!-- --></p>
 <p>Now we have only 6 well-supported clusters with differences in coalescent patterns.</p>
 <p>Note that this might change if you use a higher or lower value for the
@@ -185,7 +210,13 @@ specify the lower and upper bound to optimize the parameter <code>level</code>.<
 <code class="sourceCode R"><span><span class="va">trestruct_chindex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'trestruct_chindex.rds'</span>,</span>
 <span>                                      package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_chindex</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_chindex</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in fortify(data, ...): Arguments in `...` must be used.</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> Problematic arguments:</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> as.Date = as.Date</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> yscale_mapping = yscale_mapping</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> hang = hang</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Did you misspell an argument name?</span></span></code></pre></div>
 <p><img src="supportValues_files/figure-html/unnamed-chunk-10-1.png"><!-- --></p>
 <p>Now we have only 2 well-supported clusters with differences in coalescent
 patterns after optimizing the significance level.</p>
@@ -234,7 +265,7 @@ Website developed by <a href="https://profiles.imperial.ac.uk/f.ferreira-do-nasc
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>

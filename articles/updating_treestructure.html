@@ -6,11 +6,17 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Update of a treestructure object with new sequences • treestructure</title>
-<script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
+  window.MathJax = {
+    chtml: {
+      fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
+    }
+  };
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="../deps/MathJax-3.2.2/tex-chtml.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Update of a treestructure object with new sequences">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Update of a treestructure object with new sequences">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -20,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">treestructure</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,7 +37,7 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/treestructure.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-tutorials" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Tutorials</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials">
 <li><a class="dropdown-item" href="../articles/supportValues.html">Node support values</a></li>
@@ -66,9 +72,9 @@
       <h1>Update of a treestructure object with new sequences</h1>
                         <h4 data-toc-skip class="author">Vinicius Franceschi and Fabricia F Nascimento</h4>
             
-            <h4 data-toc-skip class="date">2025-09-23</h4>
+            <h4 data-toc-skip class="date">2025-09-24</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/emvolz-phylodynamics/treestructure/blob/HEAD/vignettes/updating_treestructure.Rmd" class="external-link"><code>vignettes/updating_treestructure.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/emvolz-phylodynamics/treestructure/blob/master/vignettes/updating_treestructure.Rmd" class="external-link"><code>vignettes/updating_treestructure.Rmd</code></a></small>
       <div class="d-none name"><code>updating_treestructure.Rmd</code></div>
     </div>
 
@@ -104,7 +110,20 @@ Ebola down-sampled phylogenetic tree:</p>
 <code class="sourceCode R"><span><span class="va">trestruct_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'downsampled_tree_struc.rds'</span>,</span>
 <span>                                      package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_res</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_res</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: `aes_()` was deprecated in ggplot2 3.0.0.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use tidy evaluation idioms with `aes()`</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> The deprecated feature was likely used in the <span style="color: #0000BB;">ggtree</span> package.</span></span>
+<span><span class="co">#&gt;   Please report the issue at <span style="color: #0000BB; font-style: italic;">&lt;https://github.com/YuLab-SMU/ggtree/issues&gt;</span>.</span></span>
+<span><span class="co">#&gt; This warning is displayed once every 8 hours.</span></span>
+<span><span class="co">#&gt; Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span>
+<span><span class="co">#&gt; generated.</span></span>
+<span><span class="co">#&gt; Warning in fortify(data, ...): Arguments in `...` must be used.</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> Problematic arguments:</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> as.Date = as.Date</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> yscale_mapping = yscale_mapping</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> hang = hang</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Did you misspell an argument name?</span></span></code></pre></div>
 <p><img src="updating_treestructure_files/figure-html/unnamed-chunk-4-1.png"><!-- --></p>
 <p>The <code>treestructure</code> analyses resulted in 4 clusters.</p>
 </div>
@@ -133,7 +152,13 @@ we are now able to add the new sequences to the existing <code>treestructure</co
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trestruct_add_tips</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/addtips.html">addtips</a></span><span class="op">(</span>trst <span class="op">=</span> <span class="va">trestruct_res</span>, tre <span class="op">=</span> <span class="va">ml_rooted_tree</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_add_tips</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_add_tips</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in fortify(data, ...): Arguments in `...` must be used.</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> Problematic arguments:</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> as.Date = as.Date</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> yscale_mapping = yscale_mapping</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> hang = hang</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Did you misspell an argument name?</span></span></code></pre></div>
 <p><img src="updating_treestructure_files/figure-html/unnamed-chunk-6-1.png"><!-- --></p>
 <p>If you would like to compare the sequence names that comprise each cluster in
 each tree, you can do:</p>
@@ -172,7 +197,7 @@ Website developed by <a href="https://profiles.imperial.ac.uk/f.ferreira-do-nasc
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
