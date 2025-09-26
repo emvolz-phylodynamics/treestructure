@@ -26,7 +26,7 @@ Description: Algorithms for detecting population structure from the history of
 License: GPL (>= 2)
 Suggests: ggtree, ggplot2, knitr, rmarkdown, getopt, bookdown, phangorn, treeio
 Depends: R (>= 4.1.0)
-Imports: ape (>= 5.0)
+Imports: ape (>= 5.0), rlang
 LinkingTo: Rcpp
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3

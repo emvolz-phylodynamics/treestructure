@@ -18,11 +18,8 @@ Platform: aarch64-apple-darwin20
 
 ## R CMD check results
 
-Linux: There were no ERRORs or WARNINGs and 1 NOTE. 
+Linux: There were no ERRORs or WARNINGs or NOTES. 
 
-Win-builder: There were no ERRORs or WARNINGs and 1 NOTE.
+Win-builder: There were no ERRORs or WARNINGs or NOTES.
 
-macOS: here were no ERRORs or WARNINGs and 1 NOTE.
-
-The NOTE is related to ggtree plots and global variables.
-They are not global variables and it is the syntax of ggtree.
+macOS: here were no ERRORs or WARNINGs or NOTES.

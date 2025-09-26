@@ -10,5 +10,6 @@
 #' @useDynLib treestructure, .registration = TRUE
 #' @import ape
 #' @keywords internal
+#' @importFrom rlang .data
 "_PACKAGE"
 #> [1] "_PACKAGE"
