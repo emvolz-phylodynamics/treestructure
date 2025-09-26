@@ -4,6 +4,7 @@ Title: Detect Population Structure Within Phylogenetic Trees
 Version: 0.7.0
 Date: 2025-09-24
 Authors@R:
+Authors@R:
     c(person(given = "Erik",
              family = "Volz",
              role = c("aut", "cre"),

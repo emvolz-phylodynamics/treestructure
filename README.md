@@ -32,12 +32,12 @@ interface direct in a terminal.
 
 ## Tutorials 
 
-* We recommend that you read the [Get started](http://emvolz-phylodynamics.github.io/treestructure/articles/treestructure.html) to 
+* We recommend that you read the [Get started](https://emvolz-phylodynamics.github.io/treestructure/articles/treestructure.html) to 
 understand the basic functions in `treestructure`.
 
 * For an additional tutorial on how to include branch support to avoid designating 
 population structure in badly supported clades, see this 
-[example](http://emvolz-phylodynamics.github.io/treestructure/articles/supportValues.html) for Ebola.
+[example](https://emvolz-phylodynamics.github.io/treestructure/articles/supportValues.html) for Ebola.
 
 
 ## Author

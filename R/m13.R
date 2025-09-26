@@ -763,7 +763,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	d$shape <-  rep('circle', ape::Ntip(tre))
 
 	tre <- ggtree::groupOTU( tre, x$clusterSets)
-	pl <- ggtree::`%<+%`( ggtree::ggtree( tre, ggplot2::aes(color=group), ... ) ,  d  )
+	pl <- ggtree::`%<+%`( ggtree::ggtree( tre, ggplot2::aes(color=.data[["group"]]), ... ) ,  d  )
 
 	#depending on the tree, the ggtree::groupOTU might add some group = 0,
 	#which does not reflect the number of clusters.
@@ -774,8 +774,8 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	pl$data$group <- factor(pl$data$group,
 	                        levels = sort(as.numeric(as.character(unique(pl$data$group)))))
 
-	pl <- pl +  ggtree::geom_tippoint(ggplot2::aes( color=partition,
-	                                                shape=shape, show.legend = TRUE), size = 2 ) +
+	pl <- pl +  ggtree::geom_tippoint(ggplot2::aes( color=.data[["partition"]],
+	                                                shape=.data[["shape"]], show.legend = TRUE), size = 2 ) +
 	  ggplot2::scale_color_discrete(na.translate = FALSE)
 
 	pl
