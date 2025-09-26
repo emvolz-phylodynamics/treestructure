@@ -25,10 +25,11 @@ Description: Algorithms for detecting population structure from the history of
     coalescent patterns.
 License: GPL (>= 2)
 Suggests: ggtree, ggplot2, knitr, rmarkdown, getopt, bookdown, phangorn, treeio
+Depends: R (>= 4.1.0)
 Imports: ape (>= 5.0)
 LinkingTo: Rcpp
 VignetteBuilder: knitr
 RoxygenNote: 7.3.3
 Encoding: UTF-8
-URL: http://emvolz-phylodynamics.github.io/treestructure/, https://github.com/emvolz-phylodynamics/treestructure, https://emvolz-phylodynamics.github.io/treestructure/
+URL: https://emvolz-phylodynamics.github.io/treestructure/, https://github.com/emvolz-phylodynamics/treestructure
 BugReports: https://github.com/emvolz-phylodynamics/treestructure/issues

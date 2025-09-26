@@ -85,7 +85,7 @@ select a significance level if none is provided.
 \section{References}{
 
 Volz EM, Carsten W, Grad YH, Frost SDW, Dennis AM, Didelot X.
-\href{https://academic.oup.com/sysbio/article/69/5/884/5734655?login=false}{Identification of hidden population structure in time-scaled phylogenies.}
+Identification of hidden population structure in time-scaled phylogenies.
 Systematic Biology 2020; 69(5):884-896.
 }
 

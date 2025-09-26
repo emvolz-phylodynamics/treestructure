@@ -22,15 +22,14 @@ Erik Volz, Wiuf Carsten, Yonatan Grad, Simon Frost, Ann Dennis, Xavier Didelot,
 \seealso{
 Useful links:
 \itemize{
-  \item \url{http://emvolz-phylodynamics.github.io/treestructure/}
-  \item \url{https://github.com/emvolz-phylodynamics/treestructure}
   \item \url{https://emvolz-phylodynamics.github.io/treestructure/}
+  \item \url{https://github.com/emvolz-phylodynamics/treestructure}
   \item Report bugs at \url{https://github.com/emvolz-phylodynamics/treestructure/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Erik Volz \email{erik@erikvolz.info} (\href{https://orcid.org/0000-0001-6268-8937}{ORCID})
+\strong{Maintainer}: Erik Volz \email{erik.volz@gmail.com} (\href{https://orcid.org/0000-0001-6268-8937}{ORCID})
 
 Other contributors:
 \itemize{
