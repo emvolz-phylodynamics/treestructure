@@ -18,10 +18,12 @@ Plot TreeStructure tree with cluster and partition variables
 }
 \examples{
 
-tree <- ape::read.tree( system.file('sim.nwk', package = 'treestructure') )
+#tree <- ape::read.tree( system.file('sim.nwk', package = 'treestructure') )
+# you can run the example above before plotting
+#struc <- trestruct( tree )
 
-(struc <- trestruct( tree ))
-
+#because it can take a minute or so to run treestructure, we will load it here
+struc <- readRDS( system.file('struc_plot_example.rds', package='treestructure') )
 #plot treestructure object
 
 suppressWarnings(plot(struc))
