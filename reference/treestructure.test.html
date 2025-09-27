@@ -88,32 +88,11 @@ can include internal node numbers.</p></dd>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/read.tree.html" class="external-link">read.tree</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'sim.nwk'</span>, package <span class="op">=</span> <span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="op">(</span><span class="va">struc</span> <span class="op">&lt;-</span> <span class="fu"><a href="trestruct.html">trestruct</a></span><span class="op">(</span> <span class="va">tree</span> <span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Tree has NA or duplicated tip labels. Adding a unique id.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Finding splits under nodes: 276 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Finding splits under nodes: 276 526 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Finding splits under nodes: 276 421 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Finding splits under nodes: 276 473 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Call: </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> .trestruct(tre = tre, minCladeSize = minCladeSize, minOverlap = minOverlap, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     nodeSupportValues = nodeSupportValues, nodeSupportThreshold = nodeSupportThreshold, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     nsim = nsim, level = level[1], ncpu = ncpu, verbosity = verbosity, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     debugLevel = debugLevel, useNodeSupport = useNodeSupport, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     tredat = tredat)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Significance level: 0.01 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Number of clusters: 4 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Number of partitions: 2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Number of taxa in each cluster:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1   2   3   4 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  25  25 200  25 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Number of taxa in each partition:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1   2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  75 200 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> For complete data, use `as.data.frame(...)` </span>
+<span class="r-in"><span><span class="co"># you can run the example below before running test</span></span></span>
+<span class="r-in"><span><span class="co">#struc &lt;- trestruct( tree )</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">#because it can take a minute or so to run treestructure, we will load it here</span></span></span>
+<span class="r-in"><span><span class="va">struc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'struc_plot_example.rds'</span>, package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#run the test</span></span></span>
 <span class="r-in"><span></span></span>
@@ -131,10 +110,10 @@ can include internal node numbers.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   1_1, 2_1, 3_1, 4_1, 5_1, 6_1, ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rooted; includes branch length(s).</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Rank sum = 638, p-value = 0.153</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Rank sum = 638, p-value = 0.1504</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Alternative hypothesis: Rank sum differs from coalescent distribution</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 95 percent confidence interval:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   491  684</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   493.975  682</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
