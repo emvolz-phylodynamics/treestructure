@@ -249,7 +249,11 @@ cocluster_accuracy <- function( x, y ){
 #' @examples
 #' tree <- ape::read.tree( system.file('sim.nwk', package = 'treestructure') )
 #'
-#' (struc <- trestruct( tree ))
+#' # you can run the example below before running test
+#' #struc <- trestruct( tree )
+#'
+#' #because it can take a minute or so to run treestructure, we will load it here
+#' struc <- readRDS( system.file('struc_plot_example.rds', package='treestructure') )
 #'
 #' #run the test
 #'
@@ -789,7 +793,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 #' @examples
 #'
 #' #tree <- ape::read.tree( system.file('sim.nwk', package = 'treestructure') )
-#' # you can run the example above before plotting
+#' # you can run the example below before plotting
 #' #struc <- trestruct( tree )
 #'
 #' #because it can take a minute or so to run treestructure, we will load it here
