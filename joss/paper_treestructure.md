@@ -11,7 +11,7 @@ output:
   html_document:
     df_print: paged
 authors:
-- name: Fabricia F. Nascimento
+- name: Fabrícia F. Nascimento
   orcid: "0000-0001-9426-6835"
   affiliation: 1
 - name: Vinicius B. Franceschi
@@ -23,7 +23,8 @@ authors:
   affiliation: 1
 bibliography: references.bib
 affiliations:
-- name: MRC Centre for Global Infectious Disease Analysis, School of Public Health,
+- name: MRC Centre for Global Infectious Disease Analysis, 
+    Department of Infectious Disease Epidemiology, School of Public Health,
     Imperial College London, London, UK
   index: 1
 ---
