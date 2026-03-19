@@ -32,7 +32,7 @@ knitr::opts_chunk$set(
 
 This example shows the function `trestruct` applied to a simulated structured 
 coalescent tree that includes samples from a large constant size population and 
-samples from three small 'outbreaks' which are growing exponentially. 
+samples from three small "outbreaks" which are growing exponentially. 
 These simulations were generated with the [phydynR package](https://emvolz-phylodynamics.github.io/phydynR/). 
 
 ```{r message=FALSE}
@@ -56,6 +56,11 @@ This will run the `treestructure` algorithm under default setting:
 ```{r message=FALSE}
 s <- trestruct( tree ) 
 ```
+
+The `treestructure` algorithm searches from root to tips of the phylogenetic tree.
+The message printed in the screen `Finding slipts under nodes` reports which nodes 
+the algorithm is currently doing the test on. 
+
 
 You can print the results: 
 

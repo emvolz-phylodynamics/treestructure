@@ -106,7 +106,8 @@ trestruct_res_nobt <- trestruct(dated_tre,
                                 level = 0.01)
 ```
 
-Because `treestructure` will take several minutes to run, we can load the results:
+In the above example, the `trestruct` function took 7 minutes to run on a macOS M2. 
+Here, we can load the results instead.
 
 ```{r}
 trestruct_res_nobt <- readRDS( system.file('trestruct_res_nobt.rds',
@@ -144,8 +145,8 @@ trestruct_res <- trestruct(dated_tre,
                            level = 0.01)
 ```
 
-Because it will take a minute or so to run `treestructure`, we can load the result 
-instead.
+In the above example, the `trestruct` function took 50 seconds to run on a macOS M2. 
+Here, we can load the results instead.
 
 ```{r}
 trestruct_res <- readRDS( system.file('trestruct_res.rds',
@@ -170,7 +171,7 @@ specify the lower and upper bound to optimize the parameter `level`.
 Note that we will also take into consideration the use of branch support.
 
 ```{r eval = FALSE}
-
+start.time <- Sys.time()
 trestruct_chindex <- trestruct(dated_tre,
                                minCladeSize = 30, 
                                nodeSupportValues = TRUE, 
@@ -178,10 +179,12 @@ trestruct_chindex <- trestruct(dated_tre,
                                level = NULL,
                                levellb = 0.0001, 
                                levelub = 0.001)
+end.time <- Sys.time()
 
 ```
 
-Because it will also take a minute or so to run `treestructure`, we can load the result instead.
+In the above example, the `trestruct` function took 5 minutes to run on a macOS M2. 
+Here, we can load the results instead.
 
 ```{r}
 trestruct_chindex <- readRDS( system.file('trestruct_chindex.rds',

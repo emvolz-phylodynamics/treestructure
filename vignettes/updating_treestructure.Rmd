@@ -64,7 +64,8 @@ trestruct_res <- trestruct(pruned_tree,
                            level = 0.01)
 ```
 
-Because `treestructure` will take several minutes to run, we can load the results:
+In the above example, the `trestruct` function took 32 seconds to run on a macOS M2. 
+Here, we will load the results.
 
 ```{r}
 trestruct_res <- readRDS( system.file('downsampled_tree_struc.rds',
