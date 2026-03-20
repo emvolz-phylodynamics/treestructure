@@ -143,7 +143,6 @@ Note that we will also take into consideration the use of branch
 support.
 
 ``` r
-start.time <- Sys.time()
 trestruct_chindex <- trestruct(dated_tre,
                                minCladeSize = 30, 
                                nodeSupportValues = TRUE, 
@@ -151,7 +150,6 @@ trestruct_chindex <- trestruct(dated_tre,
                                level = NULL,
                                levellb = 0.0001, 
                                levelub = 0.001)
-end.time <- Sys.time()
 ```
 
 In the above example, the `trestruct` function took 5 minutes to run on
