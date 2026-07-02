@@ -32,3 +32,5 @@ docs/
 figure/
 test_treestructure/
 ^CRAN-SUBMISSION$
+
+^dev/

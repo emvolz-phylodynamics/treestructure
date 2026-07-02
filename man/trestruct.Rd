@@ -6,28 +6,43 @@
 \usage{
 trestruct(
   tre,
-  minCladeSize = 25,
-  minOverlap = -Inf,
+  fdr = 0.1,
+  level = 0.01,
+  minCladeSize = 10,
   nodeSupportValues = FALSE,
   nodeSupportThreshold = 95,
+  minOverlap = -Inf,
   nsim = 10000,
-  level = 0.01,
   ncpu = 1,
   verbosity = 1,
   debugLevel = 0,
   levellb = 0.001,
   levelub = 0.1,
-  res = 11
+  res = 11,
+  method = "analytic",
+  split = c("bonferroni", "bh")
 )
 }
 \arguments{
 \item{tre}{A tree of type ape::phylo. Must be rooted. If the tree has multifurcations,
 it will be converted to a binary tree before processing.}
 
+\item{fdr}{Target false discovery rate for detected structure, a number in
+(0,1). This is the default way of choosing the split threshold
+(\code{fdr = 0.1}): the threshold at each scan is calibrated so that the
+whole-tree false discovery rate is controlled at this level (see details for
+the precise meaning). It is analytic and requires no simulation. An
+explicitly supplied \code{level} takes precedence unless \code{fdr} is also
+given; set \code{fdr = NULL} to use \code{level} instead.}
+
+\item{level}{Significance level for finding a new split within a set of tips.
+Used when \code{fdr = NULL}, or when \code{level} is supplied without an
+explicit \code{fdr}. This is a subjective clustering threshold, not an error
+rate; prefer \code{fdr}. Can also be NULL, in which case the optimal level is
+found according to the CH index (see details).}
+
 \item{minCladeSize}{All clusters within partition must have at least this many
 tips.}
-
-\item{minOverlap}{Threshold time overlap required to find splits in a clade.}
 
 \item{nodeSupportValues}{Node support values such as produced by bootstrap or
 Bayesian credibility scores. Must be logical or vector with length equal
@@ -38,12 +53,10 @@ If numeric vector, these values should be between 0 and 100.}
 \item{nodeSupportThreshold}{Threshold node support value between 0 and 100.
 Nodes with support lower than this threshold will not be tested.}
 
-\item{nsim}{Number of simulations for computing null distribution of test
-statistics.}
+\item{minOverlap}{Threshold time overlap required to find splits in a clade.}
 
-\item{level}{Significance level for finding new split within a set of tips.
-Can also be NULL, in which case the optimal level is found according to the
-CH index (see details).}
+\item{nsim}{Number of simulations for computing null distribution of test
+statistics. Only used when \code{method = 'sim'}.}
 
 \item{ncpu}{If > 1 will compute statistics in parallel using multiple CPUs.}
 
@@ -59,6 +72,19 @@ for the search.}
 
 \item{res}{If optimizing the `level` parameter, this is the number of values
 to test.}
+
+\item{method}{How the coalescent null of the rank-sum statistic is
+characterised at each test. \code{'analytic'} (the default) computes the
+exact mean and variance by a deterministic recursion (fast, and
+deterministic so results are reproducible); \code{'sim'} uses Monte-Carlo
+simulation with \code{nsim} replicates (the original behaviour).}
+
+\item{split}{Multiple-testing correction applied at each scan in \code{fdr}
+mode. \code{'bonferroni'} (the default) uses a per-scan Bonferroni bound;
+\code{'bh'} uses a Benjamini-Hochberg step-up, which is less conservative and
+retains more power on large trees with abundant moderate structure (where the
+Bonferroni bound to make the first split can grow with the tree size). Ignored
+when a subjective \code{level} is used.}
 }
 \value{
 A TreeStructure object which includes cluster and partition assignment
@@ -81,6 +107,29 @@ provided, or a range of values can be examined.
 The \href{https://en.wikipedia.org/wiki/Calinski-Harabasz_index}{CH index}
 based on within- and between-cluster variance in node heights can be used to
 select a significance level if none is provided.
+
+\strong{Calibrating to a false discovery rate (the default).} By default, and
+whenever \code{fdr} is supplied, the split threshold is calibrated to a target
+false discovery rate rather than to a subjective \code{level}. At each scan the
+algorithm splits at the most extreme eligible candidate clade only if its
+standardised statistic clears the
+Bonferroni threshold \eqn{\Phi^{-1}(1 - fdr/(2k))}, where \eqn{k} is the number
+of \emph{eligible} candidates in that scan; candidates excluded by
+\code{minCladeSize}, node support, or time overlap do not count towards \eqn{k}.
+The \code{fdr} refers to the \strong{whole tree}, not an individual scan or
+clade: under the global null of one unstructured coalescent the probability of
+designating \emph{any} structure equals \code{fdr}, and when real structure is
+present \code{fdr} bounds the expected fraction of spurious splits among all
+splits. This whole-tree guarantee is obtained by controlling each scan; it is
+not a per-clade p-value. Unlike \code{level}, the analytic default requires no
+simulation and is deterministic.
+
+The returned object also carries a global-null test in \code{$global.test}
+(the root-scan \eqn{\max|z|}, the number of candidates \eqn{k}, and a
+Bonferroni p-value for the presence of \emph{any} structure), and, in \code{fdr}
+mode, a heterochronous-sampling diagnostic in \code{$hetero}. Serially sampled
+(heterochronous) trees can modestly inflate the realised FDR; this is reported
+and discussed in the package vignette.
 }
 \section{References}{
 
@@ -91,8 +140,12 @@ Systematic Biology 2020; 69(5):884-896.
 
 \examples{
 tree <- ape::rcoal(50)
+# subjective clustering threshold (default):
 struct <-  trestruct( tree )
 print(struct)
+# calibrate the threshold to a target false discovery rate instead:
+struct_fdr <- trestruct( tree, fdr = 0.05 )
+print(struct_fdr)
 
 }
 \author{

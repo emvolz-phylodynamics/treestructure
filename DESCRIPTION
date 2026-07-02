@@ -1,8 +1,8 @@
 Package: treestructure
 Type: Package
 Title: Detect Population Structure Within Phylogenetic Trees
-Version: 0.7.0
-Date: 2025-09-24
+Version: 1.0.0
+Date: 2026-07-02
 Authors@R: c(person(given = "Erik",
              family = "Volz",
              role = c("aut", "cre"),
@@ -23,12 +23,14 @@ Description: Algorithms for detecting population structure from the history of
     tip and internal node of a tree into disjoint sets characterized by similar 
     coalescent patterns.
 License: GPL (>= 2)
-Suggests: ggtree, ggplot2, knitr, rmarkdown, getopt, bookdown, phangorn, treeio
+Suggests: ggtree, ggplot2, knitr, rmarkdown, getopt, bookdown, phangorn, treeio,
+    testthat (>= 3.0.0)
 Depends: R (>= 4.1.0)
 Imports: ape (>= 5.0), rlang
 LinkingTo: Rcpp
 VignetteBuilder: knitr
-RoxygenNote: 7.3.3
+Config/testthat/edition: 3
+RoxygenNote: 7.3.1
 Encoding: UTF-8
 URL: https://emvolz-phylodynamics.github.io/treestructure/, https://github.com/emvolz-phylodynamics/treestructure
 BugReports: https://github.com/emvolz-phylodynamics/treestructure/issues

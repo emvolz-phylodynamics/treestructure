@@ -71,7 +71,7 @@ cocluster_accuracy <- function( x, y ){
 # 2: mono / mono
 # 3: mono/mono OR mono/para OR para/mono
 # requires nhs , tre , inodes
-.uv.diss <- function(tre, nhs, inodes, n, ancestors, uset, vset, nsim , Ei = NA, returnabs=TRUE, detailedOut = FALSE){
+.uv.diss <- function(tre, nhs, inodes, n, ancestors, uset, vset, nsim , Ei = NA, returnabs=TRUE, detailedOut = FALSE, method = 'analytic'){
 	# 1 sample u
 	# 0 co
 	# -1 sample v
@@ -85,9 +85,9 @@ cocluster_accuracy <- function( x, y ){
 	vinternals <- setdiff(  intersect( vset, inodes), uinternals )
 	utips <- intersect( uset, 1:n)
 	vtips <- intersect( vset, 1:n)
-	if ( (length( utips )==0) | (length(vtips) == 0) ){
+	if ( (length( utips )==0) | (length(vtips) == 0) | (length(uinternals)==0) | (length(vinternals)==0) ){
 		if ( detailedOut )
-			return( list( statistic = 0 , null = c() , Z = x) )
+			return( list( statistic = 0 , null = NULL , Z = 0, mean = NA, sd = NA) )
 		else
 			return( 0 )
 	}
@@ -98,29 +98,32 @@ cocluster_accuracy <- function( x, y ){
 	 , cbind(  nhs[ vtips ], -1 )
 	)
 	x <- as.vector( x[ order(x[,1] ) , 2] )
-	nd <- Cuv_ranksum_nulldist(x, nsim, Ei  )
 
 	rsuv <- .rank.sum(nhs, uinternals, vinternals)
 
-	m_nd <- mean(nd)
-	sd_nd <- stats::sd(nd)
-	if ( returnabs )
-		x = ( abs( (rsuv - m_nd) / sd_nd ) )
+	# null mean and sd of the rank sum: exact analytic moments, or Monte-Carlo simulation
+	if ( method == 'analytic' ){
+		nd <- NULL
+		mom <- Cuv_ranksum_moments( x, Ei )
+		m_nd <- mom[1]
+		sd_nd <- mom[2]
+	} else {
+		nd <- Cuv_ranksum_nulldist(x, nsim, Ei  )
+		m_nd <- mean(nd)
+		sd_nd <- stats::sd(nd)
+	}
+
+	if ( is.na( sd_nd ) | (sd_nd <= 0) )
+		z = 0
+	else if ( returnabs )
+		z = ( abs( (rsuv - m_nd) / sd_nd ) )
 	else
-		x = ( (rsuv - m_nd) / sd_nd )
+		z = ( (rsuv - m_nd) / sd_nd )
 
 	if ( detailedOut ){
-		return( list ( statistic = unname( rsuv ), null = nd , Z = x )  )
+		return( list ( statistic = unname( rsuv ), null = nd , Z = z, mean = m_nd, sd = sd_nd )  )
 	}
-	return ( x )
-
-	if (FALSE){ # alternative empirical measure:
-		s <- sum(rsuv > nd )
-		p <- min( s / nsim , (nsim - s) / nsim )
-
-		p <- sum(rsuv > nd ) / nsim
-		abs( qnorm( p )  )
-	}
+	return ( z )
 }
 
 
@@ -244,7 +247,12 @@ cocluster_accuracy <- function( x, y ){
 #' @param x A character vector of tip labels or numeric node numbers. If numeric,
 #'    can include internal node numbers.
 #' @param y as x, but must be disjoint with x
-#' @param nsim Number of simulations (larger = slower and more accurate)
+#' @param nsim Number of simulations for the null distribution. Only used when
+#'    \code{method = 'sim'} (larger = slower and more accurate).
+#' @param method How the null distribution of the rank-sum statistic is
+#'    characterised. \code{'analytic'} (the default) computes the exact mean and
+#'    variance of the coalescent null with a deterministic recursion and reports a
+#'    normal-approximation p-value; \code{'sim'} uses Monte-Carlo simulation.
 #'
 #' @examples
 #' tree <- ape::read.tree( system.file('sim.nwk', package = 'treestructure') )
@@ -262,10 +270,11 @@ cocluster_accuracy <- function( x, y ){
 #'
 #' print(results)
 #' @export
-treestructure.test <- function( tre, x, y, nsim = 1e4 )
+treestructure.test <- function( tre, x, y, nsim = 1e4, method = 'analytic' )
 {
 	stopifnot( ape::is.rooted(tre))
 	stopifnot( ape::is.binary(tre))
+	stopifnot( method %in% c('analytic','sim') )
 	stopifnot( length( intersect( x, y )) == 0 )
 	if ( any(is.na(tre$tip.label)) | anyDuplicated(tre$tip.label)){
 		message('Tree has NA or duplicated tip labels. Adding a unique id.')
@@ -290,17 +299,34 @@ treestructure.test <- function( tre, x, y, nsim = 1e4 )
 	Uset <- setdiff( Uset, tredat$ancestors[[ ape::getMRCA( tredat$tre, uset ) ]] )
 	Vset = unique( c( vset, do.call( c, tredat$ancestors[vset] )) )
 	Vset = setdiff( Vset , tredat$ancestors[[ ape::getMRCA( tredat$tre, vset ) ]] )
-	uvd = .uv.diss(tredat$tre, tredat$nhs, tredat$inodes, tredat$n, tredat$ancestors, Uset, Vset, nsim = nsim, returnabs=FALSE, detailedOut = TRUE)
+	uvd = .uv.diss(tredat$tre, tredat$nhs, tredat$inodes, tredat$n, tredat$ancestors, Uset, Vset, nsim = nsim, returnabs=FALSE, detailedOut = TRUE, method = method)
+
+	if ( method == 'analytic' ){
+		# normal approximation using the exact analytic moments; uvd$Z is standardised
+		p.value = min( stats::pnorm( uvd$Z ), stats::pnorm( uvd$Z, lower.tail = FALSE ) )
+		estimate = stats::pnorm( uvd$Z )
+		std.err = uvd$sd
+		conf.int = uvd$mean + stats::qnorm( c(0.025 , 0.975) ) * uvd$sd
+		null.value = uvd$mean
+		methodstr = 'Two tailed normal approximation'
+	} else {
+		p.value = with (uvd,  min( mean(statistic < null), mean( statistic> null) ) )
+		estimate = with (uvd,  mean( statistic> null))
+		std.err = stats::sd ( uvd$null )
+		conf.int = stats::quantile( uvd$null, c(0.025 , 0.975) )
+		null.value = stats::median( uvd$null )
+		methodstr = 'Two tailed simulation quantiles'
+	}
 
 	res = structure( list(
 	  statistic = uvd$statistic
-	  , p.value = with (uvd,  min( mean(statistic < null), mean( statistic> null) ) )
-	  , estimate = with (uvd,  mean( statistic> null))
-	  , std.err = stats::sd ( uvd$nd )
-	  , conf.int = stats::quantile( uvd$null, c(0.025 , 0.975) )
-	  , null.value = stats::median( uvd$null )
+	  , p.value = p.value
+	  , estimate = estimate
+	  , std.err = std.err
+	  , conf.int = conf.int
+	  , null.value = null.value
 	  , alternative='Alternative hypothesis: Rank sum differs from coalescent distribution'
-	  , method = 'Two tailed simulation quantiles'
+	  , method = methodstr
 	  , data.name = 'tre'
 	  , data = tredat$tre
 	  , nsim = nsim
@@ -360,10 +386,19 @@ invisible(x)
 #' @param nodeSupportThreshold Threshold node support value between 0 and 100.
 #'    Nodes with support lower than this threshold will not be tested.
 #' @param nsim Number of simulations for computing null distribution of test
-#'    statistics.
-#' @param level Significance level for finding new split within a set of tips.
-#'    Can also be NULL, in which case the optimal level is found according to the
-#'    CH index (see details).
+#'    statistics. Only used when \code{method = 'sim'}.
+#' @param fdr Target false discovery rate for detected structure, a number in
+#'    (0,1). This is the default way of choosing the split threshold
+#'    (\code{fdr = 0.1}): the threshold at each scan is calibrated so that the
+#'    whole-tree false discovery rate is controlled at this level (see details for
+#'    the precise meaning). It is analytic and requires no simulation. An
+#'    explicitly supplied \code{level} takes precedence unless \code{fdr} is also
+#'    given; set \code{fdr = NULL} to use \code{level} instead.
+#' @param level Significance level for finding a new split within a set of tips.
+#'    Used when \code{fdr = NULL}, or when \code{level} is supplied without an
+#'    explicit \code{fdr}. This is a subjective clustering threshold, not an error
+#'    rate; prefer \code{fdr}. Can also be NULL, in which case the optimal level is
+#'    found according to the CH index (see details).
 #' @param ncpu If > 1 will compute statistics in parallel using multiple CPUs.
 #' @param verbosity If > 0 will print information about progress of the algorithm.
 #' @param debugLevel If > 0 will produce additional data in return value.
@@ -373,6 +408,17 @@ invisible(x)
 #'    for the search.
 #' @param res If optimizing the `level` parameter, this is the number of values
 #'    to test.
+#' @param method How the coalescent null of the rank-sum statistic is
+#'    characterised at each test. \code{'analytic'} (the default) computes the
+#'    exact mean and variance by a deterministic recursion (fast, and
+#'    deterministic so results are reproducible); \code{'sim'} uses Monte-Carlo
+#'    simulation with \code{nsim} replicates (the original behaviour).
+#' @param split Multiple-testing correction applied at each scan in \code{fdr}
+#'    mode. \code{'bonferroni'} (the default) uses a per-scan Bonferroni bound;
+#'    \code{'bh'} uses a Benjamini-Hochberg step-up, which is less conservative and
+#'    retains more power on large trees with abundant moderate structure (where the
+#'    Bonferroni bound to make the first split can grow with the tree size). Ignored
+#'    when a subjective \code{level} is used.
 #' @return A TreeStructure object which includes cluster and partition assignment
 #'    for each tip of the tree.
 #'
@@ -391,6 +437,29 @@ invisible(x)
 #' based on within- and between-cluster variance in node heights can be used to
 #' select a significance level if none is provided.
 #'
+#' \strong{Calibrating to a false discovery rate (the default).} By default, and
+#' whenever \code{fdr} is supplied, the split threshold is calibrated to a target
+#' false discovery rate rather than to a subjective \code{level}. At each scan the
+#' algorithm splits at the most extreme eligible candidate clade only if its
+#' standardised statistic clears the
+#' Bonferroni threshold \eqn{\Phi^{-1}(1 - fdr/(2k))}, where \eqn{k} is the number
+#' of \emph{eligible} candidates in that scan; candidates excluded by
+#' \code{minCladeSize}, node support, or time overlap do not count towards \eqn{k}.
+#' The \code{fdr} refers to the \strong{whole tree}, not an individual scan or
+#' clade: under the global null of one unstructured coalescent the probability of
+#' designating \emph{any} structure equals \code{fdr}, and when real structure is
+#' present \code{fdr} bounds the expected fraction of spurious splits among all
+#' splits. This whole-tree guarantee is obtained by controlling each scan; it is
+#' not a per-clade p-value. Unlike \code{level}, the analytic default requires no
+#' simulation and is deterministic.
+#'
+#' The returned object also carries a global-null test in \code{$global.test}
+#' (the root-scan \eqn{\max|z|}, the number of candidates \eqn{k}, and a
+#' Bonferroni p-value for the presence of \emph{any} structure), and, in \code{fdr}
+#' mode, a heterochronous-sampling diagnostic in \code{$hetero}. Serially sampled
+#' (heterochronous) trees can modestly inflate the realised FDR; this is reported
+#' and discussed in the package vignette.
+#'
 #' @section References:
 #' Volz EM, Carsten W, Grad YH, Frost SDW, Dennis AM, Didelot X.
 #' Identification of hidden population structure in time-scaled phylogenies.
@@ -401,14 +470,25 @@ invisible(x)
 #'
 #' @examples
 #' tree <- ape::rcoal(50)
+#' # subjective clustering threshold (default):
 #' struct <-  trestruct( tree )
 #' print(struct)
+#' # calibrate the threshold to a target false discovery rate instead:
+#' struct_fdr <- trestruct( tree, fdr = 0.05 )
+#' print(struct_fdr)
 #'
 #' @export
-trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportValues = FALSE, nodeSupportThreshold = 95, nsim = 1e4, level = .01, ncpu = 1, verbosity = 1, debugLevel=0
-	, levellb = 1e-3, levelub = 1e-1, res = 11)
+trestruct <- function( tre, fdr = 0.1, level = 0.01, minCladeSize = 10, nodeSupportValues = FALSE, nodeSupportThreshold = 95, minOverlap = -Inf, nsim = 1e4, ncpu = 1, verbosity = 1, debugLevel = 0
+	, levellb = 1e-3, levelub = 1e-1, res = 11, method = 'analytic', split = c('bonferroni','bh'))
 {
 	stopifnot( ape::is.rooted(tre))
+	stopifnot( method %in% c('analytic','sim') )
+	split <- match.arg( split )
+	if ( !is.null( fdr ) )
+		stopifnot( is.numeric(fdr), length(fdr)==1, fdr > 0, fdr < 1 )
+	# fdr calibration is the default; an explicitly supplied *level* (without an explicit
+	# *fdr*) selects the subjective-threshold mode instead.
+	.use_fdr <- !is.null( fdr ) && !( !missing(level) && missing(fdr) )
 	# stopifnot( ape::is.binary(tre))
 	if ( minOverlap >= minCladeSize){
 		stop('*minOverlap* should be < *minCladeSize*.')
@@ -455,10 +535,17 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		stop('Failure to parse node support. Must be a single logical or a numeric vector with length equal to number of internal nodes in the tree. If numeric, these values should be between 0 and 100. If logical, node support should be included in labeled nodes of the tree.')
 
 	tredat = .tredat( tre )
+	# fdr calibration (the default) overrides *level* (Bonferroni-per-scan threshold; see .trestruct)
+	if ( .use_fdr ){
+		if ( verbosity > 0 & !missing(level) )
+			message( paste0( 'Both *fdr* and *level* were supplied; calibrating to the target false discovery rate (FDR) of ', fdr, ' and ignoring *level*.' ) )
+		return( .trestruct( tre, minCladeSize, minOverlap , nodeSupportValues , nodeSupportThreshold , nsim , level , ncpu , verbosity , debugLevel
+		, useNodeSupport, tredat, method = method, fdr = fdr, split = split ) )
+	}
 	stopifnot( is.null(level) | is.numeric(level) )
 	if( !is.null( level ) & is.numeric(level))
 		return( .trestruct( tre, minCladeSize, minOverlap , nodeSupportValues , nodeSupportThreshold , nsim , level[1] , ncpu , verbosity , debugLevel
-		, useNodeSupport, tredat) )
+		, useNodeSupport, tredat, method = method, split = split) )
 	if (is.null(level))
 	{
 		levels <- seq( levellb, levelub, length.out=res )
@@ -466,7 +553,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		{
 			message( paste('Running treestructure with significance level', round(l,3) ))
 			message('')
-			.trestruct( tre, minCladeSize, minOverlap , nodeSupportValues , nodeSupportThreshold , nsim , l, ncpu , verbosity , debugLevel, useNodeSupport, tredat)
+			.trestruct( tre, minCladeSize, minOverlap , nodeSupportValues , nodeSupportThreshold , nsim , l, ncpu , verbosity , debugLevel, useNodeSupport, tredat, method = method, split = split)
 		})
 		chs <- sapply( tss, .ch )
 		chdf <- data.frame( level = levels, CH = chs, optimal= '' )
@@ -477,8 +564,25 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	}
 }
 
-.trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportValues = FALSE, nodeSupportThreshold = 95, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1, debugLevel=0
-	, useNodeSupport, tredat)
+# Heterochronous-sampling diagnostic. Overlapping coefficient of the tip-height and internal-node
+# -height distributions (kernel densities on a common grid). 0 for contemporaneous sampling (guarded
+# on ~zero tip-height variance), rising towards 1 as sampling overlaps the coalescent time range.
+.hetero_index <- function( tre ){
+	D <- ape::node.depth.edgelength( tre )
+	n <- ape::Ntip( tre )
+	H <- max( D[1:n] )
+	th <- H - D[1:n]                       # tip heights (age before most recent sample)
+	nh <- H - D[ (n+1):(n+tre$Nnode) ]     # internal-node (coalescent) heights
+	if ( stats::sd( th ) < 1e-9 )
+		return( 0 )
+	r <- range( c(th, nh) )
+	ft <- stats::density( th, from=r[1], to=r[2], n=512 )$y
+	fn <- stats::density( nh, from=r[1], to=r[2], n=512 )$y
+	sum( pmin( ft/sum(ft), fn/sum(fn) ) )
+}
+
+.trestruct <- function( tre, minCladeSize = 10, minOverlap = -Inf, nodeSupportValues = FALSE, nodeSupportThreshold = 95, nsim = 1e3, level = .01, ncpu = 1, verbosity = 1, debugLevel=0
+	, useNodeSupport, tredat, method = 'analytic', fdr = NULL, split = 'bonferroni')
 {
 	#attach( tredat )
 
@@ -577,11 +681,11 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 			if ( length( vtips ) == 0){
 				return( 0 )
 			}
-			return( .uv.diss( tredat$tre, tredat$nhs, tredat$inodes, tredat$n, tredat$ancestors, nsu , nsv, nsim = nsim , Ei=Ei, returnabs = returnabs ) )
+			return( .uv.diss( tredat$tre, tredat$nhs, tredat$inodes, tredat$n, tredat$ancestors, nsu , nsv, nsim = nsim , Ei=Ei, returnabs = returnabs, method = method ) )
 		} else{
 			nsu <- setdiff( node2nodeset[[u]], node2nodeset[[v]] )
 			nsv <- setdiff( node2nodeset[[v]], node2nodeset[[u]])
-			.uv.diss( tredat$tre, tredat$nhs, tredat$inodes, tredat$n, tredat$ancestors, nsu, nsv, nsim = nsim , Ei=Ei , returnabs = returnabs)
+			.uv.diss( tredat$tre, tredat$nhs, tredat$inodes, tredat$n, tredat$ancestors, nsu, nsv, nsim = nsim , Ei=Ei , returnabs = returnabs, method = method)
 		}
 	}
 	# find biggest outlier descend from a not counting rest of tree
@@ -594,7 +698,24 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		}
 		wm <- which.max( zs )
 		ustar <- node2nodeset[[a]][ wm ]
-		if ( zs[wm] <= zstar )
+		# split decision. Subjective level: fixed threshold zstar. FDR mode: split the most
+		# extreme eligible candidate iff the scan clears the target fdr, by either a per-scan
+		# Bonferroni bound or a Benjamini-Hochberg step-up. k = number of eligible candidates
+		# in the scan (ineligible ones -- size/support/overlap -- return z=0 from .calc.z).
+		if ( is.null( fdr ) ){
+			if ( zs[wm] <= zstar )
+			  return(NULL)
+			return( ustar )
+		}
+		elig <- zs[ zs > 0 ]
+		k <- max( 1L, length( elig ) )
+		reject <- if ( split == 'bh' ){
+			ps <- sort( 2 * stats::pnorm( elig, lower.tail = FALSE ) )
+			any( ps <= ( seq_len(k) / k ) * fdr )
+		} else {
+			zs[wm] > stats::qnorm( 1 - min(1,fdr)/(2*k) )
+		}
+		if ( !reject )
 		  return(NULL)
 		ustar
 	}
@@ -619,6 +740,15 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		 , node = node2nodeset[[tredat$rootnode]]
 		 )
 	}
+
+	# GLOBAL-NULL TEST (root scan): is there ANY structure in the tree?
+	# H0 = one unstructured coalescent; statistic = max |z| over the root's eligible candidates;
+	# p = Bonferroni p-value for that max ( 2 * k * P( N(0,1) > max|z| ) ).
+	.rzs <- sapply( node2nodeset[[ tredat$rootnode ]], function(u) .calc.z( u, tredat$rootnode, Ei = 1 ) )
+	.rk <- max( 1L, sum( .rzs > 0 ) )
+	.rmax <- max( .rzs )
+	global.test <- list( statistic = unname( .rmax ), k = .rk
+		, p.value = min( 1, 2 * .rk * stats::pnorm( -.rmax ) ) )
 
 	node2cl <- c()
 	clusterlist <- list()
@@ -671,7 +801,7 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 				# overlap
 				if ( .overlap( clusterlist[[iu]] , clusterlist[[iv]] )) #
 				{
-				  D[iu,iv] <- .uv.diss ( tredat$tre, tredat$nhs, tredat$inodes, tredat$n, tredat$ancestors, clusterlist[[iu]] , clusterlist[[iv]], nsim = nsim,  Ei = 3)
+				  D[iu,iv] <- .uv.diss ( tredat$tre, tredat$nhs, tredat$inodes, tredat$n, tredat$ancestors, clusterlist[[iu]] , clusterlist[[iv]], nsim = nsim,  Ei = 3, method = method)
 				  D[iv, iu] <- D[iu, iv]
 				}
 			}
@@ -697,10 +827,17 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		clustervec[ itip ] <- k
 	}
 
+	# partition = coarsening that merges clusters whose pairwise dissimilarity is not significant;
+	# in fdr mode the merge threshold is Bonferroni-corrected over the cluster-pair comparisons.
+	zstar_part <- zstar
+	if ( !is.null( fdr ) ){
+		npairs <- max( 1, nc*(nc-1)/2 )
+		zstar_part <- stats::qnorm( 1 - min(1,fdr)/(2*npairs) )
+	}
 	if ( nc  >  1){
 		h <- ape::as.phylo( stats::hclust( D ) )
 		#~ 	h$edge.length[ h$edge.length <= zstar ] <- 0
-		partinds <- stats::cutree( stats::hclust( stats::as.dist( ape::cophenetic.phylo( h ) ) ), h = zstar)
+		partinds <- stats::cutree( stats::hclust( stats::as.dist( ape::cophenetic.phylo( h ) ) ), h = zstar_part)
 		partition <- as.factor( stats::setNames( partinds[ clustervec ] , tredat$tre$tip.label ) )
 		clustering <- as.factor( clustervec )
 		clusters <- split( tredat$tre$tip.label, clustervec )
@@ -714,6 +851,14 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 		remainderClade <- NULL
 	}
 
+	# heterochronous-sampling diagnostic (fdr mode): distributional overlap of tip and node
+	# heights. Heterochronous nulls can modestly inflate the realized FDR (see the vignette).
+	hetero <- NULL
+	if ( !is.null( fdr ) ){
+		hi <- .hetero_index( tredat$tre )
+		hetero <- list( index = hi, flag = ( hi > 0.5 ) )
+	}
+
 	rv = list(
 	  clustering = clustering
 	  , partition = partition
@@ -723,7 +868,11 @@ trestruct <- function( tre, minCladeSize = 25, minOverlap = -Inf, nodeSupportVal
 	  , clusterList = clusterlist
 	  , tree = tredat$tre
 	  , level = level
+	  , fdr = fdr
+	  , split = if ( is.null(fdr) ) NULL else split
 	  , zstar = zstar
+	  , global.test = global.test
+	  , hetero = hetero
 	  , cluster_mrca  = node2cl
 	  , call = match.call()
 	  , data =  data.frame( taxon = tre$tip.label
@@ -829,10 +978,24 @@ print.TreeStructure <- function(x, rows = 0, ...)
 	cat( 'Call: \r\n' )
 	print( x$call )
 	cat('\r\n')
-	cat ( paste( 'Significance level:', x$level, '\n' ) )
+	if ( !is.null( x$fdr ) )
+		cat ( paste0( 'Target FDR: ', x$fdr, ' (', x$split, ' correction)\n' ) )
+	else
+		cat ( paste( 'Significance level:', x$level, '\n' ) )
+
+	if ( !is.null( x$global.test ) )
+		cat( sprintf( 'Global structure test: max|z| = %.2f over %d candidates, p = %.3g\n'
+			, x$global.test$statistic, x$global.test$k, x$global.test$p.value ) )
 
 	cat ( paste( 'Number of clusters:', nc , '\n') )
 	cat ( paste( 'Number of partitions:', npart, '\n' ) )
+
+	if ( !is.null( x$hetero ) && isTRUE( x$hetero$flag ) )
+		cat( sprintf( paste0(
+			'NOTE: heterochronous sampling detected (overlap index %.2f). Under the coalescent null this\n'
+			, '      can modestly inflate the realized FDR (up to ~2x at target 5%% in our real-data study);\n'
+			, '      see vignette(\"treestructure\"). Deep clades whose most recent sample is old are most affected.\n' )
+			, x$hetero$index ) )
 
 	cat( 'Number of taxa in each cluster:\n' )
 	print( table( x$clustering) )
