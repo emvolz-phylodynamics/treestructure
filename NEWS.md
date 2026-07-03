@@ -1,3 +1,12 @@
+# treestructure 1.0.1
+
+* The default target false discovery rate is now `fdr = 0.2` (was `0.1`). The stricter
+  0.1 default was conservative on real trees and interacted awkwardly with
+  `minCladeSize`; at `0.2` the number of designated clusters decreases monotonically as
+  `minCladeSize` grows, and more genuine structure is recovered while the whole-tree
+  error rate remains controlled.
+* The node-support vignette was revised to the new default (`fdr = 0.2`).
+
 # treestructure 1.0.0
 
 ## Calibrating to a false discovery rate

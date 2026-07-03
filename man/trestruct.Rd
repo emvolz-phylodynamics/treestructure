@@ -6,7 +6,7 @@
 \usage{
 trestruct(
   tre,
-  fdr = 0.1,
+  fdr = 0.2,
   level = 0.01,
   minCladeSize = 10,
   nodeSupportValues = FALSE,
@@ -29,7 +29,7 @@ it will be converted to a binary tree before processing.}
 
 \item{fdr}{Target false discovery rate for detected structure, a number in
 (0,1). This is the default way of choosing the split threshold
-(\code{fdr = 0.1}): the threshold at each scan is calibrated so that the
+(\code{fdr = 0.2}): the threshold at each scan is calibrated so that the
 whole-tree false discovery rate is controlled at this level (see details for
 the precise meaning). It is analytic and requires no simulation. An
 explicitly supplied \code{level} takes precedence unless \code{fdr} is also

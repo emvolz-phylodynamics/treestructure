@@ -389,7 +389,7 @@ invisible(x)
 #'    statistics. Only used when \code{method = 'sim'}.
 #' @param fdr Target false discovery rate for detected structure, a number in
 #'    (0,1). This is the default way of choosing the split threshold
-#'    (\code{fdr = 0.1}): the threshold at each scan is calibrated so that the
+#'    (\code{fdr = 0.2}): the threshold at each scan is calibrated so that the
 #'    whole-tree false discovery rate is controlled at this level (see details for
 #'    the precise meaning). It is analytic and requires no simulation. An
 #'    explicitly supplied \code{level} takes precedence unless \code{fdr} is also
@@ -478,12 +478,13 @@ invisible(x)
 #' print(struct_fdr)
 #'
 #' @export
-trestruct <- function( tre, fdr = 0.1, level = 0.01, minCladeSize = 10, nodeSupportValues = FALSE, nodeSupportThreshold = 95, minOverlap = -Inf, nsim = 1e4, ncpu = 1, verbosity = 1, debugLevel = 0
+trestruct <- function( tre, fdr = 0.2, level = 0.01, minCladeSize = 10, nodeSupportValues = FALSE, nodeSupportThreshold = 95, minOverlap = -Inf, nsim = 1e4, ncpu = 1, verbosity = 1, debugLevel = 0
 	, levellb = 1e-3, levelub = 1e-1, res = 11, method = 'analytic', split = c('bonferroni','bh'))
 {
 	stopifnot( ape::is.rooted(tre))
 	stopifnot( method %in% c('analytic','sim') )
 	split <- match.arg( split )
+	.usercall <- match.call()          # the user-facing call, stored on the result (not the internal .trestruct call)
 	if ( !is.null( fdr ) )
 		stopifnot( is.numeric(fdr), length(fdr)==1, fdr > 0, fdr < 1 )
 	# fdr calibration is the default; an explicitly supplied *level* (without an explicit
@@ -539,13 +540,18 @@ trestruct <- function( tre, fdr = 0.1, level = 0.01, minCladeSize = 10, nodeSupp
 	if ( .use_fdr ){
 		if ( verbosity > 0 & !missing(level) )
 			message( paste0( 'Both *fdr* and *level* were supplied; calibrating to the target false discovery rate (FDR) of ', fdr, ' and ignoring *level*.' ) )
-		return( .trestruct( tre, minCladeSize, minOverlap , nodeSupportValues , nodeSupportThreshold , nsim , level , ncpu , verbosity , debugLevel
-		, useNodeSupport, tredat, method = method, fdr = fdr, split = split ) )
+		rv <- .trestruct( tre, minCladeSize, minOverlap , nodeSupportValues , nodeSupportThreshold , nsim , level , ncpu , verbosity , debugLevel
+		, useNodeSupport, tredat, method = method, fdr = fdr, split = split )
+		rv$call <- .usercall
+		return( rv )
 	}
 	stopifnot( is.null(level) | is.numeric(level) )
-	if( !is.null( level ) & is.numeric(level))
-		return( .trestruct( tre, minCladeSize, minOverlap , nodeSupportValues , nodeSupportThreshold , nsim , level[1] , ncpu , verbosity , debugLevel
-		, useNodeSupport, tredat, method = method, split = split) )
+	if( !is.null( level ) & is.numeric(level)){
+		rv <- .trestruct( tre, minCladeSize, minOverlap , nodeSupportValues , nodeSupportThreshold , nsim , level[1] , ncpu , verbosity , debugLevel
+		, useNodeSupport, tredat, method = method, split = split)
+		rv$call <- .usercall
+		return( rv )
+	}
 	if (is.null(level))
 	{
 		levels <- seq( levellb, levelub, length.out=res )
@@ -560,6 +566,7 @@ trestruct <- function( tre, fdr = 0.1, level = 0.01, minCladeSize = 10, nodeSupp
 		chdf$optimal[ which.max( chs ) ] <- '***'
 		ts <-  tss[[ which.max(chs) ]]
 		ts$chdf <- chdf
+		ts$call <- .usercall
 		return(ts)
 	}
 }
@@ -707,10 +714,10 @@ trestruct <- function( tre, fdr = 0.1, level = 0.01, minCladeSize = 10, nodeSupp
 			  return(NULL)
 			return( ustar )
 		}
-		elig <- zs[ zs > 0 ]
-		k <- max( 1L, length( elig ) )
+		eligi <- which( zs > 0 )
+		k <- max( 1L, length( eligi ) )
 		reject <- if ( split == 'bh' ){
-			ps <- sort( 2 * stats::pnorm( elig, lower.tail = FALSE ) )
+			ps <- sort( 2 * stats::pnorm( zs[eligi], lower.tail = FALSE ) )
 			any( ps <= ( seq_len(k) / k ) * fdr )
 		} else {
 			zs[wm] > stats::qnorm( 1 - min(1,fdr)/(2*k) )

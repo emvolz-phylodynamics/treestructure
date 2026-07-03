@@ -62,7 +62,7 @@ The message printed on screen, `Finding splits under nodes`, reports which nodes
 the algorithm is currently testing.
 
 By default `trestruct` calibrates the split threshold to a target false discovery
-rate (`fdr = 0.1`), so that the expected proportion of spuriously designated clusters
+rate (`fdr = 0.2`), so that the expected proportion of spuriously designated clusters
 is controlled across the whole tree. The printed output reports this target and a
 global test for whether the tree has any structure at all:
 

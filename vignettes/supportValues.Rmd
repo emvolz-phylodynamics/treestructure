@@ -1,13 +1,12 @@
 ---
-title: "Node support values using treestructure"
-author: "Vinicius Franceschi and Fabricia F. Nascimento"
+title: "Node support values using treestructure (v2)"
+author: "Vinicius Franceschi, Fabricia F. Nascimento, and Erik Volz"
 date: "`r Sys.Date()`"
-output: 
+output:
   bookdown::html_vignette2:
   #rmarkdown::html_vignette
   #bookdown::pdf_book:
     toc: TRUE
-bibliography: bib/tutorials.bib
 pkgdown:
   as_is: true
 fontsize: 12pt
@@ -23,18 +22,21 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.width = 7,
   fig.height = 11,
-  warning = FALSE, 
+  warning = FALSE,
   message = FALSE
 )
 ```
 
-# Introductions
+# Introduction
 
-This tutorial uses the public data available for Ebola [here](https://github.com/ebov/space-time) to demonstrate the use of node support 
-values (e.g. bootstrap and posterior probability) to avoid designating population 
-structure in badly supported clades. 
+This tutorial uses the public data available for Ebola [here](https://github.com/ebov/space-time) to demonstrate the use of node support
+values (e.g. bootstrap and posterior probability) to avoid designating population
+structure in badly supported clades.
 
 We will use their [time-scaled phylogenetic tree](https://github.com/ebov/space-time/blob/master/Data/Makona_1610_cds_ig.GLM.MCC.tree) estimated with [BEAST](https://beast.community).
+
+Throughout we use the default analysis, in which the split threshold is calibrated to
+a target false discovery rate (`fdr = 0.2`), with `minCladeSize = 10`.
 
 
 First, we need to load the R package we will use in this tutorial.
@@ -47,7 +49,7 @@ library(treestructure)
 ```
 
 
-Now, we will load the time-scaled phylogenetic tree with posterior probability 
+Now, we will load the time-scaled phylogenetic tree with posterior probability
 support values:
 
 ```{r}
@@ -63,10 +65,10 @@ beast_tree <- read.beast(tmp_file)
 ```
 
 
-Then we need to convert the tree to a `phylo` object and add the posterior 
+Then we need to convert the tree to a `phylo` object and add the posterior
 probability information from the Bayesian tree to the `phylo` object tree.
 
-If we use the `ape:read.nexus` to read the tree that was estimated with BEAST, 
+If we use the `ape:read.nexus` to read the tree that was estimated with BEAST,
 we won't get the posterior probability associated to the clades.
 
 We now convert the dated tree to `phylo` object.
@@ -100,14 +102,13 @@ Firstly, we will assign clusters without using node support values. Note that
 the parameter `nodeSupportValues` is set to FALSE.
 
 ```{r eval=FALSE}
-trestruct_res_nobt <- trestruct(dated_tre, 
-                                minCladeSize = 30, 
-                                nodeSupportValues = FALSE, 
-                                level = 0.01)
+trestruct_res_nobt <- trestruct(dated_tre,
+                                fdr = 0.2,
+                                minCladeSize = 10,
+                                nodeSupportValues = FALSE)
 ```
 
-In the above example, the `trestruct` function took 7 minutes to run on a macOS M2. 
-Here, we can load the results instead.
+Here, we load the precomputed result.
 
 ```{r}
 trestruct_res_nobt <- readRDS( system.file('trestruct_res_nobt.rds',
@@ -116,37 +117,74 @@ trestruct_res_nobt <- readRDS( system.file('trestruct_res_nobt.rds',
 plot(trestruct_res_nobt, use_ggtree = T) + ggtree::geom_tippoint()
 ```
 
-The `treestructure` analyses resulted in 23 clusters.
+The `treestructure` analysis resulted in `r nlevels(trestruct_res_nobt$clustering)` clusters.
+
+Although `treestructure` uses only the shape of the tree, the clusters largely
+correspond to country. The tip labels encode the sampling country (Guinea, Sierra
+Leone or Liberia):
+
+```{r}
+country <- sapply(strsplit(trestruct_res_nobt$tree$tip.label, "\\|"), `[`, 4)
+country[!country %in% c("SLE", "LBR", "GIN")] <- "other"
+table(cluster = trestruct_res_nobt$clustering, country = country)
+```
+
+Most clusters are dominated by a single country, recovering the introductions and
+cross-border spread of the epidemic from the coalescent pattern alone.
+
+
+## Sensitivity to the minimum clade size
+
+`minCladeSize` sets the smallest cluster that can be designated. Repeating the same
+analysis with `minCladeSize = 20`:
+
+```{r eval = FALSE}
+trestruct_res_mcs20 <- trestruct(dated_tre, fdr = 0.2, minCladeSize = 20,
+                                 nodeSupportValues = FALSE)
+```
+
+```{r}
+trestruct_res_mcs20 <- readRDS( system.file('trestruct_res_nobt_mcs20.rds',
+                                            package='treestructure') )
+
+plot(trestruct_res_mcs20, use_ggtree = T) + ggtree::geom_tippoint()
+```
+
+This finds `r nlevels(trestruct_res_mcs20$clustering)` clusters, fewer than the
+`r nlevels(trestruct_res_nobt$clustering)` found with `minCladeSize = 10`: raising the
+minimum size drops the smallest clusters and gives a coarser partition. `minCladeSize`
+also controls how many candidate clades are tested at each step, which feeds into the
+multiple-testing threshold, so the two partitions do not simply nest — each resolves
+somewhat different structure. It is worth trying more than one.
 
 
 ## Assign clusters using branch support
 
 Now, we will assign clusters using the information on branch support.
-As we are analyzing a dated tree estimated with BEAST, the branch support is 
+As we are analyzing a dated tree estimated with BEAST, the branch support is
 the posterior probability.
 
 
 We designate clusters that have at least 0.95 posterior probability. This
 is achieved by setting to 95 the parameter _nodeSupportThreshold_ in the **trestruct**
-function. 
+function.
 
 Note that now the parameter `nodeSupportValues` is set to TRUE, which tells
 the algorithm that the node support values is provided with the `phylo` object
 as `node.label`.
 
-You can also provide the `nodeSupportValues` as a vector with length equal to 
+You can also provide the `nodeSupportValues` as a vector with length equal to
 the number of internal nodes in the tree.
 
 ```{r eval=FALSE}
-trestruct_res <- trestruct(dated_tre, 
-                           minCladeSize = 30, 
-                           nodeSupportValues = TRUE, 
-                           nodeSupportThreshold = 95, 
-                           level = 0.01)
+trestruct_res <- trestruct(dated_tre,
+                           fdr = 0.2,
+                           minCladeSize = 10,
+                           nodeSupportValues = TRUE,
+                           nodeSupportThreshold = 95)
 ```
 
-In the above example, the `trestruct` function took 50 seconds to run on a macOS M2. 
-Here, we can load the results instead.
+Here, we load the precomputed result.
 
 ```{r}
 trestruct_res <- readRDS( system.file('trestruct_res.rds',
@@ -156,32 +194,33 @@ plot(trestruct_res, use_ggtree = T) + ggtree::geom_tippoint()
 ```
 
 
-Now we have only 6 well-supported clusters with differences in coalescent patterns.
+Now we have only `r nlevels(trestruct_res$clustering)` well-supported clusters with differences in coalescent patterns.
 
 Note that this might change if you use a higher or lower value for the
 *nodeSupportThreshold* in the **trestruct** function.
 
 
-## Using the CH-index 
+## Using the CH-index
 
-The CH-index will compare different values for the parameter `levels` in the
-`treestructure` algorithm. We will need to specify `level` = NULL and 
-specify the lower and upper bound to optimize the parameter `level`.
-
-Note that we will also take into consideration the use of branch support.
+As an alternative to a target false discovery rate, the CH-index provides an
+automatic way to choose the significance `level`: `trestruct` is run over a range of
+levels (`level = NULL` with lower and upper bounds), and the level maximizing the
+[Calinski–Harabasz index](https://en.wikipedia.org/wiki/Calinski–Harabasz_index) —
+the ratio of between- to within-cluster variance in node heights — is selected. We
+show it here *without* node support, because under strong support filtering the level
+barely changes the result (the CH index is flat).
 
 ```{r eval = FALSE}
 trestruct_chindex <- trestruct(dated_tre,
-                               minCladeSize = 30, 
-                               nodeSupportValues = TRUE, 
-                               nodeSupportThreshold = 95,
+                               minCladeSize = 10,
+                               nodeSupportValues = FALSE,
                                level = NULL,
-                               levellb = 0.0001, 
-                               levelub = 0.001)
+                               levellb = 0.0001,
+                               levelub = 0.01)
 ```
 
-In the above example, the `trestruct` function took 5 minutes to run on a macOS M2. 
-Here, we can load the results instead.
+The CH optimisation runs `trestruct` at several levels, so it is slower; here we
+load the precomputed result.
 
 ```{r}
 trestruct_chindex <- readRDS( system.file('trestruct_chindex.rds',
@@ -190,39 +229,6 @@ trestruct_chindex <- readRDS( system.file('trestruct_chindex.rds',
 plot(trestruct_chindex, use_ggtree = T) + ggtree::geom_tippoint()
 ```
 
-Now we have only 2 well-supported clusters with differences in coalescent 
-patterns after optimizing the significance level.
-
-In this example, instead of using level = 0.01 (as in the default ), the optimization
-of level by using the CH-index identified level as 0.00073.
-
-
-## Combining node support with a false discovery rate
-
-The `level` argument used above is a subjective clustering threshold. Supplying a
-target false discovery rate with `fdr` instead controls the whole-tree error rate of
-the designation (see the
-[false discovery rate](false_discovery_rate.html) vignette). This is complementary
-to node support: the false discovery rate asks whether a clade's coalescent pattern
-differs significantly, while node support asks whether the clade is topologically
-resolved. Both can be required together:
-
-```{r eval=FALSE}
-trestruct( dated_tre, fdr = 0.1, minCladeSize = 30,
-           nodeSupportValues = TRUE, nodeSupportThreshold = 95 )
-```
-
-On this tree the two criteria reinforce one another. With `fdr = 0.1` alone the
-method designates four clusters; additionally requiring node support reduces this to
-two. The result is insensitive to the exact support threshold, because the clusters
-that support removes are designated at nodes with very low posterior probability
-(well below 0.5), while those it keeps are strongly supported:
-
-```{r}
-readRDS( system.file('vignette_fdr_support.rds', package = 'treestructure') )
-```
-
-These two clusters coincide with those selected by the CH index above.
-
-
-# References
+The CH-index selected a significance level of
+`r signif(trestruct_chindex$chdf$level[trestruct_chindex$chdf$optimal == "***"], 3)`,
+giving `r nlevels(trestruct_chindex$clustering)` clusters.

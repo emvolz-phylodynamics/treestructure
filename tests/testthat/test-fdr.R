@@ -40,7 +40,7 @@ test_that("fdr is the default threshold method", {
 	set.seed(7)
 	tr <- ape::rcoal(80)
 	s <- trestruct(tr, minCladeSize = 15, verbosity = 0)   # neither fdr nor level supplied
-	expect_equal(s$fdr, 0.1)
+	expect_equal(s$fdr, 0.2)
 })
 
 test_that("an explicit level (without fdr) selects level mode", {
