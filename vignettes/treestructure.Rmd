@@ -3,7 +3,7 @@ title: "treestructure applied to structured coalescent simulation"
 author: "Erik Volz"
 date: "`r Sys.Date()`"
 output:
-  bookdown::html_vignette2:
+  rmarkdown::html_vignette:
   #rmarkdown::html_vignette
   #bookdown::pdf_book:
     toc: TRUE

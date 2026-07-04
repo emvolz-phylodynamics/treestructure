@@ -3,7 +3,7 @@ title: "Update of a treestructure object with new sequences"
 author: "Vinicius Franceschi and Fabricia F Nascimento"
 date: "`r Sys.Date()`"
 output: 
-  bookdown::html_vignette2:
+  rmarkdown::html_vignette:
   #rmarkdown::html_vignette
   #bookdown::pdf_book:
     toc: TRUE

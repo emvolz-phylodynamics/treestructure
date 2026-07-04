@@ -34,3 +34,5 @@ test_treestructure/
 ^CRAN-SUBMISSION$
 
 ^dev/
+^.*\.pdf$
+^treestructure_.*\.diff$

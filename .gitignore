@@ -15,3 +15,5 @@ check_cran_status/
 test_treestructure/
 older/
 dev/
+
+*.tar.gz

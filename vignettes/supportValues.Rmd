@@ -3,7 +3,7 @@ title: "Node support values using treestructure (v2)"
 author: "Vinicius Franceschi, Fabricia F. Nascimento, and Erik Volz"
 date: "`r Sys.Date()`"
 output:
-  bookdown::html_vignette2:
+  rmarkdown::html_vignette:
   #rmarkdown::html_vignette
   #bookdown::pdf_book:
     toc: TRUE
@@ -48,11 +48,15 @@ library(ggtree)
 library(treestructure)
 ```
 
+The tree-construction and `trestruct` steps below are shown for reference but are not run
+when this vignette is built (to avoid network access and keep the build fast); each
+analysis loads a precomputed result instead.
+
 
 Now, we will load the time-scaled phylogenetic tree with posterior probability
 support values:
 
-```{r}
+```{r eval=FALSE}
 #get the dated tree by first downloading it from the URL below
 tree_url <- "https://raw.githubusercontent.com/ebov/space-time/master/Data/Makona_1610_cds_ig.GLM.MCC.tree"
 tmp_file <- tempfile(fileext = ".tree")
@@ -73,14 +77,14 @@ we won't get the posterior probability associated to the clades.
 
 We now convert the dated tree to `phylo` object.
 
-```{r}
+```{r eval=FALSE}
 dated_tre <- as.phylo(beast_tree)
 ```
 
 Now we add the posterior probability from the BEAST tree to the dated_tree
 object.
 
-```{r}
+```{r eval=FALSE}
 # Get number of tips
 n_tips <- length(dated_tre$tip.label)
 

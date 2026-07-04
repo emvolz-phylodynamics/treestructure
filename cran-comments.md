@@ -1,25 +1,33 @@
-## Test environments 
+## Submission
 
-Platform: Ubuntu 18.04.3 LTS
+treestructure 1.0.1 is a maintenance update.
 
-* using R version 3.4.4 (2018-03-15)
-* x86_64-pc-linux-gnu (64-bit)
+## Changes in this version
 
-Platform: Windows via Win-builder 
+* The default target false discovery rate is now `fdr = 0.2` (previously `0.1`). The
+  stricter default was conservative on empirical trees and non-monotone in
+  `minCladeSize`; at 0.2 the number of designated clusters decreases monotonically as
+  `minCladeSize` grows, while the whole-tree error rate remains controlled.
+* The vignettes were revised for the new default. The node-support vignette no longer
+  accesses the network when it is built: the tree-construction code is shown for
+  reference and the results are loaded from precomputed objects, so all vignettes build
+  offline.
+* Vignettes now use the `rmarkdown::html_vignette` output format; the unused `bookdown`
+  suggestion was removed.
 
-* using R version 3.5.3 (2019-03-11)
-* using platform: x86_64-w64-mingw32 (64-bit)
+## Test environments
 
-Platform: aarch64-apple-darwin20
-
-* using R version 4.4.1
-* macOS 15.6.1
-
+* win-builder: R-devel (x86_64-w64-mingw32, Windows Server 2022).
+* Local: Ubuntu Linux (kernel 6.8), R 4.5.0 (release).
 
 ## R CMD check results
 
-Linux: There were no ERRORs or WARNINGs or NOTES. 
+0 errors | 0 warnings | 0 notes.
 
-Win-builder: There were no ERRORs or WARNINGs or NOTES.
+`R CMD check --as-cran` is clean on win-builder (R-devel) and on the local Linux machine.
+(The local run additionally warned that the system tool `qpdf` is not installed for the
+PDF size-reduction check — a local tooling matter that does not arise on CRAN.)
 
-macOS: here were no ERRORs or WARNINGs or NOTES.
+## Reverse dependencies
+
+There are no reverse dependencies on CRAN.

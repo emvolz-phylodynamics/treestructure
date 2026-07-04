@@ -3,7 +3,7 @@ title: "Calibrating cluster detection to a false discovery rate"
 author: "Erik Volz"
 date: "`r Sys.Date()`"
 output:
-  bookdown::html_vignette2:
+  rmarkdown::html_vignette:
     toc: TRUE
 pkgdown:
   as_is: true
