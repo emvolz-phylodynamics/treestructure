@@ -18,13 +18,13 @@ Source:
 [`DESCRIPTION`](https://github.com/emvolz-phylodynamics/treestructure/blob/master/DESCRIPTION)
 
 Volz E (2026). *treestructure: Detect Population Structure Within
-Phylogenetic Trees*. R package version 0.7.0,
+Phylogenetic Trees*. R package version 1.0.1,
 <https://emvolz-phylodynamics.github.io/treestructure/>.
 
     @Manual{,
       title = {treestructure: Detect Population Structure Within Phylogenetic Trees},
       author = {Erik Volz},
       year = {2026},
-      note = {R package version 0.7.0},
+      note = {R package version 1.0.1},
       url = {https://emvolz-phylodynamics.github.io/treestructure/},
     }

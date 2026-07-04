@@ -26,6 +26,7 @@ plot(x, use_ggtree = TRUE, ...)
 ## Examples
 
 ``` r
+
 #tree <- ape::read.tree( system.file('sim.nwk', package = 'treestructure') )
 # you can run the example below before plotting
 #struc <- trestruct( tree )

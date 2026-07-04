@@ -5,7 +5,7 @@
       fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
     }
   };
-</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Detect cryptic population structure in time trees — trestruct"><meta name="description" content="Estimates a partition of a time-scaled tree by contrasting coalescent patterns."><meta property="og:description" content="Estimates a partition of a time-scaled tree by contrasting coalescent patterns."></head><body>
+</script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Detect cryptic population structure in time trees — trestruct"><meta name="description" content="Estimates a partition of a time-scaled tree by contrasting coalescent patterns."><meta property="og:description" content="Estimates a partition of a time-scaled tree by contrasting coalescent patterns."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">treestructure</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +28,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials"><li><a class="dropdown-item" href="../articles/supportValues.html">Node support values</a></li>
     <li><a class="dropdown-item" href="../articles/updating_treestructure.html">Updating a treestructure object</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/emvolz-phylodynamics/treestructure/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -58,18 +59,21 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">trestruct</span><span class="op">(</span></span>
 <span>  <span class="va">tre</span>,</span>
-<span>  minCladeSize <span class="op">=</span> <span class="fl">25</span>,</span>
-<span>  minOverlap <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>,</span>
+<span>  fdr <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>  level <span class="op">=</span> <span class="fl">0.01</span>,</span>
+<span>  minCladeSize <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  nodeSupportValues <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nodeSupportThreshold <span class="op">=</span> <span class="fl">95</span>,</span>
+<span>  minOverlap <span class="op">=</span> <span class="op">-</span><span class="cn">Inf</span>,</span>
 <span>  nsim <span class="op">=</span> <span class="fl">10000</span>,</span>
-<span>  level <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  ncpu <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verbosity <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  debugLevel <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  levellb <span class="op">=</span> <span class="fl">0.001</span>,</span>
 <span>  levelub <span class="op">=</span> <span class="fl">0.1</span>,</span>
-<span>  res <span class="op">=</span> <span class="fl">11</span></span>
+<span>  res <span class="op">=</span> <span class="fl">11</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"analytic"</span>,</span>
+<span>  split <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bonferroni"</span>, <span class="st">"bh"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -82,13 +86,27 @@
 it will be converted to a binary tree before processing.</p></dd>
 
 
+<dt id="arg-fdr">fdr<a class="anchor" aria-label="anchor" href="#arg-fdr"></a></dt>
+<dd><p>Target false discovery rate for detected structure, a number in
+(0,1). This is the default way of choosing the split threshold
+(<code>fdr = 0.2</code>): the threshold at each scan is calibrated so that the
+whole-tree false discovery rate is controlled at this level (see details for
+the precise meaning). It is analytic and requires no simulation. An
+explicitly supplied <code>level</code> takes precedence unless <code>fdr</code> is also
+given; set <code>fdr = NULL</code> to use <code>level</code> instead.</p></dd>
+
+
+<dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
+<dd><p>Significance level for finding a new split within a set of tips.
+Used when <code>fdr = NULL</code>, or when <code>level</code> is supplied without an
+explicit <code>fdr</code>. This is a subjective clustering threshold, not an error
+rate; prefer <code>fdr</code>. Can also be NULL, in which case the optimal level is
+found according to the CH index (see details).</p></dd>
+
+
 <dt id="arg-mincladesize">minCladeSize<a class="anchor" aria-label="anchor" href="#arg-mincladesize"></a></dt>
 <dd><p>All clusters within partition must have at least this many
 tips.</p></dd>
-
-
-<dt id="arg-minoverlap">minOverlap<a class="anchor" aria-label="anchor" href="#arg-minoverlap"></a></dt>
-<dd><p>Threshold time overlap required to find splits in a clade.</p></dd>
 
 
 <dt id="arg-nodesupportvalues">nodeSupportValues<a class="anchor" aria-label="anchor" href="#arg-nodesupportvalues"></a></dt>
@@ -104,15 +122,13 @@ If numeric vector, these values should be between 0 and 100.</p></dd>
 Nodes with support lower than this threshold will not be tested.</p></dd>
 
 
+<dt id="arg-minoverlap">minOverlap<a class="anchor" aria-label="anchor" href="#arg-minoverlap"></a></dt>
+<dd><p>Threshold time overlap required to find splits in a clade.</p></dd>
+
+
 <dt id="arg-nsim">nsim<a class="anchor" aria-label="anchor" href="#arg-nsim"></a></dt>
 <dd><p>Number of simulations for computing null distribution of test
-statistics.</p></dd>
-
-
-<dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
-<dd><p>Significance level for finding new split within a set of tips.
-Can also be NULL, in which case the optimal level is found according to the
-CH index (see details).</p></dd>
+statistics. Only used when <code>method = 'sim'</code>.</p></dd>
 
 
 <dt id="arg-ncpu">ncpu<a class="anchor" aria-label="anchor" href="#arg-ncpu"></a></dt>
@@ -141,6 +157,23 @@ for the search.</p></dd>
 <dd><p>If optimizing the `level` parameter, this is the number of values
 to test.</p></dd>
 
+
+<dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
+<dd><p>How the coalescent null of the rank-sum statistic is
+characterised at each test. <code>'analytic'</code> (the default) computes the
+exact mean and variance by a deterministic recursion (fast, and
+deterministic so results are reproducible); <code>'sim'</code> uses Monte-Carlo
+simulation with <code>nsim</code> replicates (the original behaviour).</p></dd>
+
+
+<dt id="arg-split">split<a class="anchor" aria-label="anchor" href="#arg-split"></a></dt>
+<dd><p>Multiple-testing correction applied at each scan in <code>fdr</code>
+mode. <code>'bonferroni'</code> (the default) uses a per-scan Bonferroni bound;
+<code>'bh'</code> uses a Benjamini-Hochberg step-up, which is less conservative and
+retains more power on large trees with abundant moderate structure (where the
+Bonferroni bound to make the first split can grow with the tree size). Ignored
+when a subjective <code>level</code> is used.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -162,6 +195,27 @@ provided, or a range of values can be examined.
 The <a href="https://en.wikipedia.org/wiki/Calinski-Harabasz_index" class="external-link">CH index</a>
 based on within- and between-cluster variance in node heights can be used to
 select a significance level if none is provided.</p>
+<p><strong>Calibrating to a false discovery rate (the default).</strong> By default, and
+whenever <code>fdr</code> is supplied, the split threshold is calibrated to a target
+false discovery rate rather than to a subjective <code>level</code>. At each scan the
+algorithm splits at the most extreme eligible candidate clade only if its
+standardised statistic clears the
+Bonferroni threshold \(\Phi^{-1}(1 - fdr/(2k))\), where \(k\) is the number
+of <em>eligible</em> candidates in that scan; candidates excluded by
+<code>minCladeSize</code>, node support, or time overlap do not count towards \(k\).
+The <code>fdr</code> refers to the <strong>whole tree</strong>, not an individual scan or
+clade: under the global null of one unstructured coalescent the probability of
+designating <em>any</em> structure equals <code>fdr</code>, and when real structure is
+present <code>fdr</code> bounds the expected fraction of spurious splits among all
+splits. This whole-tree guarantee is obtained by controlling each scan; it is
+not a per-clade p-value. Unlike <code>level</code>, the analytic default requires no
+simulation and is deterministic.</p>
+<p>The returned object also carries a global-null test in <code>$global.test</code>
+(the root-scan \(\max|z|\), the number of candidates \(k\), and a
+Bonferroni p-value for the presence of <em>any</em> structure), and, in <code>fdr</code>
+mode, a heterochronous-sampling diagnostic in <code>$hetero</code>. Serially sampled
+(heterochronous) trees can modestly inflate the realised FDR; this is reported
+and discussed in the package vignette.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -179,17 +233,36 @@ Systematic Biology 2020; 69(5):884-896.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">rcoal</a></span><span class="op">(</span><span class="fl">50</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># subjective clustering threshold (default):</span></span></span>
 <span class="r-in"><span><span class="va">struct</span> <span class="op">&lt;-</span>  <span class="fu">trestruct</span><span class="op">(</span> <span class="va">tree</span> <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Finding splits under nodes: 51 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">struct</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call: </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> .trestruct(tre = tre, minCladeSize = minCladeSize, minOverlap = minOverlap, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     nodeSupportValues = nodeSupportValues, nodeSupportThreshold = nodeSupportThreshold, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     nsim = nsim, level = level[1], ncpu = ncpu, verbosity = verbosity, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     debugLevel = debugLevel, useNodeSupport = useNodeSupport, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     tredat = tredat)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> trestruct(tre = tree)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Significance level: 0.01 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Target FDR: 0.2 (bonferroni correction)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Global structure test: max|z| = 1.92 over 9 candidates, p = 0.499</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Number of clusters: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Number of partitions: 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Number of taxa in each cluster:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Number of taxa in each partition:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> For complete data, use `as.data.frame(...)` </span>
+<span class="r-in"><span><span class="co"># calibrate the threshold to a target false discovery rate instead:</span></span></span>
+<span class="r-in"><span><span class="va">struct_fdr</span> <span class="op">&lt;-</span> <span class="fu">trestruct</span><span class="op">(</span> <span class="va">tree</span>, fdr <span class="op">=</span> <span class="fl">0.05</span> <span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Finding splits under nodes: 51 </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">struct_fdr</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> trestruct(tre = tree, fdr = 0.05)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Target FDR: 0.05 (bonferroni correction)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Global structure test: max|z| = 1.92 over 9 candidates, p = 0.499</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Number of clusters: 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Number of partitions: 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Number of taxa in each cluster:</span>

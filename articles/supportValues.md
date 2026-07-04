@@ -1,6 +1,6 @@
-# Node support values using treestructure
+# Node support values using treestructure (v2)
 
-## Introductions
+## Introduction
 
 This tutorial uses the public data available for Ebola
 [here](https://github.com/ebov/space-time) to demonstrate the use of
@@ -11,9 +11,14 @@ We will use their [time-scaled phylogenetic
 tree](https://github.com/ebov/space-time/blob/master/Data/Makona_1610_cds_ig.GLM.MCC.tree)
 estimated with [BEAST](https://beast.community).
 
+Throughout we use the default analysis, in which the split threshold is
+calibrated to a target false discovery rate (`fdr = 0.2`), with
+`minCladeSize = 10`.
+
 First, we need to load the R package we will use in this tutorial.
 
 ``` r
+
 library(treeio)
 library(ggtree)
 library(treestructure)
@@ -23,6 +28,7 @@ Now, we will load the time-scaled phylogenetic tree with posterior
 probability support values:
 
 ``` r
+
 #get the dated tree by first downloading it from the URL below
 tree_url <- "https://raw.githubusercontent.com/ebov/space-time/master/Data/Makona_1610_cds_ig.GLM.MCC.tree"
 tmp_file <- tempfile(fileext = ".tree")
@@ -44,6 +50,7 @@ BEAST, we won’t get the posterior probability associated to the clades.
 We now convert the dated tree to `phylo` object.
 
 ``` r
+
 dated_tre <- as.phylo(beast_tree)
 ```
 
@@ -51,6 +58,7 @@ Now we add the posterior probability from the BEAST tree to the
 dated_tree object.
 
 ``` r
+
 # Get number of tips
 n_tips <- length(dated_tre$tip.label)
 
@@ -70,16 +78,17 @@ Firstly, we will assign clusters without using node support values. Note
 that the parameter `nodeSupportValues` is set to FALSE.
 
 ``` r
-trestruct_res_nobt <- trestruct(dated_tre, 
-                                minCladeSize = 30, 
-                                nodeSupportValues = FALSE, 
-                                level = 0.01)
+
+trestruct_res_nobt <- trestruct(dated_tre,
+                                fdr = 0.2,
+                                minCladeSize = 10,
+                                nodeSupportValues = FALSE)
 ```
 
-In the above example, the `trestruct` function took 7 minutes to run on
-a macOS M2. Here, we can load the results instead.
+Here, we load the precomputed result.
 
 ``` r
+
 trestruct_res_nobt <- readRDS( system.file('trestruct_res_nobt.rds',
                                            package='treestructure') )
 
@@ -88,7 +97,75 @@ plot(trestruct_res_nobt, use_ggtree = T) + ggtree::geom_tippoint()
 
 ![](supportValues_files/figure-html/unnamed-chunk-6-1.png)
 
-The `treestructure` analyses resulted in 23 clusters.
+The `treestructure` analysis resulted in 22 clusters.
+
+Although `treestructure` uses only the shape of the tree, the clusters
+largely correspond to country. The tip labels encode the sampling
+country (Guinea, Sierra Leone or Liberia):
+
+``` r
+
+country <- sapply(strsplit(trestruct_res_nobt$tree$tip.label, "\\|"), `[`, 4)
+country[!country %in% c("SLE", "LBR", "GIN")] <- "other"
+table(cluster = trestruct_res_nobt$clustering, country = country)
+#>        country
+#> cluster GIN LBR other SLE
+#>      1    8   4     0   9
+#>      2   24   0     1   0
+#>      3    0  26     0   1
+#>      4   14   0     0   0
+#>      5    9   1     0   0
+#>      6    7  30     0   0
+#>      7    2  47     0   0
+#>      8   69   0     0   4
+#>      9   41  60     0   0
+#>      10   0   0     0  22
+#>      11   1   0     0  19
+#>      12   0   0     0  70
+#>      13   0   0     0  29
+#>      14   1   0     0  18
+#>      15   3   0     0  11
+#>      16  71  41     1   4
+#>      17   0   0     0  10
+#>      18 116   0     0 783
+#>      19   0   0     0  12
+#>      20   2   0     0  16
+#>      21   0   0     0  12
+#>      22   0   0     0  11
+```
+
+Most clusters are dominated by a single country, recovering the
+introductions and cross-border spread of the epidemic from the
+coalescent pattern alone.
+
+### Sensitivity to the minimum clade size
+
+`minCladeSize` sets the smallest cluster that can be designated.
+Repeating the same analysis with `minCladeSize = 20`:
+
+``` r
+
+trestruct_res_mcs20 <- trestruct(dated_tre, fdr = 0.2, minCladeSize = 20,
+                                 nodeSupportValues = FALSE)
+```
+
+``` r
+
+trestruct_res_mcs20 <- readRDS( system.file('trestruct_res_nobt_mcs20.rds',
+                                            package='treestructure') )
+
+plot(trestruct_res_mcs20, use_ggtree = T) + ggtree::geom_tippoint()
+```
+
+![](supportValues_files/figure-html/unnamed-chunk-9-1.png)
+
+This finds 18 clusters, fewer than the 22 found with
+`minCladeSize = 10`: raising the minimum size drops the smallest
+clusters and gives a coarser partition. `minCladeSize` also controls how
+many candidate clades are tested at each step, which feeds into the
+multiple-testing threshold, so the two partitions do not simply nest —
+each resolves somewhat different structure. It is worth trying more than
+one.
 
 ### Assign clusters using branch support
 
@@ -108,26 +185,27 @@ You can also provide the `nodeSupportValues` as a vector with length
 equal to the number of internal nodes in the tree.
 
 ``` r
-trestruct_res <- trestruct(dated_tre, 
-                           minCladeSize = 30, 
-                           nodeSupportValues = TRUE, 
-                           nodeSupportThreshold = 95, 
-                           level = 0.01)
+
+trestruct_res <- trestruct(dated_tre,
+                           fdr = 0.2,
+                           minCladeSize = 10,
+                           nodeSupportValues = TRUE,
+                           nodeSupportThreshold = 95)
 ```
 
-In the above example, the `trestruct` function took 50 seconds to run on
-a macOS M2. Here, we can load the results instead.
+Here, we load the precomputed result.
 
 ``` r
+
 trestruct_res <- readRDS( system.file('trestruct_res.rds',
                                       package='treestructure') )
 
 plot(trestruct_res, use_ggtree = T) + ggtree::geom_tippoint()
 ```
 
-![](supportValues_files/figure-html/unnamed-chunk-8-1.png)
+![](supportValues_files/figure-html/unnamed-chunk-11-1.png)
 
-Now we have only 6 well-supported clusters with differences in
+Now we have only 4 well-supported clusters with differences in
 coalescent patterns.
 
 Note that this might change if you use a higher or lower value for the
@@ -135,69 +213,38 @@ Note that this might change if you use a higher or lower value for the
 
 ### Using the CH-index
 
-The CH-index will compare different values for the parameter `levels` in
-the `treestructure` algorithm. We will need to specify `level` = NULL
-and specify the lower and upper bound to optimize the parameter `level`.
-
-Note that we will also take into consideration the use of branch
-support.
+As an alternative to a target false discovery rate, the CH-index
+provides an automatic way to choose the significance `level`:
+`trestruct` is run over a range of levels (`level = NULL` with lower and
+upper bounds), and the level maximizing the [Calinski–Harabasz
+index](https://en.wikipedia.org/wiki/Calinski%E2%80%93Harabasz_index) —
+the ratio of between- to within-cluster variance in node heights — is
+selected. We show it here *without* node support, because under strong
+support filtering the level barely changes the result (the CH index is
+flat).
 
 ``` r
+
 trestruct_chindex <- trestruct(dated_tre,
-                               minCladeSize = 30, 
-                               nodeSupportValues = TRUE, 
-                               nodeSupportThreshold = 95,
+                               minCladeSize = 10,
+                               nodeSupportValues = FALSE,
                                level = NULL,
-                               levellb = 0.0001, 
-                               levelub = 0.001)
+                               levellb = 0.0001,
+                               levelub = 0.01)
 ```
 
-In the above example, the `trestruct` function took 5 minutes to run on
-a macOS M2. Here, we can load the results instead.
+The CH optimisation runs `trestruct` at several levels, so it is slower;
+here we load the precomputed result.
 
 ``` r
+
 trestruct_chindex <- readRDS( system.file('trestruct_chindex.rds',
                                       package='treestructure') )
 
 plot(trestruct_chindex, use_ggtree = T) + ggtree::geom_tippoint()
 ```
 
-![](supportValues_files/figure-html/unnamed-chunk-10-1.png)
+![](supportValues_files/figure-html/unnamed-chunk-13-1.png)
 
-Now we have only 2 well-supported clusters with differences in
-coalescent patterns after optimizing the significance level.
-
-In this example, instead of using level = 0.01 (as in the default ), the
-optimization of level by using the CH-index identified level as 0.00073.
-
-#### Final considerations
-
-The function `trestruct` has a parameter named `nsim` that refers to the
-number of simulations for computing the null distribution of the test
-statistics (Volz et al. 2020).
-
-The `nsim` parameter in the `trestruct` function is is set to the
-default value of 10,000, which is a good value if the level parameter is
-set to 0.01 (which is the default value).
-
-If decreasing the value of the level parameter, the value of `nsim`
-should be increased. In the above example using CH-index, the algorithm
-identified a significance level of 0.00073. However, the analyses were
-carried out using the default `nsim` of 10,000 simulations. We have
-future plans to automatically detect the adequate number of simulations
-(`nsim` value) given the sizes of clades being compared and the
-threshold p-value used in the test.
-
-As treestructure is implemented in the moment, you should run a
-sensitive analyses on your own dataset, if you use a significance level
-smaller than 0.01. For example, if you use a significance `level` of
-0.001 and a `nsim` \> 10,000, then you can run your analysis twice and
-compare the results obtained in both runs, which should be very similar.
-If results are very different, you should increase the value of `nsim`.
-
-## References
-
-Volz, EM, W Carsten, YH Grad, SDW Frost, AM Dennis, and X Didelot. 2020.
-“Identification of Hidden Population Structure in Time-Scaled
-Phylogenies.” *Systematic Biology* 69: 884–96.
-<https://doi.org/10.1093/sysbio/syaa009>.
+The CH-index selected a significance level of 0.00109, giving 17
+clusters.

@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Node support values using treestructure • treestructure</title>
+<title>Node support values using treestructure (v2) • treestructure</title>
 <!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
   window.MathJax = {
     chtml: {
@@ -13,10 +13,10 @@
     }
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Node support values using treestructure">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Node support values using treestructure (v2)">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">treestructure</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,6 +44,7 @@
     <li><a class="dropdown-item" href="../articles/updating_treestructure.html">Updating a treestructure object</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -69,10 +70,10 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Node support values using treestructure</h1>
-                        <h4 data-toc-skip class="author">Vinicius Franceschi and Fabricia F. Nascimento</h4>
+      <h1>Node support values using treestructure (v2)</h1>
+                        <h4 data-toc-skip class="author">Vinicius Franceschi, Fabricia F. Nascimento, and Erik Volz</h4>
             
-            <h4 data-toc-skip class="date">2026-03-20</h4>
+            <h4 data-toc-skip class="date">2026-07-04</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/emvolz-phylodynamics/treestructure/blob/master/vignettes/supportValues.Rmd" class="external-link"><code>vignettes/supportValues.Rmd</code></a></small>
       <div class="d-none name"><code>supportValues.Rmd</code></div>
@@ -81,12 +82,14 @@
     
     
 <div class="section level2">
-<h2 id="introductions">Introductions<a class="anchor" aria-label="anchor" href="#introductions"></a>
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>This tutorial uses the public data available for Ebola <a href="https://github.com/ebov/space-time" class="external-link">here</a> to demonstrate the use of node support
 values (e.g. bootstrap and posterior probability) to avoid designating population
 structure in badly supported clades.</p>
 <p>We will use their <a href="https://github.com/ebov/space-time/blob/master/Data/Makona_1610_cds_ig.GLM.MCC.tree" class="external-link">time-scaled phylogenetic tree</a> estimated with <a href="https://beast.community" class="external-link">BEAST</a>.</p>
+<p>Throughout we use the default analysis, in which the split threshold is calibrated to
+a target false discovery rate (<code>fdr = 0.2</code>), with <code>minCladeSize = 10</code>.</p>
 <p>First, we need to load the R package we will use in this tutorial.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://yulab-smu.top/contribution-tree-data/" class="external-link">treeio</a></span><span class="op">)</span></span>
@@ -131,19 +134,72 @@ object.</p>
 <p>Firstly, we will assign clusters without using node support values. Note that
 the parameter <code>nodeSupportValues</code> is set to FALSE.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">trestruct_res_nobt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span><span class="va">dated_tre</span>, </span>
-<span>                                minCladeSize <span class="op">=</span> <span class="fl">30</span>, </span>
-<span>                                nodeSupportValues <span class="op">=</span> <span class="cn">FALSE</span>, </span>
-<span>                                level <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
-<p>In the above example, the <code>trestruct</code> function took 7 minutes to run on a macOS M2.
-Here, we can load the results instead.</p>
+<code class="sourceCode R"><span><span class="va">trestruct_res_nobt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span><span class="va">dated_tre</span>,</span>
+<span>                                fdr <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>                                minCladeSize <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>                                nodeSupportValues <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<p>Here, we load the precomputed result.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trestruct_res_nobt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'trestruct_res_nobt.rds'</span>,</span>
 <span>                                           package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_res_nobt</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="supportValues_files/figure-html/unnamed-chunk-6-1.png"><!-- --></p>
-<p>The <code>treestructure</code> analyses resulted in 23 clusters.</p>
+<p>The <code>treestructure</code> analysis resulted in 22 clusters.</p>
+<p>Although <code>treestructure</code> uses only the shape of the tree, the clusters largely
+correspond to country. The tip labels encode the sampling country (Guinea, Sierra
+Leone or Liberia):</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">country</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">trestruct_res_nobt</span><span class="op">$</span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span>, <span class="st">"\\|"</span><span class="op">)</span>, <span class="va">`[`</span>, <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">country</span><span class="op">[</span><span class="op">!</span><span class="va">country</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SLE"</span>, <span class="st">"LBR"</span>, <span class="st">"GIN"</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"other"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>cluster <span class="op">=</span> <span class="va">trestruct_res_nobt</span><span class="op">$</span><span class="va">clustering</span>, country <span class="op">=</span> <span class="va">country</span><span class="op">)</span></span>
+<span><span class="co">#&gt;        country</span></span>
+<span><span class="co">#&gt; cluster GIN LBR other SLE</span></span>
+<span><span class="co">#&gt;      1    8   4     0   9</span></span>
+<span><span class="co">#&gt;      2   24   0     1   0</span></span>
+<span><span class="co">#&gt;      3    0  26     0   1</span></span>
+<span><span class="co">#&gt;      4   14   0     0   0</span></span>
+<span><span class="co">#&gt;      5    9   1     0   0</span></span>
+<span><span class="co">#&gt;      6    7  30     0   0</span></span>
+<span><span class="co">#&gt;      7    2  47     0   0</span></span>
+<span><span class="co">#&gt;      8   69   0     0   4</span></span>
+<span><span class="co">#&gt;      9   41  60     0   0</span></span>
+<span><span class="co">#&gt;      10   0   0     0  22</span></span>
+<span><span class="co">#&gt;      11   1   0     0  19</span></span>
+<span><span class="co">#&gt;      12   0   0     0  70</span></span>
+<span><span class="co">#&gt;      13   0   0     0  29</span></span>
+<span><span class="co">#&gt;      14   1   0     0  18</span></span>
+<span><span class="co">#&gt;      15   3   0     0  11</span></span>
+<span><span class="co">#&gt;      16  71  41     1   4</span></span>
+<span><span class="co">#&gt;      17   0   0     0  10</span></span>
+<span><span class="co">#&gt;      18 116   0     0 783</span></span>
+<span><span class="co">#&gt;      19   0   0     0  12</span></span>
+<span><span class="co">#&gt;      20   2   0     0  16</span></span>
+<span><span class="co">#&gt;      21   0   0     0  12</span></span>
+<span><span class="co">#&gt;      22   0   0     0  11</span></span></code></pre></div>
+<p>Most clusters are dominated by a single country, recovering the introductions and
+cross-border spread of the epidemic from the coalescent pattern alone.</p>
+</div>
+<div class="section level3">
+<h3 id="sensitivity-to-the-minimum-clade-size">Sensitivity to the minimum clade size<a class="anchor" aria-label="anchor" href="#sensitivity-to-the-minimum-clade-size"></a>
+</h3>
+<p><code>minCladeSize</code> sets the smallest cluster that can be designated. Repeating the same
+analysis with <code>minCladeSize = 20</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">trestruct_res_mcs20</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span><span class="va">dated_tre</span>, fdr <span class="op">=</span> <span class="fl">0.2</span>, minCladeSize <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>                                 nodeSupportValues <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">trestruct_res_mcs20</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'trestruct_res_nobt_mcs20.rds'</span>,</span>
+<span>                                            package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_res_mcs20</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="supportValues_files/figure-html/unnamed-chunk-9-1.png"><!-- --></p>
+<p>This finds 18 clusters, fewer than the
+22 found with <code>minCladeSize = 10</code>: raising the
+minimum size drops the smallest clusters and gives a coarser partition. <code>minCladeSize</code>
+also controls how many candidate clades are tested at each step, which feeds into the
+multiple-testing threshold, so the two partitions do not simply nest — each resolves
+somewhat different structure. It is worth trying more than one.</p>
 </div>
 <div class="section level3">
 <h3 id="assign-clusters-using-branch-support">Assign clusters using branch support<a class="anchor" aria-label="anchor" href="#assign-clusters-using-branch-support"></a>
@@ -159,79 +215,51 @@ the algorithm that the node support values is provided with the <code>phylo</cod
 as <code>node.label</code>.</p>
 <p>You can also provide the <code>nodeSupportValues</code> as a vector with length equal to
 the number of internal nodes in the tree.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">trestruct_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span><span class="va">dated_tre</span>, </span>
-<span>                           minCladeSize <span class="op">=</span> <span class="fl">30</span>, </span>
-<span>                           nodeSupportValues <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span>                           nodeSupportThreshold <span class="op">=</span> <span class="fl">95</span>, </span>
-<span>                           level <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
-<p>In the above example, the <code>trestruct</code> function took 50 seconds to run on a macOS M2.
-Here, we can load the results instead.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">trestruct_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span><span class="va">dated_tre</span>,</span>
+<span>                           fdr <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>                           minCladeSize <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>                           nodeSupportValues <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                           nodeSupportThreshold <span class="op">=</span> <span class="fl">95</span><span class="op">)</span></span></code></pre></div>
+<p>Here, we load the precomputed result.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trestruct_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'trestruct_res.rds'</span>,</span>
 <span>                                      package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_res</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="supportValues_files/figure-html/unnamed-chunk-8-1.png"><!-- --></p>
-<p>Now we have only 6 well-supported clusters with differences in coalescent patterns.</p>
+<p><img src="supportValues_files/figure-html/unnamed-chunk-11-1.png"><!-- --></p>
+<p>Now we have only 4 well-supported clusters with differences in coalescent patterns.</p>
 <p>Note that this might change if you use a higher or lower value for the
 <em>nodeSupportThreshold</em> in the <strong>trestruct</strong> function.</p>
 </div>
 <div class="section level3">
 <h3 id="using-the-ch-index">Using the CH-index<a class="anchor" aria-label="anchor" href="#using-the-ch-index"></a>
 </h3>
-<p>The CH-index will compare different values for the parameter <code>levels</code> in the
-<code>treestructure</code> algorithm. We will need to specify <code>level</code> = NULL and
-specify the lower and upper bound to optimize the parameter <code>level</code>.</p>
-<p>Note that we will also take into consideration the use of branch support.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>As an alternative to a target false discovery rate, the CH-index provides an
+automatic way to choose the significance <code>level</code>: <code>trestruct</code> is run over a range of
+levels (<code>level = NULL</code> with lower and upper bounds), and the level maximizing the
+<a href="https://en.wikipedia.org/wiki/Calinski%E2%80%93Harabasz_index" class="external-link">Calinski–Harabasz index</a> —
+the ratio of between- to within-cluster variance in node heights — is selected. We
+show it here <em>without</em> node support, because under strong support filtering the level
+barely changes the result (the CH index is flat).</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trestruct_chindex</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span><span class="va">dated_tre</span>,</span>
-<span>                               minCladeSize <span class="op">=</span> <span class="fl">30</span>, </span>
-<span>                               nodeSupportValues <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span>                               nodeSupportThreshold <span class="op">=</span> <span class="fl">95</span>,</span>
+<span>                               minCladeSize <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>                               nodeSupportValues <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                               level <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>                               levellb <span class="op">=</span> <span class="fl">0.0001</span>, </span>
-<span>                               levelub <span class="op">=</span> <span class="fl">0.001</span><span class="op">)</span></span></code></pre></div>
-<p>In the above example, the <code>trestruct</code> function took 5 minutes to run on a macOS M2.
-Here, we can load the results instead.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<span>                               levellb <span class="op">=</span> <span class="fl">0.0001</span>,</span>
+<span>                               levelub <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
+<p>The CH optimisation runs <code>trestruct</code> at several levels, so it is slower; here we
+load the precomputed result.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trestruct_chindex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'trestruct_chindex.rds'</span>,</span>
 <span>                                      package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_chindex</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="supportValues_files/figure-html/unnamed-chunk-10-1.png"><!-- --></p>
-<p>Now we have only 2 well-supported clusters with differences in coalescent
-patterns after optimizing the significance level.</p>
-<p>In this example, instead of using level = 0.01 (as in the default ), the optimization
-of level by using the CH-index identified level as 0.00073.</p>
-<div class="section level4">
-<h4 id="final-considerations">Final considerations<a class="anchor" aria-label="anchor" href="#final-considerations"></a>
-</h4>
-<p>The function <code>trestruct</code> has a parameter named <code>nsim</code> that refers to the number
-of simulations for computing the null distribution of the test statistics <span class="citation">(Volz et al. 2020)</span>.</p>
-<p>The <code>nsim</code> parameter in the <code>trestruct</code> function is is set to the default value of
-10,000, which is a good value if the level parameter is set to 0.01 (which is the
-default value).</p>
-<p>If decreasing the value of the level parameter, the value of <code>nsim</code> should be
-increased. In the above example using CH-index, the algorithm identified a
-significance level of 0.00073. However, the analyses were carried out using the
-default <code>nsim</code> of 10,000 simulations. We have future plans to automatically detect
-the adequate number of simulations (<code>nsim</code> value) given the sizes of clades being
-compared and the threshold p-value used in the test.</p>
-<p>As treestructure is implemented in the moment, you should run a sensitive analyses
-on your own dataset, if you use a significance level smaller than 0.01. For example,
-if you use a significance <code>level</code> of 0.001 and a <code>nsim</code> &gt; 10,000, then you can run your analysis twice and compare the results obtained in both runs, which should be very similar.
-If results are very different, you should increase the value of <code>nsim</code>.</p>
-</div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
-<div id="ref-Volz2020" class="csl-entry">
-Volz, EM, W Carsten, YH Grad, SDW Frost, AM Dennis, and X Didelot. 2020. <span>“Identification of Hidden Population Structure in Time-Scaled Phylogenies.”</span> <em>Systematic Biology</em> 69: 884–96. <a href="https://doi.org/10.1093/sysbio/syaa009" class="external-link">https://doi.org/10.1093/sysbio/syaa009</a>.
-</div>
+<p><img src="supportValues_files/figure-html/unnamed-chunk-13-1.png"><!-- --></p>
+<p>The CH-index selected a significance level of
+0.00109,
+giving 17 clusters.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

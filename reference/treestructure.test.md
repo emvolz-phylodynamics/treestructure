@@ -6,7 +6,7 @@ same coalescent process.
 ## Usage
 
 ``` r
-treestructure.test(tre, x, y, nsim = 10000)
+treestructure.test(tre, x, y, nsim = 10000, method = "analytic")
 ```
 
 ## Arguments
@@ -26,7 +26,15 @@ treestructure.test(tre, x, y, nsim = 10000)
 
 - nsim:
 
-  Number of simulations (larger = slower and more accurate)
+  Number of simulations for the null distribution. Only used when
+  `method = 'sim'` (larger = slower and more accurate).
+
+- method:
+
+  How the null distribution of the rank-sum statistic is characterised.
+  `'analytic'` (the default) computes the exact mean and variance of the
+  coalescent null with a deterministic recursion and reports a
+  normal-approximation p-value; `'sim'` uses Monte-Carlo simulation.
 
 ## Examples
 
@@ -55,8 +63,8 @@ print(results)
 #>   1_1, 2_1, 3_1, 4_1, 5_1, 6_1, ...
 #> 
 #> Rooted; includes branch length(s).
-#> Rank sum = 638, p-value = 0.1505
+#> Rank sum = 638, p-value = 0.151274
 #> Alternative hypothesis: Rank sum differs from coalescent distribution
 #> 95 percent confidence interval:
-#>   493.975  682.025
+#>   492.947  683.053
 ```

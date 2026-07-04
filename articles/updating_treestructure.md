@@ -12,6 +12,7 @@ First, we will load all the R packages that we will use in this
 tutorial.
 
 ``` r
+
 library(ape)
 library(treestructure)
 library(phangorn)
@@ -21,6 +22,7 @@ Now we can read the down-sampled time-tree for Ebola. In this pruned
 tree, we have 1,310 tips.
 
 ``` r
+
 pruned_tree <- readRDS( system.file('Ebola_down_sampled_tree.rds',
                                     package='treestructure') )
 ```
@@ -31,6 +33,7 @@ Now we will assign clusters using the posterior probability node support
 to the Ebola down-sampled phylogenetic tree:
 
 ``` r
+
 trestruct_res <- trestruct(pruned_tree, 
                            minCladeSize = 30, 
                            nodeSupportValues = TRUE, 
@@ -42,6 +45,7 @@ In the above example, the `trestruct` function took 32 seconds to run on
 a macOS M2. Here, we will load the results.
 
 ``` r
+
 trestruct_res <- readRDS( system.file('downsampled_tree_struc.rds',
                                       package='treestructure') )
 
@@ -62,6 +66,7 @@ Note that this new tree must be rooted, but does not need to be
 time-scaled or binary.
 
 ``` r
+
 #Note that this tree has more sequences than the previous tree used in this
 #tutorial.
 new_tree <- ape::read.nexus( system.file('Makona_1610_genomes_2016-06-23.ml.tree',
@@ -81,6 +86,7 @@ from scratch, we are now able to add the new sequences to the existing
 `treestructure` object:
 
 ``` r
+
 trestruct_add_tips <- addtips(trst = trestruct_res, tre = ml_rooted_tree)
 
 plot(trestruct_add_tips, use_ggtree = T) + ggtree::geom_tippoint()
@@ -92,6 +98,7 @@ If you would like to compare the sequence names that comprise each
 cluster in each tree, you can do:
 
 ``` r
+
 
 #compare sequences in cluster 1 from trestruct_res object and the 
 #trestruct_add_tips object
@@ -113,6 +120,7 @@ You can also see that all elements in tree1_cluster1 is contained in
 tree2_cluster1
 
 ``` r
+
 
 sum(tree1_cluster1 %in% tree2_cluster1)
 #> [1] 30

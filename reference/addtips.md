@@ -50,47 +50,48 @@ tr0 <- ape::drop.tip( tr, ex )
 (s0 <- treestructure::trestruct( tr0 ))
 #> Finding splits under nodes: 121 
 #> Finding splits under nodes: 121 163 
+#> Finding splits under nodes: 121 142 
 #> Call: 
-#> .trestruct(tre = tre, minCladeSize = minCladeSize, minOverlap = minOverlap, 
-#>     nodeSupportValues = nodeSupportValues, nodeSupportThreshold = nodeSupportThreshold, 
-#>     nsim = nsim, level = level[1], ncpu = ncpu, verbosity = verbosity, 
-#>     debugLevel = debugLevel, useNodeSupport = useNodeSupport, 
-#>     tredat = tredat)
+#> treestructure::trestruct(tre = tr0)
 #> 
-#> Significance level: 0.01 
-#> Number of clusters: 2 
+#> Target FDR: 0.2 (bonferroni correction)
+#> Global structure test: max|z| = 3.34 over 24 candidates, p = 0.02
+#> Number of clusters: 3 
 #> Number of partitions: 2 
+#> NOTE: heterochronous sampling detected (overlap index 0.86). Under the coalescent null this
+#>       can modestly inflate the realized FDR (up to ~2x at target 5% in our real-data study);
+#>       see vignette("treestructure"). Deep clades whose most recent sample is old are most affected.
 #> Number of taxa in each cluster:
 #> 
-#>  1  2 
-#> 42 78 
+#>  1  2  3 
+#> 78 28 14 
 #> Number of taxa in each partition:
 #> 
 #>  1  2 
-#> 42 78 
+#> 78 42 
 #> ...
 #> For complete data, use `as.data.frame(...)` 
 
 # assign structure to the previously missing tips
 (s <- treestructure::addtips( s0, tr ))
 #> Call: 
-#> .trestruct(tre = tre, minCladeSize = minCladeSize, minOverlap = minOverlap, 
-#>     nodeSupportValues = nodeSupportValues, nodeSupportThreshold = nodeSupportThreshold, 
-#>     nsim = nsim, level = level[1], ncpu = ncpu, verbosity = verbosity, 
-#>     debugLevel = debugLevel, useNodeSupport = useNodeSupport, 
-#>     tredat = tredat)
+#> treestructure::trestruct(tre = tr0)
 #> 
-#> Significance level: 0.01 
-#> Number of clusters: 2 
+#> Target FDR: 0.2 (bonferroni correction)
+#> Global structure test: max|z| = 3.34 over 24 candidates, p = 0.02
+#> Number of clusters: 3 
 #> Number of partitions: 2 
+#> NOTE: heterochronous sampling detected (overlap index 0.86). Under the coalescent null this
+#>       can modestly inflate the realized FDR (up to ~2x at target 5% in our real-data study);
+#>       see vignette("treestructure"). Deep clades whose most recent sample is old are most affected.
 #> Number of taxa in each cluster:
 #> 
-#>   1   2 
-#>  50 100 
+#>   1   2   3 
+#> 100  36  14 
 #> Number of taxa in each partition:
 #> 
 #>   1   2 
-#>  50 100 
+#> 100  50 
 #> ...
 #> For complete data, use `as.data.frame(...)` 
 ```
