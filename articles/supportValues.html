@@ -71,9 +71,10 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Node support values using treestructure (v2)</h1>
-                        <h4 data-toc-skip class="author">Vinicius Franceschi, Fabricia F. Nascimento, and Erik Volz</h4>
+                        <h4 data-toc-skip class="author">Vinicius
+Franceschi, Fabricia F. Nascimento, and Erik Volz</h4>
             
-            <h4 data-toc-skip class="date">2026-07-04</h4>
+            <h4 data-toc-skip class="date">2026-07-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/emvolz-phylodynamics/treestructure/blob/master/vignettes/supportValues.Rmd" class="external-link"><code>vignettes/supportValues.Rmd</code></a></small>
       <div class="d-none name"><code>supportValues.Rmd</code></div>
@@ -84,19 +85,26 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>This tutorial uses the public data available for Ebola <a href="https://github.com/ebov/space-time" class="external-link">here</a> to demonstrate the use of node support
-values (e.g. bootstrap and posterior probability) to avoid designating population
-structure in badly supported clades.</p>
-<p>We will use their <a href="https://github.com/ebov/space-time/blob/master/Data/Makona_1610_cds_ig.GLM.MCC.tree" class="external-link">time-scaled phylogenetic tree</a> estimated with <a href="https://beast.community" class="external-link">BEAST</a>.</p>
-<p>Throughout we use the default analysis, in which the split threshold is calibrated to
-a target false discovery rate (<code>fdr = 0.2</code>), with <code>minCladeSize = 10</code>.</p>
-<p>First, we need to load the R package we will use in this tutorial.</p>
+<p>This tutorial uses the public data available for Ebola <a href="https://github.com/ebov/space-time" class="external-link">here</a> to demonstrate the
+use of node support values (e.g. bootstrap and posterior probability) to
+avoid designating population structure in badly supported clades.</p>
+<p>We will use their <a href="https://github.com/ebov/space-time/blob/master/Data/Makona_1610_cds_ig.GLM.MCC.tree" class="external-link">time-scaled
+phylogenetic tree</a> estimated with <a href="https://beast.community" class="external-link">BEAST</a>.</p>
+<p>Throughout we use the default analysis, in which the split threshold
+is calibrated to a target false discovery rate (<code>fdr = 0.2</code>),
+with <code>minCladeSize = 10</code>.</p>
+<p>First, we need to load the R package we will use in this
+tutorial.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://yulab-smu.top/contribution-tree-data/" class="external-link">treeio</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.amazon.com/Integration-Manipulation-Visualization-Phylogenetic-Computational-ebook/dp/B0B5NLZR1Z/" class="external-link">ggtree</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://emvolz-phylodynamics.github.io/treestructure/">treestructure</a></span><span class="op">)</span></span></code></pre></div>
-<p>Now, we will load the time-scaled phylogenetic tree with posterior probability
-support values:</p>
+<p>The tree-construction and <code>trestruct</code> steps below are
+shown for reference but are not run when this vignette is built (to
+avoid network access and keep the build fast); each analysis loads a
+precomputed result instead.</p>
+<p>Now, we will load the time-scaled phylogenetic tree with posterior
+probability support values:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#get the dated tree by first downloading it from the URL below</span></span>
 <span><span class="va">tree_url</span> <span class="op">&lt;-</span> <span class="st">"https://raw.githubusercontent.com/ebov/space-time/master/Data/Makona_1610_cds_ig.GLM.MCC.tree"</span></span>
@@ -107,15 +115,17 @@ support values:</p>
 <span></span>
 <span><span class="co">#read the downloaded tree</span></span>
 <span><span class="va">beast_tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/treeio/man/beast-parser.html" class="external-link">read.beast</a></span><span class="op">(</span><span class="va">tmp_file</span><span class="op">)</span></span></code></pre></div>
-<p>Then we need to convert the tree to a <code>phylo</code> object and add the posterior
-probability information from the Bayesian tree to the <code>phylo</code> object tree.</p>
-<p>If we use the <code>ape:read.nexus</code> to read the tree that was estimated with BEAST,
-we won’t get the posterior probability associated to the clades.</p>
+<p>Then we need to convert the tree to a <code>phylo</code> object and
+add the posterior probability information from the Bayesian tree to the
+<code>phylo</code> object tree.</p>
+<p>If we use the <code>ape:read.nexus</code> to read the tree that was
+estimated with BEAST, we won’t get the posterior probability associated
+to the clades.</p>
 <p>We now convert the dated tree to <code>phylo</code> object.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dated_tre</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/as.phylo.html" class="external-link">as.phylo</a></span><span class="op">(</span><span class="va">beast_tree</span><span class="op">)</span></span></code></pre></div>
-<p>Now we add the posterior probability from the BEAST tree to the dated_tree
-object.</p>
+<p>Now we add the posterior probability from the BEAST tree to the
+dated_tree object.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get number of tips</span></span>
 <span><span class="va">n_tips</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">dated_tre</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span></span>
@@ -131,8 +141,9 @@ object.</p>
 <div class="section level3">
 <h3 id="assign-clusters-without-using-node-support">Assign clusters without using node support<a class="anchor" aria-label="anchor" href="#assign-clusters-without-using-node-support"></a>
 </h3>
-<p>Firstly, we will assign clusters without using node support values. Note that
-the parameter <code>nodeSupportValues</code> is set to FALSE.</p>
+<p>Firstly, we will assign clusters without using node support values.
+Note that the parameter <code>nodeSupportValues</code> is set to
+FALSE.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trestruct_res_nobt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span><span class="va">dated_tre</span>,</span>
 <span>                                fdr <span class="op">=</span> <span class="fl">0.2</span>,</span>
@@ -146,9 +157,9 @@ the parameter <code>nodeSupportValues</code> is set to FALSE.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_res_nobt</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="supportValues_files/figure-html/unnamed-chunk-6-1.png"><!-- --></p>
 <p>The <code>treestructure</code> analysis resulted in 22 clusters.</p>
-<p>Although <code>treestructure</code> uses only the shape of the tree, the clusters largely
-correspond to country. The tip labels encode the sampling country (Guinea, Sierra
-Leone or Liberia):</p>
+<p>Although <code>treestructure</code> uses only the shape of the tree,
+the clusters largely correspond to country. The tip labels encode the
+sampling country (Guinea, Sierra Leone or Liberia):</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">country</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/strsplit.html" class="external-link">strsplit</a></span><span class="op">(</span><span class="va">trestruct_res_nobt</span><span class="op">$</span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span>, <span class="st">"\\|"</span><span class="op">)</span>, <span class="va">`[`</span>, <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="va">country</span><span class="op">[</span><span class="op">!</span><span class="va">country</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SLE"</span>, <span class="st">"LBR"</span>, <span class="st">"GIN"</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"other"</span></span>
@@ -177,14 +188,16 @@ Leone or Liberia):</p>
 <span><span class="co">#&gt;      20   2   0     0  16</span></span>
 <span><span class="co">#&gt;      21   0   0     0  12</span></span>
 <span><span class="co">#&gt;      22   0   0     0  11</span></span></code></pre></div>
-<p>Most clusters are dominated by a single country, recovering the introductions and
-cross-border spread of the epidemic from the coalescent pattern alone.</p>
+<p>Most clusters are dominated by a single country, recovering the
+introductions and cross-border spread of the epidemic from the
+coalescent pattern alone.</p>
 </div>
 <div class="section level3">
 <h3 id="sensitivity-to-the-minimum-clade-size">Sensitivity to the minimum clade size<a class="anchor" aria-label="anchor" href="#sensitivity-to-the-minimum-clade-size"></a>
 </h3>
-<p><code>minCladeSize</code> sets the smallest cluster that can be designated. Repeating the same
-analysis with <code>minCladeSize = 20</code>:</p>
+<p><code>minCladeSize</code> sets the smallest cluster that can be
+designated. Repeating the same analysis with
+<code>minCladeSize = 20</code>:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trestruct_res_mcs20</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span><span class="va">dated_tre</span>, fdr <span class="op">=</span> <span class="fl">0.2</span>, minCladeSize <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>                                 nodeSupportValues <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
@@ -194,27 +207,29 @@ analysis with <code>minCladeSize = 20</code>:</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_res_mcs20</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="supportValues_files/figure-html/unnamed-chunk-9-1.png"><!-- --></p>
-<p>This finds 18 clusters, fewer than the
-22 found with <code>minCladeSize = 10</code>: raising the
-minimum size drops the smallest clusters and gives a coarser partition. <code>minCladeSize</code>
-also controls how many candidate clades are tested at each step, which feeds into the
-multiple-testing threshold, so the two partitions do not simply nest — each resolves
-somewhat different structure. It is worth trying more than one.</p>
+<p>This finds 18 clusters, fewer than the 22 found with
+<code>minCladeSize = 10</code>: raising the minimum size drops the
+smallest clusters and gives a coarser partition.
+<code>minCladeSize</code> also controls how many candidate clades are
+tested at each step, which feeds into the multiple-testing threshold, so
+the two partitions do not simply nest — each resolves somewhat different
+structure. It is worth trying more than one.</p>
 </div>
 <div class="section level3">
 <h3 id="assign-clusters-using-branch-support">Assign clusters using branch support<a class="anchor" aria-label="anchor" href="#assign-clusters-using-branch-support"></a>
 </h3>
 <p>Now, we will assign clusters using the information on branch support.
-As we are analyzing a dated tree estimated with BEAST, the branch support is
-the posterior probability.</p>
-<p>We designate clusters that have at least 0.95 posterior probability. This
-is achieved by setting to 95 the parameter <em>nodeSupportThreshold</em> in the <strong>trestruct</strong>
+As we are analyzing a dated tree estimated with BEAST, the branch
+support is the posterior probability.</p>
+<p>We designate clusters that have at least 0.95 posterior probability.
+This is achieved by setting to 95 the parameter
+<em>nodeSupportThreshold</em> in the <strong>trestruct</strong>
 function.</p>
-<p>Note that now the parameter <code>nodeSupportValues</code> is set to TRUE, which tells
-the algorithm that the node support values is provided with the <code>phylo</code> object
-as <code>node.label</code>.</p>
-<p>You can also provide the <code>nodeSupportValues</code> as a vector with length equal to
-the number of internal nodes in the tree.</p>
+<p>Note that now the parameter <code>nodeSupportValues</code> is set to
+TRUE, which tells the algorithm that the node support values is provided
+with the <code>phylo</code> object as <code>node.label</code>.</p>
+<p>You can also provide the <code>nodeSupportValues</code> as a vector
+with length equal to the number of internal nodes in the tree.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trestruct_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span><span class="va">dated_tre</span>,</span>
 <span>                           fdr <span class="op">=</span> <span class="fl">0.2</span>,</span>
@@ -228,20 +243,24 @@ the number of internal nodes in the tree.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_res</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="supportValues_files/figure-html/unnamed-chunk-11-1.png"><!-- --></p>
-<p>Now we have only 4 well-supported clusters with differences in coalescent patterns.</p>
-<p>Note that this might change if you use a higher or lower value for the
-<em>nodeSupportThreshold</em> in the <strong>trestruct</strong> function.</p>
+<p>Now we have only 4 well-supported clusters with differences in
+coalescent patterns.</p>
+<p>Note that this might change if you use a higher or lower value for
+the <em>nodeSupportThreshold</em> in the <strong>trestruct</strong>
+function.</p>
 </div>
 <div class="section level3">
 <h3 id="using-the-ch-index">Using the CH-index<a class="anchor" aria-label="anchor" href="#using-the-ch-index"></a>
 </h3>
-<p>As an alternative to a target false discovery rate, the CH-index provides an
-automatic way to choose the significance <code>level</code>: <code>trestruct</code> is run over a range of
-levels (<code>level = NULL</code> with lower and upper bounds), and the level maximizing the
-<a href="https://en.wikipedia.org/wiki/Calinski%E2%80%93Harabasz_index" class="external-link">Calinski–Harabasz index</a> —
-the ratio of between- to within-cluster variance in node heights — is selected. We
-show it here <em>without</em> node support, because under strong support filtering the level
-barely changes the result (the CH index is flat).</p>
+<p>As an alternative to a target false discovery rate, the CH-index
+provides an automatic way to choose the significance <code>level</code>:
+<code>trestruct</code> is run over a range of levels
+(<code>level = NULL</code> with lower and upper bounds), and the level
+maximizing the <a href="https://en.wikipedia.org/wiki/Calinski%E2%80%93Harabasz_index" class="external-link">Calinski–Harabasz
+index</a> — the ratio of between- to within-cluster variance in node
+heights — is selected. We show it here <em>without</em> node support,
+because under strong support filtering the level barely changes the
+result (the CH index is flat).</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trestruct_chindex</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span><span class="va">dated_tre</span>,</span>
 <span>                               minCladeSize <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -249,17 +268,16 @@ barely changes the result (the CH index is flat).</p>
 <span>                               level <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>                               levellb <span class="op">=</span> <span class="fl">0.0001</span>,</span>
 <span>                               levelub <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
-<p>The CH optimisation runs <code>trestruct</code> at several levels, so it is slower; here we
-load the precomputed result.</p>
+<p>The CH optimisation runs <code>trestruct</code> at several levels, so
+it is slower; here we load the precomputed result.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trestruct_chindex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'trestruct_chindex.rds'</span>,</span>
 <span>                                      package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_chindex</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="supportValues_files/figure-html/unnamed-chunk-13-1.png"><!-- --></p>
-<p>The CH-index selected a significance level of
-0.00109,
-giving 17 clusters.</p>
+<p>The CH-index selected a significance level of 0.00109, giving 17
+clusters.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

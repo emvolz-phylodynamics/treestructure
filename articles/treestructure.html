@@ -73,7 +73,7 @@
       <h1>treestructure applied to structured coalescent simulation</h1>
                         <h4 data-toc-skip class="author">Erik Volz</h4>
             
-            <h4 data-toc-skip class="date">2026-07-04</h4>
+            <h4 data-toc-skip class="date">2026-07-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/emvolz-phylodynamics/treestructure/blob/master/vignettes/treestructure.Rmd" class="external-link"><code>vignettes/treestructure.Rmd</code></a></small>
       <div class="d-none name"><code>treestructure.Rmd</code></div>
@@ -84,10 +84,11 @@
 <div class="section level2">
 <h2 id="structured-coalescent-simulation">Structured coalescent simulation<a class="anchor" aria-label="anchor" href="#structured-coalescent-simulation"></a>
 </h2>
-<p>This example shows the function <code>trestruct</code> applied to a simulated structured
-coalescent tree that includes samples from a large constant size population and
-samples from three small “outbreaks” which are growing exponentially.
-These simulations were generated with the <a href="https://emvolz-phylodynamics.github.io/phydynR/" class="external-link">phydynR package</a>.</p>
+<p>This example shows the function <code>trestruct</code> applied to a
+simulated structured coalescent tree that includes samples from a large
+constant size population and samples from three small “outbreaks” which
+are growing exponentially. These simulations were generated with the <a href="https://emvolz-phylodynamics.github.io/phydynR/" class="external-link">phydynR
+package</a>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/emmanuelparadis/ape" class="external-link">ape</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://emvolz-phylodynamics.github.io/treestructure/">treestructure</a></span><span class="op">)</span></span>
@@ -102,9 +103,11 @@ These simulations were generated with the <a href="https://emvolz-phylodynamics.
 <span><span class="co">#&gt;   1, 1, 1, 1, 1, 1, ...</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Rooted; includes branch length(s).</span></span></code></pre></div>
-<p>Note that the tip labels corresponds to the deme of each sample.
-‘1’ is the constant size reservoir, and ‘0’ is the exponentially growing deme.</p>
-<p>This will run the <code>treestructure</code> algorithm under default settings:</p>
+<p>Note that the tip labels corresponds to the deme of each sample. ‘1’
+is the constant size reservoir, and ‘0’ is the exponentially growing
+deme.</p>
+<p>This will run the <code>treestructure</code> algorithm under default
+settings:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">s</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span> <span class="va">tree</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; Tree has NA or duplicated tip labels. Adding a unique id.</span></span>
@@ -112,12 +115,14 @@ These simulations were generated with the <a href="https://emvolz-phylodynamics.
 <span><span class="co">#&gt; Finding splits under nodes: 276 526 </span></span>
 <span><span class="co">#&gt; Finding splits under nodes: 276 421 526 530 </span></span>
 <span><span class="co">#&gt; Finding splits under nodes: 276 421 422 473</span></span></code></pre></div>
-<p>The <code>treestructure</code> algorithm searches from root to tips of the phylogenetic tree.
-The message printed on screen, <code>Finding splits under nodes</code>, reports which nodes
-the algorithm is currently testing.</p>
-<p>By default <code>trestruct</code> calibrates the split threshold to a target false discovery
-rate (<code>fdr = 0.2</code>), so that the expected proportion of spuriously designated clusters
-is controlled across the whole tree. The printed output reports this target and a
+<p>The <code>treestructure</code> algorithm searches from root to tips
+of the phylogenetic tree. The message printed on screen,
+<code>Finding splits under nodes</code>, reports which nodes the
+algorithm is currently testing.</p>
+<p>By default <code>trestruct</code> calibrates the split threshold to a
+target false discovery rate (<code>fdr = 0.2</code>), so that the
+expected proportion of spuriously designated clusters is controlled
+across the whole tree. The printed output reports this target and a
 global test for whether the tree has any structure at all:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">s</span><span class="op">)</span></span>
@@ -141,7 +146,8 @@ global test for whether the tree has any structure at all:</p>
 <div class="section level3">
 <h3 id="plotting-results">Plotting results<a class="anchor" aria-label="anchor" href="#plotting-results"></a>
 </h3>
-<p>The default plotting behavior uses the <code>ggtree</code> package if available.</p>
+<p>The default plotting behavior uses the <code>ggtree</code> package if
+available.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">s</span><span class="op">)</span>  <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tiplab.html" class="external-link">geom_tiplab</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="treestructure_files/figure-html/unnamed-chunk-5-1.png"><!-- --></p>
@@ -149,8 +155,8 @@ global test for whether the tree has any structure at all:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">s</span>, use_ggtree <span class="op">=</span> <span class="cn">FALSE</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="treestructure_files/figure-html/unnamed-chunk-6-1.png"><!-- --></p>
-<p>For subsequent analysis, you may want to turn the <code>treestructure</code> result into a
-dataframe:</p>
+<p>For subsequent analysis, you may want to turn the
+<code>treestructure</code> result into a dataframe:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">structureData</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span> <span class="va">s</span> <span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span> <span class="va">structureData</span> <span class="op">)</span></span>
@@ -161,8 +167,8 @@ dataframe:</p>
 <span><span class="co">#&gt; 4   4_1       3         3</span></span>
 <span><span class="co">#&gt; 5   5_1       3         3</span></span>
 <span><span class="co">#&gt; 6   6_1       3         3</span></span></code></pre></div>
-<p>Each cluster and partition assignment is stored as a factor. You could use <code>split</code>
-to get a data frame for each partition.
+<p>Each cluster and partition assignment is stored as a factor. You
+could use <code>split</code> to get a data frame for each partition.
 Suppose we want a tree corresponding to partition 1:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span> <span class="op">(</span> <span class="va">structureData</span>,</span>
@@ -186,11 +192,12 @@ Suppose we want a tree corresponding to partition 1:</p>
 <p>Two things have the largest influence on the number of clusters.</p>
 <ol style="list-style-type: decimal">
 <li>
-<code>minCladeSize</code> controls the smallest allowed cluster in terms of the number of
-tips; the default is 10. With a smaller value, smaller clusters may be detected, but
-computation time increases. For example, structure that exists in clades smaller than
-<code>minCladeSize</code> will not be detected regardless of the threshold, so lowering it can
-reveal finer structure:</li>
+<code>minCladeSize</code> controls the smallest allowed cluster in
+terms of the number of tips; the default is 10. With a smaller value,
+smaller clusters may be detected, but computation time increases. For
+example, structure that exists in clades smaller than
+<code>minCladeSize</code> will not be detected regardless of the
+threshold, so lowering it can reveal finer structure:</li>
 </ol>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span> <span class="va">tree</span>, minCladeSize <span class="op">=</span> <span class="fl">5</span> <span class="op">)</span></span>
@@ -217,16 +224,18 @@ reveal finer structure:</li>
 <span><span class="co">#&gt; ...</span></span>
 <span><span class="co">#&gt; For complete data, use `as.data.frame(...)`</span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
-<li>The split threshold — how readily a clade is designated a new cluster. By default
-this is set by a false discovery rate (<code>fdr</code>); alternatively it can be set by a
-subjective significance <code>level</code>, or that <code>level</code> chosen automatically with the CH
-index.</li>
+<li>The split threshold — how readily a clade is designated a new
+cluster. By default this is set by a false discovery rate
+(<code>fdr</code>); alternatively it can be set by a subjective
+significance <code>level</code>, or that <code>level</code> chosen
+automatically with the CH index.</li>
 </ol>
 <div class="section level4">
 <h4 id="false-discovery-rate-default">False discovery rate (default)<a class="anchor" aria-label="anchor" href="#false-discovery-rate-default"></a>
 </h4>
-<p>By default the threshold is calibrated to a target false discovery rate, so that
-<code>fdr</code> has an interpretable, whole-tree error-rate meaning:</p>
+<p>By default the threshold is calibrated to a target false discovery
+rate, so that <code>fdr</code> has an interpretable, whole-tree
+error-rate meaning:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span> <span class="va">tree</span>, fdr <span class="op">=</span> <span class="fl">0.05</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; Tree has NA or duplicated tip labels. Adding a unique id.</span></span>
@@ -251,16 +260,17 @@ index.</li>
 <span><span class="co">#&gt;  75 200 </span></span>
 <span><span class="co">#&gt; ...</span></span>
 <span><span class="co">#&gt; For complete data, use `as.data.frame(...)`</span></span></code></pre></div>
-<p>The <a href="false_discovery_rate.html">false discovery rate</a> vignette explains what the rate
-controls, the global test for any structure, and the effect of serial (heterochronous)
-sampling.</p>
+<p>The <a href="false_discovery_rate.html">false discovery rate</a>
+vignette explains what the rate controls, the global test for any
+structure, and the effect of serial (heterochronous) sampling.</p>
 </div>
 <div class="section level4">
 <h4 id="subjective-significance-level">Subjective significance level<a class="anchor" aria-label="anchor" href="#subjective-significance-level"></a>
 </h4>
-<p>Supplying a <code>level</code> (without <code>fdr</code>) uses it instead as a fixed per-test significance.
-This is a subjective clustering threshold rather than an error rate: raising it detects
-more clusters but also increases the false positive rate.</p>
+<p>Supplying a <code>level</code> (without <code>fdr</code>) uses it
+instead as a fixed per-test significance. This is a subjective
+clustering threshold rather than an error rate: raising it detects more
+clusters but also increases the false positive rate.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span> <span class="va">tree</span>, level <span class="op">=</span> <span class="fl">0.05</span> <span class="op">)</span></span>
 <span><span class="co">#&gt; Tree has NA or duplicated tip labels. Adding a unique id.</span></span>
@@ -285,21 +295,24 @@ more clusters but also increases the false positive rate.</p>
 <span><span class="co">#&gt;  75 200 </span></span>
 <span><span class="co">#&gt; ...</span></span>
 <span><span class="co">#&gt; For complete data, use `as.data.frame(...)`</span></span></code></pre></div>
-<p>The best value of <code>level</code> depends on your application. One way to choose it is to use
-additional data associated with each sample, selecting the <code>level</code> that gives clusters
-explaining the most variance in a variable of interest (e.g. using the cluster as a
-factor in an ANOVA).</p>
+<p>The best value of <code>level</code> depends on your application. One
+way to choose it is to use additional data associated with each sample,
+selecting the <code>level</code> that gives clusters explaining the most
+variance in a variable of interest (e.g. using the cluster as a factor
+in an ANOVA).</p>
 </div>
 <div class="section level4">
 <h4 id="ch-index">CH index<a class="anchor" aria-label="anchor" href="#ch-index"></a>
 </h4>
-<p>Alternatively, in the absence of any additional data, the <code>treestructure</code> package
-supports using the <a href="https://en.wikipedia.org/wiki/Calinski%E2%80%93Harabasz_index" class="external-link">CH index</a>
-to compare different <code>level</code>s. This statistic is based on the ratio of the
-between-cluster and within-cluster variance of the time of each node
-(distance from the root) and returns the <code>level</code> such that this ratio is maximized.
-If you wish to use the CH index, pass <code>level = NULL</code> to <code>trestruct</code>, and
-read documentation for the <code>levellb</code>, <code>levelub</code>, and <code>res</code> parameters.</p>
+<p>Alternatively, in the absence of any additional data, the
+<code>treestructure</code> package supports using the <a href="https://en.wikipedia.org/wiki/Calinski%E2%80%93Harabasz_index" class="external-link">CH
+index</a> to compare different <code>level</code>s. This statistic is
+based on the ratio of the between-cluster and within-cluster variance of
+the time of each node (distance from the root) and returns the
+<code>level</code> such that this ratio is maximized. If you wish to use
+the CH index, pass <code>level = NULL</code> to <code>trestruct</code>,
+and read documentation for the <code>levellb</code>,
+<code>levelub</code>, and <code>res</code> parameters.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

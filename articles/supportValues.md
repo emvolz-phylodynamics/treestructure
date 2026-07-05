@@ -24,6 +24,11 @@ library(ggtree)
 library(treestructure)
 ```
 
+The tree-construction and `trestruct` steps below are shown for
+reference but are not run when this vignette is built (to avoid network
+access and keep the build fast); each analysis loads a precomputed
+result instead.
+
 Now, we will load the time-scaled phylogenetic tree with posterior
 probability support values:
 

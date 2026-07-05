@@ -71,9 +71,10 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Update of a treestructure object with new sequences</h1>
-                        <h4 data-toc-skip class="author">Vinicius Franceschi and Fabricia F Nascimento</h4>
+                        <h4 data-toc-skip class="author">Vinicius
+Franceschi and Fabricia F Nascimento</h4>
             
-            <h4 data-toc-skip class="date">2026-07-04</h4>
+            <h4 data-toc-skip class="date">2026-07-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/emvolz-phylodynamics/treestructure/blob/master/vignettes/updating_treestructure.Rmd" class="external-link"><code>vignettes/updating_treestructure.Rmd</code></a></small>
       <div class="d-none name"><code>updating_treestructure.Rmd</code></div>
@@ -84,31 +85,34 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>In this tutorial, we will exemplify how to update a previous <code>treestructure</code>
-object with new sequences using a down sampled version of the <a href="https://github.com/ebov/space-time/blob/master/Data/Makona_1610_cds_ig.GLM.MCC.tree" class="external-link">Ebola dated tree</a>, which is publicly available.</p>
-<p>First, we will load all the R packages that we will use in this tutorial.</p>
+<p>In this tutorial, we will exemplify how to update a previous
+<code>treestructure</code> object with new sequences using a down
+sampled version of the <a href="https://github.com/ebov/space-time/blob/master/Data/Makona_1610_cds_ig.GLM.MCC.tree" class="external-link">Ebola
+dated tree</a>, which is publicly available.</p>
+<p>First, we will load all the R packages that we will use in this
+tutorial.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/emmanuelparadis/ape" class="external-link">ape</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://emvolz-phylodynamics.github.io/treestructure/">treestructure</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KlausVigo/phangorn" class="external-link">phangorn</a></span><span class="op">)</span></span></code></pre></div>
-<p>Now we can read the down-sampled time-tree for Ebola. In this pruned tree, we
-have 1,310 tips.</p>
+<p>Now we can read the down-sampled time-tree for Ebola. In this pruned
+tree, we have 1,310 tips.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pruned_tree</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'Ebola_down_sampled_tree.rds'</span>,</span>
 <span>                                    package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="assign-clusters-using-node-support">Assign clusters using node support<a class="anchor" aria-label="anchor" href="#assign-clusters-using-node-support"></a>
 </h3>
-<p>Now we will assign clusters using the posterior probability node support to the
-Ebola down-sampled phylogenetic tree:</p>
+<p>Now we will assign clusters using the posterior probability node
+support to the Ebola down-sampled phylogenetic tree:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trestruct_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span><span class="va">pruned_tree</span>, </span>
 <span>                           minCladeSize <span class="op">=</span> <span class="fl">30</span>, </span>
 <span>                           nodeSupportValues <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>                           nodeSupportThreshold <span class="op">=</span> <span class="fl">95</span>,</span>
 <span>                           level <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
-<p>In the above example, the <code>trestruct</code> function took 32 seconds to run on a macOS M2.
-Here, we will load the results.</p>
+<p>In the above example, the <code>trestruct</code> function took 32
+seconds to run on a macOS M2. Here, we will load the results.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trestruct_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'downsampled_tree_struc.rds'</span>,</span>
 <span>                                      package<span class="op">=</span><span class="st">'treestructure'</span><span class="op">)</span> <span class="op">)</span></span>
@@ -120,10 +124,11 @@ Here, we will load the results.</p>
 <div class="section level3">
 <h3 id="update-a-previous-treestrucuture-object-with-new-sequences">Update a previous treestrucuture object with new sequences<a class="anchor" aria-label="anchor" href="#update-a-previous-treestrucuture-object-with-new-sequences"></a>
 </h3>
-<p>To update the previous <code>treestructure</code> object with new sequences, we will now use
-the maximum likelihood <a href="https://github.com/ebov/space-time/blob/master/Data/Makona_1610_genomes_2016-06-23.ml.tree" class="external-link">Ebola tree</a>.</p>
-<p>Note that this new tree must be rooted, but does not need to be time-scaled or
-binary.</p>
+<p>To update the previous <code>treestructure</code> object with new
+sequences, we will now use the maximum likelihood <a href="https://github.com/ebov/space-time/blob/master/Data/Makona_1610_genomes_2016-06-23.ml.tree" class="external-link">Ebola
+tree</a>.</p>
+<p>Note that this new tree must be rooted, but does not need to be
+time-scaled or binary.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#Note that this tree has more sequences than the previous tree used in this</span></span>
 <span><span class="co">#tutorial.</span></span>
@@ -137,15 +142,16 @@ binary.</p>
 <span><span class="co">#treestructure function)</span></span>
 <span><span class="va">ml_rooted_tree</span><span class="op">$</span><span class="va">tip.label</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">ml_rooted_tree</span><span class="op">$</span><span class="va">tip.label</span>, </span>
 <span>                                          <span class="kw">function</span> <span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"'"</span>, <span class="st">""</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>And without the need to re-estimate a timetree or re-run <code>trestruct</code> from scratch,
-we are now able to add the new sequences to the existing <code>treestructure</code> object:</p>
+<p>And without the need to re-estimate a timetree or re-run
+<code>trestruct</code> from scratch, we are now able to add the new
+sequences to the existing <code>treestructure</code> object:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trestruct_add_tips</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/addtips.html">addtips</a></span><span class="op">(</span>trst <span class="op">=</span> <span class="va">trestruct_res</span>, tre <span class="op">=</span> <span class="va">ml_rooted_tree</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">trestruct_add_tips</span>, use_ggtree <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">+</span> <span class="fu">ggtree</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tippoint.html" class="external-link">geom_tippoint</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="updating_treestructure_files/figure-html/unnamed-chunk-6-1.png"><!-- --></p>
-<p>If you would like to compare the sequence names that comprise each cluster in
-each tree, you can do:</p>
+<p>If you would like to compare the sequence names that comprise each
+cluster in each tree, you can do:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co">#compare sequences in cluster 1 from trestruct_res object and the </span></span>
@@ -158,10 +164,12 @@ each tree, you can do:</p>
 <span><span class="co">#&gt; [1] 30</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">tree2_cluster1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 41</span></span></code></pre></div>
-<p>Note that the length of tree1_cluster1 and tree2_cluster1 is different.
-That is because we <em>added</em> tips from the ML tree, <em>ml_rooted_tree</em>, to the
-<code>treestructure</code> object, <em>trestruct_res</em>.</p>
-<p>You can also see that all elements in tree1_cluster1 is contained in tree2_cluster1</p>
+<p>Note that the length of tree1_cluster1 and tree2_cluster1 is
+different. That is because we <em>added</em> tips from the ML tree,
+<em>ml_rooted_tree</em>, to the <code>treestructure</code> object,
+<em>trestruct_res</em>.</p>
+<p>You can also see that all elements in tree1_cluster1 is contained in
+tree2_cluster1</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">tree1_cluster1</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">tree2_cluster1</span><span class="op">)</span></span>

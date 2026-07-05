@@ -73,7 +73,7 @@
       <h1>Calibrating cluster detection to a false discovery rate</h1>
                         <h4 data-toc-skip class="author">Erik Volz</h4>
             
-            <h4 data-toc-skip class="date">2026-07-04</h4>
+            <h4 data-toc-skip class="date">2026-07-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/emvolz-phylodynamics/treestructure/blob/master/vignettes/false_discovery_rate.Rmd" class="external-link"><code>vignettes/false_discovery_rate.Rmd</code></a></small>
       <div class="d-none name"><code>false_discovery_rate.Rmd</code></div>
@@ -84,17 +84,19 @@
 <div class="section level2">
 <h2 id="why-a-false-discovery-rate">Why a false discovery rate?<a class="anchor" aria-label="anchor" href="#why-a-false-discovery-rate"></a>
 </h2>
-<p><code>treestructure</code> partitions a tree by repeatedly testing, at each node, whether a
-clade differs from the rest of the tree in its coalescent pattern. The <code>level</code>
-argument sets the significance of each individual test. Because the algorithm
-examines many candidate clades and retains the most extreme one at every step,
-<code>level</code> behaves like a subjective sensitivity dial: lowering it detects more
-clusters, but the number of <em>spurious</em> clusters grows as well. On its own it is not
-an error rate.</p>
-<p>Specifying a target <strong>false discovery rate</strong> with the <code>fdr</code> argument makes the
-threshold interpretable, and is the default behaviour of <code>trestruct</code>. We illustrate
-with the simulated tree from the
-<a href="treestructure.html">introductory vignette</a>:</p>
+<p><code>treestructure</code> partitions a tree by repeatedly testing,
+at each node, whether a clade differs from the rest of the tree in its
+coalescent pattern. The <code>level</code> argument sets the
+significance of each individual test. Because the algorithm examines
+many candidate clades and retains the most extreme one at every step,
+<code>level</code> behaves like a subjective sensitivity dial: lowering
+it detects more clusters, but the number of <em>spurious</em> clusters
+grows as well. On its own it is not an error rate.</p>
+<p>Specifying a target <strong>false discovery rate</strong> with the
+<code>fdr</code> argument makes the threshold interpretable, and is the
+default behaviour of <code>trestruct</code>. We illustrate with the
+simulated tree from the <a href="treestructure.html">introductory
+vignette</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/emmanuelparadis/ape" class="external-link">ape</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://emvolz-phylodynamics.github.io/treestructure/">treestructure</a></span><span class="op">)</span></span>
@@ -124,32 +126,36 @@ with the simulated tree from the
 <span><span class="co">#&gt;  75 200 </span></span>
 <span><span class="co">#&gt; ...</span></span>
 <span><span class="co">#&gt; For complete data, use `as.data.frame(...)`</span></span></code></pre></div>
-<p>The output reports the target FDR, a global structure test (below), and the
-resulting clusters.</p>
+<p>The output reports the target FDR, a global structure test (below),
+and the resulting clusters.</p>
 </div>
 <div class="section level2">
 <h2 id="what-fdr-controls">What <code>fdr</code> controls<a class="anchor" aria-label="anchor" href="#what-fdr-controls"></a>
 </h2>
-<p><code>fdr</code> is used by default; supplying <code>level</code> without <code>fdr</code> selects a subjective
-threshold instead. The false discovery rate is a property of the <strong>whole tree</strong>, not
-of any single test:</p>
+<p><code>fdr</code> is used by default; supplying <code>level</code>
+without <code>fdr</code> selects a subjective threshold instead. The
+false discovery rate is a property of the <strong>whole tree</strong>,
+not of any single test:</p>
 <ul>
-<li>If the tree has no structure at all — a single, unstructured coalescent — the
-probability that <code>treestructure</code> designates <em>any</em> cluster is <code>fdr</code>.</li>
-<li>If the tree does contain real structure, <code>fdr</code> bounds the expected fraction of
-spurious clusters among all the clusters designated.</li>
+<li>If the tree has no structure at all — a single, unstructured
+coalescent — the probability that <code>treestructure</code> designates
+<em>any</em> cluster is <code>fdr</code>.</li>
+<li>If the tree does contain real structure, <code>fdr</code> bounds the
+expected fraction of spurious clusters among all the clusters
+designated.</li>
 </ul>
-<p>Internally this is achieved by requiring the most extreme clade at each node to
-clear a threshold that is adjusted for the number of candidate clades examined
-there, so that the error is controlled across the whole tree rather than one clade
-at a time.</p>
-<p>The calibration is analytic and deterministic — identical inputs give identical
-results, with no simulation.</p>
+<p>Internally this is achieved by requiring the most extreme clade at
+each node to clear a threshold that is adjusted for the number of
+candidate clades examined there, so that the error is controlled across
+the whole tree rather than one clade at a time.</p>
+<p>The calibration is analytic and deterministic — identical inputs give
+identical results, with no simulation.</p>
 <div class="section level3">
 <h3 id="a-test-for-any-structure-at-all">A test for any structure at all<a class="anchor" aria-label="anchor" href="#a-test-for-any-structure-at-all"></a>
 </h3>
-<p>Alongside the partition, the result carries a single test of the null hypothesis
-that the tree has <em>no</em> structure, reported in the printed output and available as:</p>
+<p>Alongside the partition, the result carries a single test of the null
+hypothesis that the tree has <em>no</em> structure, reported in the
+printed output and available as:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">s</span><span class="op">$</span><span class="va">global.test</span></span>
 <span><span class="co">#&gt; $statistic</span></span>
@@ -160,40 +166,45 @@ that the tree has <em>no</em> structure, reported in the printed output and avai
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $p.value</span></span>
 <span><span class="co">#&gt; [1] 1.097851e-06</span></span></code></pre></div>
-<p><code>statistic</code> is the most extreme standardized clade contrast at the root, <code>k</code> the
-number of candidate clades, and <code>p.value</code> a p-value for the presence of any
-structure.</p>
+<p><code>statistic</code> is the most extreme standardized clade
+contrast at the root, <code>k</code> the number of candidate clades, and
+<code>p.value</code> a p-value for the presence of any structure.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="the-false-discovery-rate-is-controlled">The false discovery rate is controlled<a class="anchor" aria-label="anchor" href="#the-false-discovery-rate-is-controlled"></a>
 </h2>
-<p>Unstructured coalescent trees (produced by <code><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">ape::rcoal</a></code>) contain no structure, so
-the fraction of such trees in which <code>treestructure</code> designates any cluster should
-not exceed the target <code>fdr</code>. The following pre-computed check confirms this:</p>
+<p>Unstructured coalescent trees (produced by <code><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">ape::rcoal</a></code>)
+contain no structure, so the fraction of such trees in which
+<code>treestructure</code> designates any cluster should not exceed the
+target <code>fdr</code>. The following pre-computed check confirms
+this:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"vignette_fwer.rds"</span>, package <span class="op">=</span> <span class="st">"treestructure"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   target_fdr realized reps ntip</span></span>
 <span><span class="co">#&gt; 1       0.05    0.020  200  100</span></span>
 <span><span class="co">#&gt; 2       0.10    0.070  200  100</span></span>
 <span><span class="co">#&gt; 3       0.20    0.085  200  100</span></span></code></pre></div>
-<p>The realized rate stays at or below the target. It is somewhat conservative: the
-threshold treats every candidate clade as a separate test, whereas nearby clades are
-statistically correlated, so the true error is smaller than the correction assumes.</p>
+<p>The realized rate stays at or below the target. It is somewhat
+conservative: the threshold treats every candidate clade as a separate
+test, whereas nearby clades are statistically correlated, so the true
+error is smaller than the correction assumes.</p>
 </div>
 <div class="section level2">
 <h2 id="serially-sampled-heterochronous-trees">Serially sampled (heterochronous) trees<a class="anchor" aria-label="anchor" href="#serially-sampled-heterochronous-trees"></a>
 </h2>
-<p>The coalescent null underlying the test assumes that all tips were sampled at the
-same time. When samples are collected over a period comparable to the timescale of
-the tree — as with most genomic epidemiology data — the test statistic acquires a
-small upward bias, which can push the realized false discovery rate somewhat above
-the target.</p>
-<p>In practice the inflation is modest. The table below reports the realized false
-discovery rate at a target of 0.05 for unstructured trees simulated to match the
-estimated population dynamics and sampling times of several real, densely
-time-sampled pathogen datasets. The <code>heterochronicity_index</code> (0 for contemporaneous
-sampling, approaching 1 as sampling spans the tree) measures how serially sampled
+<p>The coalescent null underlying the test assumes that all tips were
+sampled at the same time. When samples are collected over a period
+comparable to the timescale of the tree — as with most genomic
+epidemiology data — the test statistic acquires a small upward bias,
+which can push the realized false discovery rate somewhat above the
+target.</p>
+<p>In practice the inflation is modest. The table below reports the
+realized false discovery rate at a target of 0.05 for unstructured trees
+simulated to match the estimated population dynamics and sampling times
+of several real, densely time-sampled pathogen datasets. The
+<code>heterochronicity_index</code> (0 for contemporaneous sampling,
+approaching 1 as sampling spans the tree) measures how serially sampled
 each dataset is:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"vignette_hetero.rds"</span>, package <span class="op">=</span> <span class="st">"treestructure"</span><span class="op">)</span><span class="op">)</span></span>
@@ -202,44 +213,49 @@ each dataset is:</p>
 <span><span class="co">#&gt; 2 influenza H3N2                   0.95         0.10</span></span>
 <span><span class="co">#&gt; 3   B. pertussis                   0.76         0.03</span></span>
 <span><span class="co">#&gt; 4          Ebola                   0.86         0.04</span></span></code></pre></div>
-<p>Even the most heterochronous datasets stay within roughly twice the target, and most
-are at or below it. <code>treestructure</code> detects heterochronous sampling automatically and
-prints a note when it is present; the clade whose most recent sample is oldest is the
-most affected. On such trees the target <code>fdr</code> should be read as approximate,
-particularly for deep clusters.</p>
+<p>Even the most heterochronous datasets stay within roughly twice the
+target, and most are at or below it. <code>treestructure</code> detects
+heterochronous sampling automatically and prints a note when it is
+present; the clade whose most recent sample is oldest is the most
+affected. On such trees the target <code>fdr</code> should be read as
+approximate, particularly for deep clusters.</p>
 </div>
 <div class="section level2">
 <h2 id="large-trees-bonferroni-vs-benjamini-hochberg">Large trees: Bonferroni vs Benjamini-Hochberg<a class="anchor" aria-label="anchor" href="#large-trees-bonferroni-vs-benjamini-hochberg"></a>
 </h2>
-<p>At each step the algorithm corrects for the number of candidate clades it examines.
-By default this is a Bonferroni correction, which is simple and conservative. On very
-large trees the Bonferroni bar needed to make the <em>first</em> split grows slowly with the
-number of candidates, so genuinely structured but individually-moderate clades can be
-missed. Setting <code>split = "bh"</code> uses a Benjamini–Hochberg step-up instead, which is
-less conservative — it recovers more such structure while still controlling the false
-discovery rate:</p>
+<p>At each step the algorithm corrects for the number of candidate
+clades it examines. By default this is a Bonferroni correction, which is
+simple and conservative. On very large trees the Bonferroni bar needed
+to make the <em>first</em> split grows slowly with the number of
+candidates, so genuinely structured but individually-moderate clades can
+be missed. Setting <code>split = "bh"</code> uses a Benjamini–Hochberg
+step-up instead, which is less conservative — it recovers more such
+structure while still controlling the false discovery rate:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span><span class="va">tree</span>, fdr <span class="op">=</span> <span class="fl">0.05</span>, split <span class="op">=</span> <span class="st">"bh"</span><span class="op">)</span></span></code></pre></div>
-<p>Bonferroni remains the default; <code>"bh"</code> is worth trying on large trees, or whenever you
-suspect moderate structure is being missed. (Since BH always includes the Bonferroni
-decision as a special case, it never designates fewer clusters.)</p>
+<p>Bonferroni remains the default; <code>"bh"</code> is worth trying on
+large trees, or whenever you suspect moderate structure is being missed.
+(Since BH always includes the Bonferroni decision as a special case, it
+never designates fewer clusters.)</p>
 </div>
 <div class="section level2">
 <h2 id="combining-with-node-support">Combining with node support<a class="anchor" aria-label="anchor" href="#combining-with-node-support"></a>
 </h2>
-<p>Whether a clade’s coalescent pattern differs significantly is a separate question
-from whether the clade is well supported topologically. The two criteria are
-complementary and can be combined: supply node support values (for example bootstrap
-proportions or Bayesian posterior probabilities) and a minimum threshold, and only
-sufficiently supported clades are eligible to be designated as clusters.</p>
+<p>Whether a clade’s coalescent pattern differs significantly is a
+separate question from whether the clade is well supported
+topologically. The two criteria are complementary and can be combined:
+supply node support values (for example bootstrap proportions or
+Bayesian posterior probabilities) and a minimum threshold, and only
+sufficiently supported clades are eligible to be designated as
+clusters.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># tree$node.label holds support values in [0, 100] (or [0, 1])</span></span>
 <span><span class="fu"><a href="../reference/trestruct.html">trestruct</a></span><span class="op">(</span><span class="va">tree</span>, fdr <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>          nodeSupportValues <span class="op">=</span> <span class="cn">TRUE</span>, nodeSupportThreshold <span class="op">=</span> <span class="fl">95</span><span class="op">)</span></span></code></pre></div>
-<p>Requiring both a controlled false discovery rate and adequate support is the most
-conservative option, and removes clusters designated at poorly resolved nodes. The
-<a href="supportValues.html">node support values</a> vignette develops this with a worked
-example.</p>
+<p>Requiring both a controlled false discovery rate and adequate support
+is the most conservative option, and removes clusters designated at
+poorly resolved nodes. The <a href="supportValues.html">node support
+values</a> vignette develops this with a worked example.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
