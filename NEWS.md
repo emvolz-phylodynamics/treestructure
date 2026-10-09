@@ -1,3 +1,14 @@
+# treestructure (development version)
+
+* `addtips()` is now linear in the size of the new tree. Each node inherits the
+  cluster of its nearest ancestral cluster MRCA in a single preorder pass, replacing
+  per-tip searches of descendant lists that were quadratic in time and memory. Results
+  are unchanged, and trees with millions of tips are now practical.
+* `addtips()` gains `verbose = FALSE` to report progress.
+* `addtips()` no longer fails when some new tips do not descend from any cluster
+  MRCA; these tips are assigned `NA` with a message. A cluster with a single
+  remaining tip in the new tree is also handled.
+
 # treestructure 1.0.1
 
 * The default target false discovery rate is now `fdr = 0.2` (was `0.1`). The stricter
