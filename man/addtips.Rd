@@ -4,13 +4,15 @@
 \alias{addtips}
 \title{Compare and add tips into new treestructure object}
 \usage{
-addtips(trst, tre)
+addtips(trst, tre, verbose = FALSE)
 }
 \arguments{
 \item{trst}{Original treestructure fit that that will be updated.}
 
 \item{tre}{A new tree (ape::phylo) which may contain samples not in trst.
 This tree must be rooted, but does not need to be time-scaled or binary.}
+
+\item{verbose}{If TRUE, report progress with \code{message()}.}
 }
 \value{
 A new treestructure fit.
@@ -21,6 +23,18 @@ new treestructure object.
 Tips in the new tree that are not in the new treestructure will be merged.
 Merging is carried out based on a phylogenetic criterion. The new tips are
 added to the cluster which shares its MRCA (most recent common ancestor).
+}
+\details{
+The MRCA of each cluster is located in the new tree, and every node then
+inherits the cluster of its nearest ancestral MRCA in a single preorder pass.
+Each new tip is assigned by direct lookup, so the cost is linear in the size
+of \code{tre}. This makes it practical to place millions of tips, e.g. when
+assigning lineages to a large maximum-likelihood tree from a fit on a
+subsample.
+
+If several clusters share the same MRCA in the new tree, tips below it are
+assigned to the cluster with the lowest index. New tips that do not descend
+from the MRCA of any cluster are given \code{NA} for cluster and partition.
 }
 \examples{
 set.seed(072023)
@@ -42,5 +56,5 @@ tr0 <- ape::drop.tip( tr, ex )
 (s <- treestructure::addtips( s0, tr ))
 }
 \author{
-Erik Volz
+Erik Volz, Vinicius Franceschi
 }

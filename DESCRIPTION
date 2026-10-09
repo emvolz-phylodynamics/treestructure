@@ -30,7 +30,7 @@ Imports: ape (>= 5.0), rlang
 LinkingTo: Rcpp
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.3
 Encoding: UTF-8
 URL: https://emvolz-phylodynamics.github.io/treestructure/, https://github.com/emvolz-phylodynamics/treestructure
 BugReports: https://github.com/emvolz-phylodynamics/treestructure/issues
